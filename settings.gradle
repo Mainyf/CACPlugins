@@ -1,0 +1,3 @@
+rootProject.name = 'CACPlugins'
+
+include("item-skills-plus", "world-settings", "my-islands")
