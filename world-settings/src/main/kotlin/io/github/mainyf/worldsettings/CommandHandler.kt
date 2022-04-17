@@ -5,6 +5,7 @@ import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.successMsg
 import io.github.mainyf.worldsettings.config.ConfigManager
 import org.bukkit.Bukkit
+import org.bukkit.GameRule
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -35,6 +36,14 @@ object CommandHandler : CommandExecutor {
                     }
                     sender.successMsg("应用完成")
                 }
+//                "viewGameRule" -> {
+//                    Bukkit.getWorlds().forEach { world ->
+//                        GameRule.values().forEach {
+//                            val value = world.getGameRuleValue(it)
+//                            sender.msg("${it.name}: $value")
+//                        }
+//                    }
+//                }
             }
         }
         return false

@@ -9,12 +9,14 @@ import org.bukkit.util.Vector
 object ConfigManager {
 
     private lateinit var mainConfig: FileConfiguration
+    lateinit var coreId: String
     val schematicMap = mutableMapOf<String, PlotSchematicConfig>()
 
     fun load() {
         MyIslands.INSTANCE.saveDefaultConfig()
         MyIslands.INSTANCE.reloadConfig()
         mainConfig = MyIslands.INSTANCE.config
+        coreId = mainConfig.getString("coreId") ?: "itemsadder:amethyst_block"
         val schematicListSection = mainConfig.getConfigurationSection("schematics")!!
         schematicListSection.getKeys(false).forEach { schematicKey ->
             val schematicSection = schematicListSection.getConfigurationSection(schematicKey)!!

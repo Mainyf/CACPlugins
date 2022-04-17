@@ -3,6 +3,7 @@ package io.github.mainyf.itemskillsplus
 import dev.lone.itemsadder.api.CustomStack
 import io.github.mainyf.itemskillsplus.config.ConfigManager
 import io.github.mainyf.itemskillsplus.menu.MainMenu
+import io.github.mainyf.itemskillsplus.storage.StorageManager
 import io.github.mainyf.newmclib.command.cmdParser
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.msg
@@ -12,6 +13,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import kotlin.system.measureTimeMillis
 
 class CommandHandler : CommandExecutor {
 
@@ -19,6 +21,9 @@ class CommandHandler : CommandExecutor {
         cmdParser(sender, args) cmd@{
             val type = arg<String>() ?: return@cmd
             when (type) {
+                "testI" -> {
+                    StorageManager.testInsert()
+                }
                 "mmenu" -> {
                     val player = arg<Player>() ?: return@cmd
                     MainMenu().open(player)
@@ -59,14 +64,17 @@ class CommandHandler : CommandExecutor {
                     val exp = arg<Double>() ?: return@cmd
                     val item = player.inventory.itemInMainHand
                     if (item.type == Material.AIR) return@cmd
-                    val data = SkillManager.getItemSkill(item)
-                    if (data == null) {
-                        player.errorMsg("该物品无进阶附魔数据")
-                        return@cmd
+                    val ms = measureTimeMillis {
+                        val data = SkillManager.getItemSkill(item)
+                        if (data == null) {
+                            player.errorMsg("该物品无进阶附魔数据")
+                            return@cmd
+                        }
+                        SkillManager.addExpToItem(data, exp)
+                        SkillManager.updateItemMeta(item, SkillManager.getSkillByName(data.skillType), data)
+                        player.msg("获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
                     }
-                    SkillManager.addExpToItem(data, exp)
-                    SkillManager.updateItemMeta(item, SkillManager.getSkillByName(data.skillType), data)
-                    player.msg("获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
+                    println("${ms}ms")
                 }
                 "view" -> {
                     val player = sender as? Player ?: return@cmd

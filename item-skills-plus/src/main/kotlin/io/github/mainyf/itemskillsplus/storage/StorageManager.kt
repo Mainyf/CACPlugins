@@ -1,14 +1,15 @@
 package io.github.mainyf.itemskillsplus.storage
 
+import io.github.mainyf.itemskillsplus.ItemSkillsPlus
 import io.github.mainyf.itemskillsplus.config.ConfigManager
+import io.github.mainyf.newmclib.exts.runTaskAsyncBR
 import io.github.mainyf.newmclib.storage.BaseModel
-import io.github.mainyf.newmclib.storage.GeneralStorage
-import io.github.mainyf.newmclib.storage.GeneralStorage.Companion.of
+import io.github.mainyf.newmclib.storage.NoCacheStorage
 import java.util.UUID
 
 object StorageManager {
 
-    private lateinit var storage: GeneralStorage<SkillData>
+    private lateinit var storage: NoCacheStorage<SkillData>
     private val stageLevel = arrayOf(
         100,
         200,
@@ -16,19 +17,21 @@ object StorageManager {
     )
 
     fun init() {
-        storage = of(SkillData::class) {
-            jdbcUrl = "jdbc:mysql://${ConfigManager.host}:${ConfigManager.port}/${ConfigManager.databaseName}"
-            username = ConfigManager.user
-            password = ConfigManager.password
-            driverClassName = "com.mysql.jdbc.Driver"
-            addDataSourceProperty("cachePrepStmts", "true")
-            addDataSourceProperty("prepStmtCacheSize", "250")
-            addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
+        storage = NoCacheStorage.mysql(SkillData::class)
+    }
+
+    fun testInsert() {
+        ItemSkillsPlus.INSTANCE.runTaskAsyncBR {
+            val list = mutableListOf<SkillData>()
+            repeat(100000) {
+                list.add(SkillData(1, 1, 0.0))
+            }
+            storage.addAll(list)
         }
     }
 
     fun setLevelAndExp(uuid: UUID, stage: Int, level: Int, exp: Double) {
-        var data = storage.find(uuid)
+        var data = storage.findAtSync(uuid)
         if (data == null) {
             data = SkillData(stage, level, exp).apply {
                 this.id = uuid
@@ -45,7 +48,7 @@ object StorageManager {
     }
 
     fun addExp(uuid: UUID, value: Double): SkillData {
-        var data = storage.find(uuid)
+        var data = storage.findAtSync(uuid)
         if (data == null) {
             data = SkillData(0, 0, value).apply {
                 this.id = uuid
@@ -65,7 +68,7 @@ object StorageManager {
     }
 
     fun getSkillData(uuid: UUID): SkillData {
-        var data = storage.find(uuid)
+        var data = storage.findAtSync(uuid)
         if (data == null) {
             data = SkillData(0, 1, 0.0)
             data.id = uuid
@@ -75,7 +78,7 @@ object StorageManager {
     }
 
     fun exists(uuid: UUID): Boolean {
-        return storage.find(uuid) != null
+        return storage.findAtSync(uuid) != null
     }
 
     fun getStageMaxLevel(stage: Int): Int {

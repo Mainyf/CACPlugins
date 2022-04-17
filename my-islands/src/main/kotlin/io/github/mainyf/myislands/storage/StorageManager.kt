@@ -1,55 +1,75 @@
 package io.github.mainyf.myislands.storage
 
-import io.github.mainyf.myislands.MyIslands
-import io.github.mainyf.newmclib.storage.BaseModel
-import io.github.mainyf.newmclib.storage.GeneralStorage
+import io.github.mainyf.newmclib.serverId
+import io.github.mainyf.newmclib.storage.AbstractStorageManager
 import org.bukkit.util.Vector
-import java.util.UUID
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.and
+import org.joda.time.DateTime
+import java.util.*
 
-object StorageManager {
+object StorageManager : AbstractStorageManager() {
 
-    private lateinit var storage: GeneralStorage<PlayerIslandData>
-
-    fun init() {
-        storage = GeneralStorage.of(MyIslands.INSTANCE.dataFolder.toPath().resolve("island-data"))
+    override fun init() {
+        super.init()
+        transaction {
+            SchemaUtils.createMissingTablesAndColumns(PlayerIslandTable)
+        }
     }
 
-    fun close() {
-        storage.close()
-    }
+    fun createPlayerIsland(uuid: UUID, coreLoc: Vector) {
+        transaction {
+            PlayerIslandData.new(uuid) {
+                createTime = DateTime.now()
 
-    fun createPlayerIsLand(uuid: UUID, coreLoc: Vector) {
-        storage.add(
-            PlayerIslandData(
-                coreLoc,
-                false,
-                0
-            ).apply {
-                this.id = uuid
+                serverId = serverId()
+                coreX = coreLoc.blockX
+                coreY = coreLoc.blockY
+                coreZ = coreLoc.blockZ
+                visibility = false
+                kudos = 0
             }
-        )
+        }
+    }
+
+    fun getPlayerIsland(uuid: UUID): PlayerIslandData? {
+        return transaction {
+            PlayerIslandData.find { (PlayerIslandTable.id eq uuid) and (PlayerIslandTable.serverId eq serverId()) }
+                .firstOrNull()
+        }
     }
 
     fun setVisibility(uuid: UUID, visibility: Boolean) {
-        storage.update(uuid) {
-            this.visibility = visibility
+        transaction {
+            val data = getPlayerIsland(uuid) ?: return@transaction
+            data.visibility = visibility
         }
     }
 
     fun addKudos(uuid: UUID, count: Int = 1) {
-        storage.update(uuid) {
-            this.kudos += count
+        transaction {
+            val data = getPlayerIsland(uuid) ?: return@transaction
+            data.kudos += count
         }
     }
 
-    fun getIsLandsOrderByKudos(): List<PlayerIslandData> {
-        return storage.findAll().sortedByDescending { it.kudos }
+    fun updateCoreLoc(uuid: UUID, coreLoc: Vector) {
+        transaction {
+            val data = getPlayerIsland(uuid) ?: return@transaction
+            data.coreX = coreLoc.blockX
+            data.coreY = coreLoc.blockY
+            data.coreZ = coreLoc.blockZ
+        }
     }
 
-    data class PlayerIslandData(
-        var coreLoc: Vector = Vector(0, 0, 0),
-        var visibility: Boolean = false,
-        var kudos: Int = 0
-    ) : BaseModel()
+    fun getIsLandsOrderByKudos(pageIndex: Int, pageSize: Int): List<PlayerIslandData> {
+        return transaction {
+            PlayerIslandData.all()
+                .orderBy(PlayerIslandTable.kudos to SortOrder.DESC)
+                .limit(pageSize, (pageIndex.toLong() - 1L) * pageSize.toLong())
+                .toList()
+        }
+    }
 
 }

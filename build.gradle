@@ -91,7 +91,7 @@ subprojects {
         if (project.name == "item-skills-plus") {
             dd.addAll("ProtocolLib", "ItemsAdder")
         } else if (project.name == "my-islands") {
-            dd.addAll("PlotSquared", "ItemsAdder")
+            dd.addAll("PlotSquared", "ItemsAdder", "ProtocolLib")
         } else if (project.name == "world-settings") {
             dd.addAll("ProtocolLib")
         }

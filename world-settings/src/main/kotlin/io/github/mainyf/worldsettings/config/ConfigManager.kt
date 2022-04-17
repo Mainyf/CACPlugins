@@ -14,11 +14,13 @@ import org.bukkit.configuration.ConfigurationSection
 
 object ConfigManager {
 
+    var debug = false
     lateinit var ignorePermission: String
     lateinit var global: WorldSettingConfig
     val settingMap = mutableMapOf<String, WorldSettingConfig>()
 
     fun load(config: ConfigurationSection) {
+        debug = config.getBoolean("debug", false)
         ignorePermission = config.getString("ignore-permission") ?: "worldsettings.admin"
         loadGlobalSetting(config.getConfigurationSection("global")!!)
         settingMap.clear()
@@ -110,11 +112,9 @@ object ConfigManager {
         val antiCreatePortal = config.getBoolean("antiCreatePortal", global.antiCreatePortal)
         val antiChangeMobSpawn = config.getBoolean("antiChangeMobSpawn", global.antiChangeMobSpawn)
         val antiTramplingFarmland = config.getBoolean("antiTramplingFarmland", global.antiTramplingFarmland)
-        val antiItemUse =
-            if (config.contains("antiItemUse")) config.getStringList("antiItemUse")
-                .mapNotNull {
-                    kotlin.runCatching { Material.valueOf(it.uppercase()) }.getOrNull()
-                } else global.antiItemUse
+        val antiItemUse = if (config.contains("antiItemUse")) config.getStringList("antiItemUse").mapNotNull {
+                kotlin.runCatching { Material.valueOf(it.uppercase()) }.getOrNull()
+            } else global.antiItemUse
         val itemBlockAction = config.getMultiAction("itemBlockAction", global.itemBlockAction)
 
         val antiFly = config.getBoolean("antiFly", global.antiFly)
@@ -140,18 +140,17 @@ object ConfigManager {
             config.getBoolean("antiCursorNoEmptyPickupItem", global.antiCursorNoEmptyPickupItem)
         val antiBreakBlock = config.getBoolean("antiBreakBlock", global.antiBreakBlock)
         val antiPlaceBlock = config.getBoolean("antiPlaceBlock", global.antiPlaceBlock)
-        val blockInteractWhite = if (config.contains("blockInteractWhite")) config.getStringList("blockInteractWhite")
-            .mapNotNull {
-                kotlin.runCatching { Material.valueOf(it.uppercase()) }.getOrNull()
-            } else global.blockInteractWhite
+        val blockInteractWhite =
+            if (config.contains("blockInteractWhite")) config.getStringList("blockInteractWhite").mapNotNull {
+                    kotlin.runCatching { Material.valueOf(it.uppercase()) }.getOrNull()
+                } else global.blockInteractWhite
         val antiInteractDisplayFrameAndPaint =
             config.getBoolean("antiInteractDisplayFrameAndPaint", global.antiInteractDisplayFrameAndPaint)
         val antiInteractArmorStand = config.getBoolean("antiInteractArmorStand", global.antiInteractArmorStand)
         val antiPlayerPickupOtherPlayerDropOfItem =
             config.getBoolean("antiPlayerPickupOtherPlayerDropOfItem", global.antiPlayerPickupOtherPlayerDropOfItem)
         val antiNoPlayerPickupItem = config.getBoolean("antiNoPlayerPickupItem", global.antiNoPlayerPickupItem)
-        val pvp =
-            config.getBoolean("pvp", global.pvp)
+        val pvp = config.getBoolean("pvp", global.pvp)
         val tabComplete = config.getBoolean("tabComplete", global.tabComplete)
         return WorldSettingConfig(
             difficulty,
@@ -223,6 +222,5 @@ data class WorldSettingConfig(
 )
 
 enum class CommandMatchType {
-    LIKE,
-    START
+    LIKE, START
 }

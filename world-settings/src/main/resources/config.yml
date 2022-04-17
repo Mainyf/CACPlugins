@@ -1,3 +1,4 @@
+debug: true
 ignore-permission: worldsettings.admin
 global:
   # 难度

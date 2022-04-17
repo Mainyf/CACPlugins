@@ -125,8 +125,11 @@ object SkillManager {
         val skillType = meta.persistentDataContainer.get(itemSkillTypeDataKey, PersistentDataType.STRING) ?: return null
         val dataContainer = meta.persistentDataContainer.get(dataKey, PersistentDataType.TAG_CONTAINER) ?: return null
         val uuidStr = dataContainer.get(itemUIDDataKey, PersistentDataType.STRING) ?: return null
+//        println("[ItemSkillsPlus] 查询O: $uuidStr")
         val uuid = uuidStr.asUUID()
+//        println("[ItemSkillsPlus] 查询: $uuid")
         if (!StorageManager.exists(uuid)) {
+//            println("[ItemSkillsPlus] 查询: $uuid，没有找到数据")
             return null
         }
         val ownerUID = dataContainer.get(ownerUIDDataKey, PersistentDataType.STRING) ?: return null

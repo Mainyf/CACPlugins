@@ -1,8 +1,9 @@
 package io.github.mainyf.myislands
 
-import dev.lone.itemsadder.api.CustomBlock
 import io.github.mainyf.myislands.config.ConfigManager
+import io.github.mainyf.myislands.features.MoveIslandCore
 import io.github.mainyf.myislands.menu.IslandsChooseMenu
+import io.github.mainyf.myislands.storage.StorageManager
 import io.github.mainyf.newmclib.command.cmdParser
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.msg
@@ -25,10 +26,39 @@ class CommandHandler : CommandExecutor {
                     ConfigManager.load()
                     sender.successMsg("[MyIsLands] 重载成功")
                 }
-                "tt" -> {
+                "moveCore" -> {
                     val target = arg<Player>() ?: return@cmdParser
-                    val coreBlock = CustomBlock.getInstance("itemsadder:lit_campfire")!!
-                    coreBlock.place(target.location)
+                    val plotPlayer = MyIslands.plotAPI.wrapPlayer(target.uniqueId)!!
+                    val plot = plotPlayer.location.plotAbs
+                    if (MoveIslandCore.hasMoveingCore(target.uniqueId)) {
+                        target.errorMsg("你正在移动你的核心")
+                        return@cmdParser
+                    }
+                    if (plot == null) {
+                        target.errorMsg("你的脚下没有地皮")
+                        return@cmdParser
+                    }
+                    val owner = plot.owner
+                    if (owner != target.uniqueId) {
+                        target.errorMsg("你不是脚下地皮的主人")
+                        return@cmdParser
+                    }
+                    val islandData = StorageManager.getPlayerIsland(target.uniqueId)
+                    if (islandData == null) {
+                        target.errorMsg("意外的错误: 0xMI1")
+                        return@cmdParser
+                    }
+                    MoveIslandCore.startMoveCore(target, islandData, plot)
+                    target.successMsg("开始移动核心水晶")
+                }
+                "endMove" -> {
+                    val target = arg<Player>() ?: return@cmdParser
+                    if (!MoveIslandCore.hasMoveingCore(target.uniqueId)) {
+                        target.errorMsg("你不在移动核心的状态")
+                        return@cmdParser
+                    }
+                    MoveIslandCore.endMoveCore(target)
+                    target.successMsg("结束移动核心水晶")
                 }
                 "coreLoc" -> {
                     val target = arg<Player>() ?: return@cmdParser

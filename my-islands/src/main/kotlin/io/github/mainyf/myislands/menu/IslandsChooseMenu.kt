@@ -115,7 +115,7 @@ class IslandsChooseMenu : AbstractMenuHandler() {
                 if (it) {
                     IslandsManager.createPlayerIsland(player, plot, plotSchematic)
                 } else {
-                    player.errorMsg("意料之外的错误: 0xdd4")
+                    player.errorMsg("意外的错误: 0xMI0")
                 }
             }
         }

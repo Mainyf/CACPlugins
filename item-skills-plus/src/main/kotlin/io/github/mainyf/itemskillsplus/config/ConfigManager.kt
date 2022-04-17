@@ -27,12 +27,6 @@ object ConfigManager {
 
     private val skinMap = mutableMapOf<String, Skin>()
 
-    lateinit var host: String
-    lateinit var port: String
-    lateinit var user: String
-    lateinit var password: String
-    lateinit var databaseName: String
-
     lateinit var initMenuTipsName: String
     lateinit var initMenuTipsLore: List<String>
     lateinit var upgradeMenuTipsName: String
@@ -93,12 +87,6 @@ object ConfigManager {
     }
 
     private fun loadMainConfig() {
-        host = mainConfig.getString("database.host")!!
-        port = mainConfig.getString("database.port")!!
-        user = mainConfig.getString("database.user")!!
-        password = mainConfig.getString("database.password")!!
-        databaseName = mainConfig.getString("database.databaseName")!!
-
         initMenuTipsName = mainConfig.getString("initMenuTipsName")!!
         initMenuTipsLore = mainConfig.getStringList("initMenuTipsLore")
         upgradeMenuTipsName = mainConfig.getString("upgradeMenuTipsName")!!

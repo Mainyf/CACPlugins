@@ -51,12 +51,17 @@ class WorldSettings : JavaPlugin() {
                 }
             }
         }
-        Bukkit.getWorlds().forEach {
-            val settings = ConfigManager.getSetting(it) ?: return@forEach
-            settings.gameRules.forEach { (rule, value) ->
-                val oldValue = it.getGameRuleValue(rule)
-                if (oldValue != value) {
-                    it.setGameRule(rule, value)
+        runTaskTimerBR(5 * 20L, 5 * 20L) {
+            Bukkit.getWorlds().forEach {
+                val settings = ConfigManager.getSetting(it) ?: return@forEach
+                settings.gameRules.forEach { (rule, value) ->
+                    val oldValue = it.getGameRuleValue(rule)
+                    var log = "获取世界: ${it.name} 的规则: ${rule.name} 为: $oldValue"
+                    if (oldValue != value) {
+                        log += " 与配置不符，修改为: $value"
+                        it.setGameRule(rule, value)
+                    }
+                    Log.debug(log)
                 }
             }
         }

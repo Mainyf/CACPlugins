@@ -4,7 +4,9 @@ import com.plotsquared.core.PlotAPI
 import com.plotsquared.core.PlotSquared
 import io.github.mainyf.newmclib.exts.registerCommand
 import io.github.mainyf.myislands.config.ConfigManager
+import io.github.mainyf.myislands.features.MoveIslandCore
 import io.github.mainyf.myislands.storage.StorageManager
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
 class MyIslands : JavaPlugin() {
@@ -27,6 +29,8 @@ class MyIslands : JavaPlugin() {
         val injector = PlotSquared.platform().injector()
         val commandHandler = injector.getInstance(CommandHandler::class.java)
         plotUtils = injector.getInstance(PlotUtils::class.java)
+
+        Bukkit.getServer().pluginManager.registerEvents(MoveIslandCore, this)
         registerCommand("myislands", commandHandler)
     }
 
