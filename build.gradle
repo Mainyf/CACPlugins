@@ -24,7 +24,9 @@ allprojects {
 subprojects {
     apply plugin: "java"
     apply plugin: "org.jetbrains.kotlin.jvm"
-    apply plugin: "net.minecrell.plugin-yml.bukkit"
+    if (hasBukkit(project)) {
+        apply plugin: "net.minecrell.plugin-yml.bukkit"
+    }
 
     version '1.0'
 
@@ -55,20 +57,25 @@ subprojects {
     }
 
     dependencies {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib")
-        implementation("io.github.mainyf:newmclib-craftbukkit:1.7.2")
-//        implementation("org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT")
-        implementation("io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT")
-        compileOnly(rootProject.fileTree("libs"))
-        compileOnly(rootProject.files("./server/plugins/ProtocolLib.jar"))
-        if (project.name == "item-skills-plus") {
-            embed("com.udojava:EvalEx:2.7")
-            compileOnly(rootProject.files("./server/plugins/ItemsAdder_3.0.4b.jar"))
-            compileOnly(rootProject.files("PlaceholderAPI-2.11.1.jar"))
+        if (hasBungeeCord(project)) {
+            embed("org.jetbrains.kotlin:kotlin-stdlib")
+            compileOnly(rootProject.files("libs/BungeeCord.jar"))
         }
-        if (project.name == "my-islands") {
-            compileOnly(rootProject.files("./server/plugins/ItemsAdder_3.0.4b.jar"))
-            compileOnly(rootProject.files("./server/plugins/PlotSquared-Bukkit-6.6.2-Premium.jar"))
+        if (hasBukkit(project)) {
+            implementation("io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT")
+            implementation("org.jetbrains.kotlin:kotlin-stdlib")
+            compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
+            implementation("io.github.mainyf:newmclib-craftbukkit:1.7.2")
+            compileOnly(rootProject.files("./server/bukkit/plugins/ProtocolLib.jar"))
+            if (project.name == "item-skills-plus") {
+                embed("com.udojava:EvalEx:2.7")
+                compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.0.4b.jar"))
+                compileOnly(rootProject.files("./server/bukkit/plugins/PlaceholderAPI-2.11.1.jar"))
+            }
+            if (project.name == "my-islands") {
+                compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.0.4b.jar"))
+                compileOnly(rootProject.files("./server/bukkit/plugins/PlotSquared-Bukkit-6.6.2-Premium.jar"))
+            }
         }
     }
 
@@ -79,51 +86,78 @@ subprojects {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
-    bukkit {
-        def pluginName = lineToUpper(project.name)
-        def packageName = lineToLower(project.name)
-        name = pluginName
-        main = "io.github.mainyf.${packageName}.${pluginName}"
-        version = project.version
-        apiVersion = '1.13'
+    if (hasBukkit(project)) {
+        bukkit {
+            def pluginName = lineToUpper(project.name)
+            def packageName = lineToLower(project.name)
+            name = pluginName
+            main = "io.github.mainyf.${packageName}.${pluginName}"
+            version = project.version
+            apiVersion = '1.13'
 
-        def dd = []
-        if (project.name == "item-skills-plus") {
-            dd.addAll("ProtocolLib", "ItemsAdder")
-        } else if (project.name == "my-islands") {
-            dd.addAll("PlotSquared", "ItemsAdder", "ProtocolLib")
-        } else if (project.name == "world-settings") {
-            dd.addAll("ProtocolLib")
+            def dd = []
+            if (project.name == "item-skills-plus") {
+                dd.addAll("ProtocolLib", "ItemsAdder")
+            } else if (project.name == "my-islands") {
+                dd.addAll("PlotSquared", "ItemsAdder", "ProtocolLib")
+            } else if (project.name == "world-settings") {
+                dd.addAll("ProtocolLib")
+            }
+            dd.add("NewMCLib")
+            depend = dd
         }
-        dd.add("NewMCLib")
-        depend = dd
+
+        tasks.register("copyPlugin", Copy) {
+            group = "bukkit"
+            rootProject.file("./server/bukkit/plugins/").listFiles().find {
+                it.name.startsWith(project.name) && it.name.endsWith(".jar")
+            }?.delete()
+            from(jar)
+            into(rootProject.file("./server/bukkit/plugins/").absolutePath)
+        }
+
+        tasks.register("runServer", JavaExec) {
+            dependsOn(copyPlugin)
+            classpath = rootProject.files("./server/bukkit/paper-1.18.2-239.jar")
+            main = "io.papermc.paperclip.Paperclip"
+            jvmArgs = ["-Xmx4g", "-Dfile.encoding=UTF-8"/*, "-javaagent:${rootProject.file("./server/paper-1.18.2-239.jar").absolutePath}"*/]
+            args = ["nogui"]
+            workingDir = rootProject.file("./server/bukkit")
+            standardOutput = System.out
+            standardInput = System.in
+            errorOutput = System.err
+            group = "bukkit"
+            description = "runs the bukkit server"
+        }
     }
 
-    tasks.register("copyPlugin", Copy) {
-        group = "bukkit"
-        rootProject.file("./server/plugins/").listFiles().find {
-            it.name.startsWith(project.name) && it.name.endsWith(".jar")
-        }?.delete()
-        from(jar)
-        into(rootProject.file("./server/plugins/").absolutePath)
-    }
 
-    tasks.register("runServer", JavaExec) {
-        dependsOn(copyPlugin)
-        classpath = rootProject.files("./server/paper-1.18.2-239.jar")
-        main = "io.papermc.paperclip.Paperclip"
-        jvmArgs = ["-Xmx4g", "-Dfile.encoding=UTF-8"/*, "-javaagent:${rootProject.file("./server/paper-1.18.2-239.jar").absolutePath}"*/]
-        args = ["nogui"]
-        workingDir = rootProject.file("./server")
-        standardOutput = System.out
-        standardInput = System.in
-        errorOutput = System.err
-        group = "bukkit"
-        description = "runs the bukkit server"
+    if (hasBungeeCord(project)) {
+        tasks.register("copyPlugin", Copy) {
+            group = "bukkit"
+            rootProject.file("./server/bungeecord/plugins/").listFiles().find {
+                it.name.startsWith(project.name) && it.name.endsWith(".jar")
+            }?.delete()
+            from(jar)
+            into(rootProject.file("./server/bungeecord/plugins/").absolutePath)
+        }
+
+        tasks.register("runServer", JavaExec) {
+            dependsOn(copyPlugin)
+            classpath = rootProject.files("./server/bungeecord/BungeeCord.jar")
+            main = "net.md_5.bungee.Bootstrap"
+            jvmArgs = ["-Xmx4g", "-Dfile.encoding=UTF-8"]
+            args = ["nogui"]
+            workingDir = rootProject.file("./server/bungeecord")
+            standardOutput = System.out
+            standardInput = System.in
+            errorOutput = System.err
+            group = "bukkit"
+            description = "runs the bukkit server"
+        }
     }
 
 }
-
 
 static def lineToUpper(String param) {
     def sb = new StringBuilder(param)
@@ -146,4 +180,12 @@ static def lineToLower(String param) {
         sb.replace(position - 1, position + 1, sb.substring(position, position + 1).toLowerCase())
     }
     return sb.toString()
+}
+
+def hasBukkit(Project project) {
+    return "bukkit" == project.projectDir.parentFile.name
+}
+
+def hasBungeeCord(Project project) {
+    return "bungeecord" == project.projectDir.parentFile.name
 }

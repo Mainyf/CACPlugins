@@ -1,3 +1,15 @@
 rootProject.name = 'CACPlugins'
 
-include("item-skills-plus", "world-settings", "my-islands")
+def rootDir = rootProject.projectDir
+def bukkitProjects = (new File(rootDir, "bukkit")).listFiles()
+bukkitProjects.each {
+    if(it.isDirectory()) {
+        include("bukkit:${it.name}")
+    }
+}
+def bungeecordProjects = (new File(rootDir, "bungeecord")).listFiles()
+bungeecordProjects.each {
+    if(it.isDirectory()) {
+        include("bungeecord:${it.name}")
+    }
+}
