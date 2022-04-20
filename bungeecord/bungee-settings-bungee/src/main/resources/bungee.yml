@@ -1,0 +1,3 @@
+name: BungeeSettings
+main: io.github.mainyf.bungeesettingsbungee.BungeeSettingsBungee
+version: 1.0
