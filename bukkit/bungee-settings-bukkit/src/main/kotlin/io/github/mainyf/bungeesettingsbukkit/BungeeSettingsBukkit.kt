@@ -18,6 +18,7 @@ import java.util.*
 class BungeeSettingsBukkit : JavaPlugin() {
 
     private val LOG = io.github.mainyf.newmclib.getLogger("BungeeSettingsBukkit")
+
     private lateinit var storage: NoCacheStorage<GlobalCommandCache>
     private val CHANNEL_NAME = "cacserver:dispatcher"
     private val pendingTPRequest = mutableMapOf<UUID, Location>()
@@ -93,14 +94,13 @@ class BungeeSettingsBukkit : JavaPlugin() {
             }
             event<CMIPlayerTeleportEvent> {
                 if (joinPlayers.contains(player.uniqueId)) {
-                    isCancelled = true
                     joinPlayers.remove(player.uniqueId)
-                }
-                if (pendingTPRequest.containsKey(player.uniqueId)) {
-                    isCancelled = true
-                    val loc = pendingTPRequest[player.uniqueId]!!
-                    player.teleport(loc)
-                    pendingTPRequest.remove(player.uniqueId)
+                    if (pendingTPRequest.containsKey(player.uniqueId)) {
+                        isCancelled = true
+                        val loc = pendingTPRequest[player.uniqueId]!!
+                        player.teleport(loc)
+                        pendingTPRequest.remove(player.uniqueId)
+                    }
                 }
             }
         }

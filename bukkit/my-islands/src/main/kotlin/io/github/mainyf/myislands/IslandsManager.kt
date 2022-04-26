@@ -13,6 +13,9 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
+import kotlin.math.abs
+import kotlin.math.acos
+import kotlin.math.sqrt
 
 object IslandsManager {
 
@@ -31,7 +34,7 @@ object IslandsManager {
         PaperLib.getChunkAtAsync(loc, true).thenAccept {
             MyIslands.INSTANCE.runTaskBR {
                 setupPlotCore(loc)
-                val homeLoc = loc.clone().subtract(4.0, 0.0, 0.0)
+                val homeLoc = lookAtLoc(loc.clone().add(-3.0, 0.0, 0.5), loc.clone().add(0.0, -1.0, 0.5))
                 setPlotHome(plot, homeLoc)
                 player.teleport(homeLoc)
                 StorageManager.createPlayerIsland(player.uniqueId, loc.let { Vector(it.x, it.y, it.z) })
@@ -57,6 +60,24 @@ object IslandsManager {
                 loc.pitch
             )
         )
+    }
+
+    fun lookAtLoc(locA: Location, locB: Location): Location {
+        val xDiff = locB.x - locA.x
+        val yDiff = locB.y - locA.y
+        val zDiff = locB.z - locA.z
+
+        val distanceXZ = sqrt(xDiff * xDiff + zDiff * zDiff)
+        val distanceY = sqrt(distanceXZ * distanceXZ + yDiff * yDiff)
+        // xDiff(邻边) / distanceXZ(斜边) = cos(theta)
+        var yaw = Math.toDegrees(acos(xDiff / distanceXZ))
+        // yDiff(邻边) / distanceY(斜边) = cos(theta)
+        val pitch = Math.toDegrees(acos(yDiff / distanceY)) - 90
+//                    println(pitch)
+        if (zDiff < 0.0) {
+            yaw += abs(180.0 - yaw) * 2.0
+        }
+        return Location(locA.world, locA.x, locA.y, locA.z, yaw.toFloat() - 90f, pitch.toFloat())
     }
 
 }

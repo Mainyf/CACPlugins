@@ -2,6 +2,7 @@ package io.github.mainyf.itemskillsplus.skill
 
 import io.github.mainyf.itemskillsplus.SkillManager
 import io.github.mainyf.itemskillsplus.config.ConfigManager
+import io.github.mainyf.itemskillsplus.config.EffectTriggerType
 import io.github.mainyf.newmclib.exts.msg
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -60,9 +61,9 @@ object PowerSkill : Listener {
                 damager,
                 SkillManager.powerDataKey,
                 data,
-                ConfigManager.EffectTriggerType.KILL
+                EffectTriggerType.KILL
             )
-            damager.msg("你杀死了 ${event.entity.type.name} 获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
+//            damager.msg("你杀死了 ${event.entity.type.name} 获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
         }
 
     }

@@ -3,6 +3,7 @@ package io.github.mainyf.itemskillsplus.menu
 import io.github.mainyf.itemskillsplus.*
 import io.github.mainyf.itemskillsplus.config.ConfigManager
 import io.github.mainyf.newmclib.exts.pagination
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -77,7 +78,7 @@ class InitItemSkillMenu : AbstractMenuHandler() {
                 this
             ),
             6 * 9,
-            "请在在左侧选择附魔"
+            Component.text(ConfigManager.menuSlotConfig.initItemSkillTitle1)
         )
 
         updateInv(player, inv)
@@ -87,7 +88,7 @@ class InitItemSkillMenu : AbstractMenuHandler() {
 
     private fun tryUnEquip(player: Player, inv: Inventory) {
         if (!equipItemStack.isEmpty()) {
-            inv.setItem(EQUIP_SLOT, null)
+            inv.unSetIcon(ConfigManager.menuSlotConfig.equipSlot.initSlots)
             player.giveItem(equipItemStack!!)
             equipItemStack = null
         }
@@ -96,57 +97,57 @@ class InitItemSkillMenu : AbstractMenuHandler() {
     private fun updateInv(player: Player, inv: Inventory) {
         updateInvSkillList(inv)
 
+        val menuSlot = ConfigManager.menuSlotConfig
         if (equipItemStack.isEmpty()) {
-            inv.setIcon(EQUIP_SLOT, Material.RED_STAINED_GLASS_PANE, "装备槽位")
+            val equipSlot = menuSlot.equipSlot
+            inv.setIcon(equipSlot.initSlots, equipSlot.itemDisplay.toItemStack())
         } else {
-            inv.setIcon(EQUIP_SLOT, equipItemStack!!) {
+            inv.setIcon(menuSlot.equipSlot.initSlots, equipItemStack!!) {
                 tryUnEquip(it, inv)
-                player.setOpenInventoryTitle("请在背包中选择需要赋予的装备")
+                player.setOpenInventoryTitle(ConfigManager.menuSlotConfig.initItemSkillTitle2)
                 updateInv(player, inv)
             }
         }
         if (currentSkill.isBlank()) {
-            inv.setIcon(15, Material.ENCHANTED_BOOK, "&c暂未选择附魔")
+            inv.setIcon(menuSlot.enchantSlot.initSlots, menuSlot.enchantSlot.initItemDisplay.toItemStack())
         } else {
-            val type = ConfigManager.getSkillOnlyItemTypeByName(SKILL_MAP[currentSkill]!!)
-            inv.setIcon(
-                15,
-                type,
-                ConfigManager.initMenuTipsName.tvar("skill", currentSkill),
-                ConfigManager.initMenuTipsLore.map { it.tvar("skill", currentSkill) })
+            val skill = menuSlot.enchantSlot.skills[currentSkill]!![0]
+            inv.setIcon(menuSlot.enchantSlot.initSlots, skill.toItemStack())
         }
 
         if (currentSkill.isNotBlank()) {
             val materials = ConfigManager.getUpgradeMaterialByName(currentSkill)[0]
-            for ((index, slot) in MATERIALS_STATUS_SLOT_LIST.withIndex()) {
-                val (id, amount) = materials.getOrNull(index) ?: break
-
-                val itemStack = ConfigManager.getItemByUPMaterialID(id)
-                itemStack.amount = amount
-                inv.setIcon(slot, itemStack)
-
-            }
             var flag = true
-            for ((index, slot) in MATERIALS_SLOT_LIST.withIndex()) {
+            for ((index, slot) in menuSlot.materialsSlot.initSlots.withIndex()) {
                 val (id, amount) = materials.getOrNull(index) ?: break
 
                 val itemStack = ConfigManager.getItemByUPMaterialID(id)
 //                itemStack.amount = amount
                 inv.setIcon(slot, itemStack)
 
+                val mof = menuSlot.materialsOfAdequacySlot
                 if (hasMeetQuantity(player, id, amount)) {
-                    inv.setIcon(MATERIALS_STATUS_SLOT_LIST[index], Material.GREEN_STAINED_GLASS_PANE, "&aok")
+                    inv.setIcon(mof.initSlots[index], mof.satisfied.toItemStack())
                 } else {
                     flag = false
-                    inv.setIcon(MATERIALS_STATUS_SLOT_LIST[index], Material.RED_STAINED_GLASS_PANE, "&cno")
+                    inv.setIcon(mof.initSlots[index], mof.unSatisfied.toItemStack())
                 }
 
-                inv.setIcon(MATERIAL_COUNT_SLOT_LIST[index], Material.TORCH, "x${amount}")
+                inv.setIcon(
+                    menuSlot.materialsCountSlot.initSlots[index], (when (amount) {
+                        32 -> menuSlot.materialsCountSlot.selectx32
+                        64 -> menuSlot.materialsCountSlot.selectx64
+                        128 -> menuSlot.materialsCountSlot.selectx128
+                        192 -> menuSlot.materialsCountSlot.selectx192
+                        else -> menuSlot.materialsCountSlot.selectx192
+                    }).toItemStack()
+                )
             }
             if (flag && equipItemStack != null) {
-                inv.setIcon(50, Material.GREEN_STAINED_GLASS_PANE, "&a赋予") {
+                inv.setIcon(menuSlot.completeSlot.initSlots, menuSlot.completeSlot.itemDisplay.toItemStack()) {
                     if (currentSkill.isBlank()) return@setIcon
-                    val skillType = SKILL_MAP[currentSkill] ?: return@setIcon
+//                    val skillType = SKILL_MAP[] ?: return@setIcon
+                    val skillType = currentSkill
                     val dataKey = SkillManager.getSkillByName(skillType)
                     val equipItem = equipItemStack ?: return@setIcon
                     if (!tryRemoveMaterial(it)) {
@@ -160,8 +161,18 @@ class InitItemSkillMenu : AbstractMenuHandler() {
                     ResultViewMenu(equipItem).open(it)
                 }
             } else {
-                inv.unSetIcon(50)
+                inv.unSetIcon(menuSlot.completeSlot.initSlots)
             }
+        } else {
+            inv.setIcon(
+                menuSlot.materialsOfAdequacySlot.initSlots,
+                menuSlot.materialsOfAdequacySlot.default.toItemStack()
+            )
+            inv.unSetIcon(menuSlot.materialsSlot.initSlots)
+            inv.setIcon(
+                menuSlot.materialsCountSlot.initSlots,
+                menuSlot.materialsCountSlot.default.toItemStack()
+            )
         }
 
     }
@@ -210,19 +221,20 @@ class InitItemSkillMenu : AbstractMenuHandler() {
     }
 
     private fun updateInvSkillList(inv: Inventory) {
+        val menuSlot = ConfigManager.menuSlotConfig
         SKILL_SLOT_LIST.forEach {
             inv.setItem(it, ItemStack(Material.AIR))
         }
         currentSkillList.clear()
-        currentSkillList.addAll(SKILL_MAP.map { it.key }.pagination(pageIndex, SKILL_SLOT_LIST.size))
+        currentSkillList.addAll(SKILL_MAP.map { it.value }.pagination(pageIndex, SKILL_SLOT_LIST.size))
         currentSkillList.forEachIndexed { index, skillName ->
-            inv.setIcon(SKILL_SLOT_LIST[index], Material.BOOK, skillName) {
+            inv.setIcon(SKILL_SLOT_LIST[index], menuSlot.skills[skillName]!!.toItemStack()) {
                 currentSkill = skillName
-                val type = ConfigManager.getSkillOnlyItemTypeByName(SKILL_MAP[currentSkill]!!)
+                val type = ConfigManager.getSkillOnlyItemTypeByName(currentSkill)
                 if (equipItemStack?.type != type) {
                     tryUnEquip(it, inv)
                 }
-                it.setOpenInventoryTitle("请在背包中选择需要赋予的装备")
+                it.setOpenInventoryTitle(ConfigManager.menuSlotConfig.initItemSkillTitle2)
                 updateInv(it, inv)
             }
         }
@@ -247,7 +259,7 @@ class InitItemSkillMenu : AbstractMenuHandler() {
         val item = player.inventory.getItem(slot)
         if (currentSkill.isBlank()) return
         if (item.isEmpty()) return
-        val type = ConfigManager.getSkillOnlyItemTypeByName(SKILL_MAP[currentSkill]!!)
+        val type = ConfigManager.getSkillOnlyItemTypeByName(currentSkill)
         if (item!!.type == type && !SkillManager.hasSkillItem(item)) {
             if (!equipItemStack.isEmpty()) {
                 player.inventory.setItem(slot, equipItemStack)
@@ -256,7 +268,7 @@ class InitItemSkillMenu : AbstractMenuHandler() {
                 equipItemStack = item
                 player.inventory.setItem(slot, null)
             }
-            player.setOpenInventoryTitle("点击赋予附魔")
+            player.setOpenInventoryTitle(ConfigManager.menuSlotConfig.initItemSkillTitle3)
             updateInv(player, inv)
         }
     }

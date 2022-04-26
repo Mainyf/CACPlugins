@@ -2,6 +2,13 @@ expandDefaultSkinA:
   enable: true
   equipType: "expand"
   skin:
+    - customModelData: 0
+      effect:
+        a:
+          type: "break"
+          value:
+            - 'location: 0,1,0'
+            - 'sound: ENTITY_ARROW_HIT,1,1,1'
     - customModelData: 1
       effect:
         a:
@@ -27,6 +34,13 @@ expandProSkinA:
   enable: true
   equipType: "expand"
   skin:
+    - customModelData: 0
+      effect:
+        a:
+          type: "break"
+          value:
+            - 'location: 0,1,0'
+            - 'sound: ENTITY_ARROW_HIT,1,1,1'
     - customModelData: 1
       effect:
         a:
@@ -73,6 +87,13 @@ luckDefaultSkinA:
           value:
             - 'location: 0,1,0'
             - 'sound: ENTITY_ARROW_HIT,1,1,1'
+    - customModelData: 7
+      effect:
+        a:
+          type: "break"
+          value:
+            - 'location: 0,1,0'
+            - 'sound: ENTITY_ARROW_HIT,1,1,1'
 luckProSkinA:
   enable: true
   equipType: "luck"
@@ -92,6 +113,13 @@ luckProSkinA:
             - 'location: 0,1,0'
             - 'sound: ENTITY_ARROW_HIT,1,1,1'
     - customModelData: 6
+      effect:
+        a:
+          type: "break"
+          value:
+            - 'location: 0,1,0'
+            - 'sound: ENTITY_ARROW_HIT,1,1,1'
+    - customModelData: 7
       effect:
         a:
           type: "break"
@@ -123,6 +151,13 @@ sharpDefaultSkinA:
           value:
             - 'location: 0,1,0'
             - 'sound: ENTITY_ARROW_HIT,1,1,1'
+    - customModelData: 7
+      effect:
+        a:
+          type: "break"
+          value:
+            - 'location: 0,1,0'
+            - 'sound: ENTITY_ARROW_HIT,1,1,1'
 sharpProSkinA:
   enable: true
   equipType: "sharp"
@@ -142,6 +177,13 @@ sharpProSkinA:
             - 'location: 0,1,0'
             - 'sound: ENTITY_ARROW_HIT,1,1,1'
     - customModelData: 6
+      effect:
+        a:
+          type: "break"
+          value:
+            - 'location: 0,1,0'
+            - 'sound: ENTITY_ARROW_HIT,1,1,1'
+    - customModelData: 7
       effect:
         a:
           type: "break"
@@ -173,6 +215,13 @@ powerDefaultSkinA:
           value:
             - 'location: 0,1,0'
             - 'sound: ENTITY_ARROW_HIT,1,1,1'
+    - customModelData: 7
+      effect:
+        a:
+          type: "break"
+          value:
+            - 'location: 0,1,0'
+            - 'sound: ENTITY_ARROW_HIT,1,1,1'
 powerProSkinA:
   enable: true
   equipType: "power"
@@ -192,6 +241,13 @@ powerProSkinA:
             - 'location: 0,1,0'
             - 'sound: ENTITY_ARROW_HIT,1,1,1'
     - customModelData: 6
+      effect:
+        a:
+          type: "break"
+          value:
+            - 'location: 0,1,0'
+            - 'sound: ENTITY_ARROW_HIT,1,1,1'
+    - customModelData: 7
       effect:
         a:
           type: "break"

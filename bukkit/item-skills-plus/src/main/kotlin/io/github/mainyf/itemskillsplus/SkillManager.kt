@@ -1,6 +1,7 @@
 package io.github.mainyf.itemskillsplus
 
 import io.github.mainyf.itemskillsplus.config.ConfigManager
+import io.github.mainyf.itemskillsplus.config.EffectTriggerType
 import io.github.mainyf.itemskillsplus.storage.StorageManager
 import io.github.mainyf.newmclib.exts.asUUID
 import io.github.mainyf.newmclib.exts.colored
@@ -38,7 +39,7 @@ object SkillManager {
     // 主人 Name
     private val ownerNameDataKey = NamespacedKey(ItemSkillsPlus.INSTANCE, "ownerName")
 
-    private val stageText = arrayOf("I", "II", "III")
+    private val stageText = arrayOf("", "I", "II", "III")
 
     fun getSkillByName(name: String): NamespacedKey {
         return when (name) {
@@ -67,7 +68,7 @@ object SkillManager {
         root.set(ownerNameDataKey, PersistentDataType.STRING, player.name)
         StorageManager.setLevelAndExp(
             itemUUID,
-            1,
+            0,
             1,
             0.0
         )
@@ -161,7 +162,7 @@ object SkillManager {
             }
             Component.text(
                 line
-                    .tvar("stage", stageText[data.stage - 1])
+                    .tvar("stage", stageText[data.stage])
                     .tvar("level", data.level.toString())
                     .tvar("exp_progress", progressList.joinToString(""))
                     .colored()
@@ -169,7 +170,7 @@ object SkillManager {
         })
         val skin = ConfigManager.getSkillDefaultSkinByName(dataKey.key)
         if (skin != null) {
-            val equipSkin = skin.equipments[data.stage - 1]
+            val equipSkin = skin.equipments[data.stage]
             meta.setCustomModelData(equipSkin.customModelData)
         }
         item.itemMeta = meta
@@ -179,7 +180,7 @@ object SkillManager {
         player: Player,
         dataKey: NamespacedKey,
         data: ItemSkillData,
-        type: ConfigManager.EffectTriggerType
+        type: EffectTriggerType
     ) {
         val skin = when (dataKey) {
             expandDataKey -> ConfigManager.expandSkin

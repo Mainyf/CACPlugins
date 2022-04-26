@@ -55,7 +55,7 @@ class ItemSkillUpgradeMenu : AbstractMenuHandler() {
                 this
             ),
             6 * 9,
-            Component.text("请在背包中选择需要进阶的装备")
+            Component.text(ConfigManager.menuSlotConfig.upgradeItemSkillTitle1)
         )
 
         updateInv(player, inv)
@@ -63,69 +63,69 @@ class ItemSkillUpgradeMenu : AbstractMenuHandler() {
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
+        val menuSlot = ConfigManager.menuSlotConfig
+        val equipSlot = menuSlot.equipSlot
         if (equipItemStack.isEmpty()) {
-            inv.setIcon(EQUIP_SLOT, Material.RED_STAINED_GLASS_PANE, "装备槽位")
+            inv.setIcon(equipSlot.upgradeSlots, equipSlot.itemDisplay.toItemStack())
         } else {
-            inv.setIcon(EQUIP_SLOT, equipItemStack!!) {
+            inv.setIcon(equipSlot.upgradeSlots, equipItemStack!!) {
                 tryUnEquip(it, inv)
-                player.setOpenInventoryTitle("请在背包中选择需要赋予的装备")
+                player.setOpenInventoryTitle(ConfigManager.menuSlotConfig.upgradeItemSkillTitle1)
                 updateInv(player, inv)
             }
         }
-        if (currentSkill.isBlank()) {
-            inv.setIcon(14, Material.ENCHANTED_BOOK, "请在背包中选择需要赋予的装备")
-        } else {
-            val text = SKILL_BI_MAP.inverse()[currentSkill] ?: ""
+        if (equipItemStack.isEmpty()) {
             inv.setIcon(
-                14,
-                Material.ENCHANTED_BOOK,
-                ConfigManager.upgradeMenuTipsName.tvar("skill", text),
-                ConfigManager.upgradeMenuTipsLore.map { it.tvar("skill", text) })
+                menuSlot.enchantSlot.upgradeSlots,
+                menuSlot.enchantSlot.upgradeItemDisplay.toItemStack()
+            )
+        } else {
+            val skill = menuSlot.enchantSlot.skills[currentSkill]!![0]
+            inv.setIcon(
+                menuSlot.enchantSlot.upgradeSlots,
+                skill.toItemStack()
+            )
         }
-//        if (currentSkill.isBlank()) {
-//            inv.setIcon(14, Material.ENCHANTED_BOOK, "请在背包中选择需要赋予的装备")
-//        } else {
-//            val type = ConfigManager.getSkillOnlyItemTypeByName(SKILL_MAP[currentSkill]!!)
-//            inv.setIcon(14, type, "请点击背包相同类型的物品，会自动放入装备槽位")
-//        }
 
         if (!equipItemStack.isEmpty()) {
-            val materials = ConfigManager.getUpgradeMaterialByName(currentSkill)[currentStage]
-            for ((index, slot) in MATERIALS_STATUS_SLOT_LIST.withIndex()) {
-                val (id, amount) = materials.getOrNull(index) ?: break
-
-                val itemStack = ConfigManager.getItemByUPMaterialID(id)
-                itemStack.amount = amount
-                inv.setIcon(slot, itemStack)
-
-            }
+            val materials = ConfigManager.getUpgradeMaterialByName(currentSkill)[currentStage + 1]
+//            for ((index, slot) in menuSlot.materialsSlot.upgradeSlots.withIndex()) {
+//                val (id, amount) = materials.getOrNull(index) ?: break
+//
+//                val itemStack = ConfigManager.getItemByUPMaterialID(id)
+////                itemStack.amount = amount
+//                inv.setIcon(slot, itemStack)
+//
+//            }
             var flag = true
-            for ((index, slot) in MATERIALS_SLOT_LIST.withIndex()) {
+            for ((index, slot) in menuSlot.materialsSlot.upgradeSlots.withIndex()) {
                 val (id, amount) = materials.getOrNull(index) ?: break
 
                 val itemStack = ConfigManager.getItemByUPMaterialID(id)
 //                itemStack.amount = amount
                 inv.setIcon(slot, itemStack)
 
+                val mof = menuSlot.materialsOfAdequacySlot
                 if (hasMeetQuantity(player, id, amount)) {
-                    inv.setIcon(
-                        MATERIALS_STATUS_SLOT_LIST[index],
-                        Material.GREEN_STAINED_GLASS_PANE,
-                        "&aok"
-                    )
+                    inv.setIcon(mof.upgradeSlots[index], mof.satisfied.toItemStack())
                 } else {
                     flag = false
-                    inv.setIcon(
-                        MATERIALS_STATUS_SLOT_LIST[index],
-                        Material.RED_STAINED_GLASS_PANE,
-                        "&cno"
-                    )
+                    inv.setIcon(mof.upgradeSlots[index], mof.unSatisfied.toItemStack())
                 }
 
-                inv.setIcon(MATERIAL_COUNT_SLOT_LIST[index], Material.TORCH, "x${amount}")
+                inv.setIcon(
+                    menuSlot.materialsCountSlot.upgradeSlots[index], (when (amount) {
+                        32 -> menuSlot.materialsCountSlot.selectx32
+                        64 -> menuSlot.materialsCountSlot.selectx64
+                        128 -> menuSlot.materialsCountSlot.selectx128
+                        192 -> menuSlot.materialsCountSlot.selectx192
+                        else -> menuSlot.materialsCountSlot.selectx192
+                    }).toItemStack()
+                )
+//                inv.setIcon(MATERIAL_COUNT_SLOT_LIST[index], Material.TORCH, "x${amount}")
             }
             if (flag && equipItemStack != null) {
-                inv.setIcon(49, Material.GREEN_STAINED_GLASS_PANE, "&a赋予") {
+                inv.setIcon(menuSlot.completeSlot.upgradeSlots, menuSlot.completeSlot.itemDisplay.toItemStack()) {
                     if (currentSkill.isBlank()) return@setIcon
                     val dataKey = SkillManager.getSkillByName(currentSkill)
                     val equipItem = equipItemStack ?: return@setIcon
@@ -145,7 +145,7 @@ class ItemSkillUpgradeMenu : AbstractMenuHandler() {
                     ResultViewMenu(equipItem).open(it)
                 }
             } else {
-                inv.unSetIcon(49)
+                inv.unSetIcon(menuSlot.completeSlot.upgradeSlots)
             }
         }
 
@@ -153,9 +153,10 @@ class ItemSkillUpgradeMenu : AbstractMenuHandler() {
 
     private fun tryUnEquip(player: Player, inv: Inventory) {
         if (!equipItemStack.isEmpty()) {
-            inv.setItem(EQUIP_SLOT, null)
+            inv.unSetIcon(ConfigManager.menuSlotConfig.equipSlot.initSlots)
             player.giveItem(equipItemStack!!)
             equipItemStack = null
+            currentSkill = ""
         }
     }
 
@@ -173,7 +174,7 @@ class ItemSkillUpgradeMenu : AbstractMenuHandler() {
     }
 
     private fun tryRemoveMaterial(player: Player): Boolean {
-        val materials = ConfigManager.getUpgradeMaterialByName(currentSkill)[currentStage]
+        val materials = ConfigManager.getUpgradeMaterialByName(currentSkill)[currentStage + 1]
         if (!materials.all { hasMeetQuantity(player, it.first, it.second) }) {
             return false
         }
@@ -202,9 +203,9 @@ class ItemSkillUpgradeMenu : AbstractMenuHandler() {
         return true
     }
 
-    override fun onClick(slot: Int, player: Player, inv: Inventory, event: InventoryClickEvent) {
-        println("[当前slot] $slot")
-    }
+//    override fun onClick(slot: Int, player: Player, inv: Inventory, event: InventoryClickEvent) {
+//        println("[当前slot] $slot")
+//    }
 
     override fun onClickPlayerInv(slot: Int, player: Player, inv: Inventory, event: InventoryClickEvent) {
         super.onClickPlayerInv(slot, player, inv, event)
@@ -223,7 +224,7 @@ class ItemSkillUpgradeMenu : AbstractMenuHandler() {
             equipItemStack = item
             player.inventory.setItem(slot, null)
         }
-        player.setOpenInventoryTitle("点击进阶附魔")
+        player.setOpenInventoryTitle(ConfigManager.menuSlotConfig.upgradeItemSkillTitle2)
         updateInv(player, inv)
     }
 

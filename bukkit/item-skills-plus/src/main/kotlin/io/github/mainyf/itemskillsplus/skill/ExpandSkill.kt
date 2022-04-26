@@ -3,6 +3,7 @@ package io.github.mainyf.itemskillsplus.skill
 import io.github.mainyf.itemskillsplus.ItemSkillsPlus
 import io.github.mainyf.itemskillsplus.SkillManager
 import io.github.mainyf.itemskillsplus.config.ConfigManager
+import io.github.mainyf.itemskillsplus.config.EffectTriggerType
 import io.github.mainyf.newmclib.exts.msg
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -31,20 +32,21 @@ object ExpandSkill : Listener {
             Bukkit.getOnlinePlayers().forEach { p ->
                 val item = p.inventory.itemInMainHand
                 if (item.type == Material.AIR) {
-                    tryRemovePlayerBuff(p)
+//                    tryRemovePlayerBuff(p)
                     return@forEach
                 }
                 val data = SkillManager.getItemSkill(SkillManager.expandDataKey, item)
                 if (data == null) {
-                    tryRemovePlayerBuff(p)
+//                    tryRemovePlayerBuff(p)
                     return@forEach
                 }
                 if (data.stage >= 3) {
-                    p.addPotionEffect(PotionEffect(PotionEffectType.FAST_DIGGING, 5 * 20, 2))
+                    p.addPotionEffect(PotionEffect(PotionEffectType.FAST_DIGGING, 5 * 20, 0))
                     playerHeldItem.add(p.uniqueId)
-                } else {
-                    tryRemovePlayerBuff(p)
                 }
+//                else {
+//                    tryRemovePlayerBuff(p)
+//                }
             }
         }, 2 * 20L, 2 * 20L)
     }
@@ -70,7 +72,7 @@ object ExpandSkill : Listener {
         val exp = ConfigManager.getBlockExp(event.block)
         if (exp > 0.0) {
             SkillManager.addExpToItem(data, exp)
-            player.msg("你破坏了 ${event.block.type.name} 获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
+//            player.msg("你破坏了 ${event.block.type.name} 获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
         }
 
         if (hasRecursive(player)) {
@@ -101,10 +103,7 @@ object ExpandSkill : Listener {
                 )
                 if (hasBottom) {
                     val index = arrayOf(
-                        BlockFace.EAST,
-                        BlockFace.NORTH,
-                        BlockFace.WEST,
-                        BlockFace.SOUTH
+                        BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH
                     ).indexOf(player.facing)
                     if (index != -1) {
                         repeat(index) {
@@ -118,10 +117,7 @@ object ExpandSkill : Listener {
                     eastList.reverse()
                     eastList.add(eastList.removeFirst())
                     val index = arrayOf(
-                        BlockFace.EAST,
-                        BlockFace.NORTH,
-                        BlockFace.WEST,
-                        BlockFace.SOUTH
+                        BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH
                     ).indexOf(player.facing)
                     if (index != -1) {
                         repeat(index) {
@@ -195,10 +191,7 @@ object ExpandSkill : Listener {
 
         SkillManager.updateItemMeta(item, SkillManager.expandDataKey, data)
         SkillManager.triggerItemSkinEffect(
-            player,
-            SkillManager.expandDataKey,
-            data,
-            ConfigManager.EffectTriggerType.BREAK
+            player, SkillManager.expandDataKey, data, EffectTriggerType.BREAK
         )
         unMarkRecursive(player)
     }

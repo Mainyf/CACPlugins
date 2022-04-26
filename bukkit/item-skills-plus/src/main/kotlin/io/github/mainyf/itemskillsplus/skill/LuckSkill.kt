@@ -2,6 +2,7 @@ package io.github.mainyf.itemskillsplus.skill
 
 import io.github.mainyf.itemskillsplus.SkillManager
 import io.github.mainyf.itemskillsplus.config.ConfigManager
+import io.github.mainyf.itemskillsplus.config.EffectTriggerType
 import io.github.mainyf.itemskillsplus.exts.blockKey
 import io.github.mainyf.itemskillsplus.exts.getKey
 import io.github.mainyf.newmclib.exts.currentTime
@@ -45,7 +46,7 @@ object LuckSkill : Listener {
         val exp = ConfigManager.getBlockExp(event.block)
         if (exp > 0.0) {
             SkillManager.addExpToItem(data, exp)
-            player.msg("你破坏了 ${event.block.type.name} 获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
+//            player.msg("你破坏了 ${event.block.type.name} 获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
         }
 
         if (hasRecursive(player)) {
@@ -81,7 +82,7 @@ object LuckSkill : Listener {
             player,
             SkillManager.luckDataKey,
             data,
-            ConfigManager.EffectTriggerType.BREAK
+            EffectTriggerType.BREAK
         )
         unMarkRecursive(player)
     }

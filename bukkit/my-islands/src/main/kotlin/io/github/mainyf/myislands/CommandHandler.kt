@@ -69,12 +69,20 @@ class CommandHandler : CommandExecutor {
                         return@cmdParser
                     }
                     val dLoc = plot.bottomAbs
-                    target.msg("dLoc: ${dLoc.x} ${dLoc.y} ${dLoc.z}")
+//                    target.msg("dLoc: ${dLoc.x} ${dLoc.y} ${dLoc.z}")
                     val loc = target.location
                     val x = dLoc.x - loc.blockX
                     val y = dLoc.y - loc.blockY
                     val z = dLoc.z - loc.blockZ
                     target.msg("相对坐标为: $x $y $z")
+                }
+                "tryMenu" -> {
+                    val target = arg<Player>() ?: return@cmdParser
+                    val plotPlayer = MyIslands.plotAPI.wrapPlayer(target.uniqueId) ?: return@cmdParser
+                    if (MyIslands.plotAPI.getPlayerPlots(plotPlayer).isNotEmpty()) {
+                        return@cmdParser
+                    }
+                    IslandsChooseMenu().open(target)
                 }
                 "menu" -> {
                     val target = arg<Player>() ?: return@cmdParser

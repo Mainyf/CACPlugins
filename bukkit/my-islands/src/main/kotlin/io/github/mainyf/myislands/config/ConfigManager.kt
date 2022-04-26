@@ -3,6 +3,8 @@
 package io.github.mainyf.myislands.config
 
 import io.github.mainyf.myislands.MyIslands
+import io.github.mainyf.newmclib.config.ActionParser
+import io.github.mainyf.newmclib.config.action.MultiAction
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.util.Vector
 
@@ -10,6 +12,7 @@ object ConfigManager {
 
     private lateinit var mainConfig: FileConfiguration
     lateinit var coreId: String
+    lateinit var backLobbyAction: MultiAction
     val schematicMap = mutableMapOf<String, PlotSchematicConfig>()
 
     fun load() {
@@ -17,6 +20,7 @@ object ConfigManager {
         MyIslands.INSTANCE.reloadConfig()
         mainConfig = MyIslands.INSTANCE.config
         coreId = mainConfig.getString("coreId") ?: "itemsadder:amethyst_block"
+        backLobbyAction = ActionParser.parseAction(mainConfig.getStringList("backLobby"))!!
         val schematicListSection = mainConfig.getConfigurationSection("schematics")!!
         schematicListSection.getKeys(false).forEach { schematicKey ->
             val schematicSection = schematicListSection.getConfigurationSection(schematicKey)!!

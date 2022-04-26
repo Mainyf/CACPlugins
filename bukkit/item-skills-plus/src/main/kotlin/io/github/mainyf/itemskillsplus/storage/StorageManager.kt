@@ -24,7 +24,7 @@ object StorageManager {
         ItemSkillsPlus.INSTANCE.runTaskAsyncBR {
             val list = mutableListOf<SkillData>()
             repeat(100000) {
-                list.add(SkillData(1, 1, 0.0))
+                list.add(SkillData(0, 1, 0.0))
             }
             storage.addAll(list)
         }
@@ -82,13 +82,13 @@ object StorageManager {
     }
 
     fun getStageMaxLevel(stage: Int): Int {
-        return stageLevel.getOrNull(stage - 1) ?: 300
+        return stageLevel.getOrNull(stage) ?: 300
     }
 
     private fun handleSkillLevel(data: SkillData) {
         if (data.stage >= 3) return
         var maxExp = ConfigManager.getLevelMaxExp(data.level)
-        val maxLevel = stageLevel[data.stage - 1]
+        val maxLevel = stageLevel[data.stage]
         while (data.exp >= maxExp && data.level < maxLevel) {
             data.exp -= maxExp
             data.level++

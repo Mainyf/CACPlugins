@@ -1,9 +1,3 @@
-initMenuTipsName: "当前选择的赋予的附魔是 {skill}"
-initMenuTipsLore:
-  - "当前选择的赋予的附魔是 {skill}"
-upgradeMenuTipsName: "当前选择进阶的附魔是 {skill}"
-upgradeMenuTipsLore:
-  - "当前选择进阶的附魔是 {skill}"
 exp:
   # 每两级所需经验增加
   level: '100*(level/2)'
@@ -105,6 +99,7 @@ equipments:
       - black_terracotta
     skin: "expandDefaultSkinA"
     upgradeMaterials:
+      - "eqMaterial1:16,eqMaterial2:16,eqMaterial3:16,eqMaterial4:16,eqMaterial5:16"
       - "eqMaterial1:32,eqMaterial2:32,eqMaterial3:32,eqMaterial4:32,eqMaterial5:32"
       - "eqMaterial1:64,eqMaterial2:64,eqMaterial3:64,eqMaterial4:64,eqMaterial5:64"
       - "eqMaterial1:128,eqMaterial2:128,eqMaterial3:128,eqMaterial4:128,eqMaterial5:128"
@@ -135,6 +130,7 @@ equipments:
       - nether_quartz_ore
     skin: "luckDefaultSkinA"
     upgradeMaterials:
+      - "eqMaterial1:16,eqMaterial2:16,eqMaterial3:16,eqMaterial4:16,eqMaterial5:16"
       - "eqMaterial1:32,eqMaterial2:32,eqMaterial3:32,eqMaterial4:32,eqMaterial5:32"
       - "eqMaterial1:64,eqMaterial2:64,eqMaterial3:64,eqMaterial4:64,eqMaterial5:64"
       - "eqMaterial1:128,eqMaterial2:128,eqMaterial3:128,eqMaterial4:128,eqMaterial5:128"
@@ -148,9 +144,10 @@ equipments:
       - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
       - '&r'
     # 每阶段的伤害提升百分比
-    damageForm: '50,100,200'
+    damageForm: '0,50,100,200'
     skin: "sharpDefaultSkinA"
     upgradeMaterials:
+      - "eqMaterial1:16,eqMaterial2:16,eqMaterial3:16,eqMaterial4:16,eqMaterial5:16"
       - "eqMaterial1:32,eqMaterial2:32,eqMaterial3:32,eqMaterial4:32,eqMaterial5:32"
       - "eqMaterial1:64,eqMaterial2:64,eqMaterial3:64,eqMaterial4:64,eqMaterial5:64"
       - "eqMaterial1:128,eqMaterial2:128,eqMaterial3:128,eqMaterial4:128,eqMaterial5:128"
@@ -164,9 +161,10 @@ equipments:
       - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
       - '&r'
     # 每阶段的伤害提升百分比
-    damageForm: '50,100,200'
+    damageForm: '0,50,100,200'
     skin: "powerDefaultSkinA"
     upgradeMaterials:
+      - "eqMaterial1:16,eqMaterial2:16,eqMaterial3:16,eqMaterial4:16,eqMaterial5:16"
       - "eqMaterial1:32,eqMaterial2:32,eqMaterial3:32,eqMaterial4:32,eqMaterial5:32"
       - "eqMaterial1:64,eqMaterial2:64,eqMaterial3:64,eqMaterial4:64,eqMaterial5:64"
       - "eqMaterial1:128,eqMaterial2:128,eqMaterial3:128,eqMaterial4:128,eqMaterial5:128"

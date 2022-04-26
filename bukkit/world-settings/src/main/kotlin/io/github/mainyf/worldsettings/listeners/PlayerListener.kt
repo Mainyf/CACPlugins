@@ -9,11 +9,13 @@ import io.github.mainyf.worldsettings.config.CommandMatchType.START
 import io.github.mainyf.worldsettings.config.ConfigManager
 import org.bukkit.Material
 import org.bukkit.entity.*
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.player.*
@@ -54,7 +56,7 @@ object PlayerListener : Listener {
     @EventHandler(ignoreCancelled = true)
     fun handlePlayerGameMode(event: PlayerTeleportEvent) {
         val player = event.player
-        val world = event.to?.world
+        val world = event.to.world
         if (player.hasPermission(ConfigManager.ignorePermission)) return
         val settings = ConfigManager.getSetting(world) ?: return
         if (player.gameMode != settings.gameMode) {
@@ -100,6 +102,21 @@ object PlayerListener : Listener {
     }
 
     @EventHandler
+    fun onDamage(event: EntityDamageEvent) {
+        val player = event.entity as? Player ?: return
+        if (player.hasPermission(ConfigManager.ignorePermission)) return
+        val settings = ConfigManager.getSetting(player.world) ?: return
+        if (event.cause == EntityDamageEvent.DamageCause.VOID && settings.antiVoidDamage) {
+            event.isCancelled = true
+        }
+    }
+
+//    @EventHandler
+//    fun onRespawn(event: PlayerRespawnEvent) {
+//
+//    }
+
+    @EventHandler
     fun onTabComplete(event: TabCompleteEvent) {
         val player = event.sender as? Player ?: return
         if (player.hasPermission(ConfigManager.ignorePermission)) return
@@ -141,8 +158,12 @@ object PlayerListener : Listener {
             event.isCancelled = true
             return
         }
-        if (event.action == Action.RIGHT_CLICK_BLOCK && event.hasBlock() && !settings.blockInteractWhite.contains(event.clickedBlock?.blockData?.material)) {
-            event.isCancelled = true
+        if (event.action == Action.RIGHT_CLICK_BLOCK && event.hasBlock() && settings.blockInteractWhite.isNotEmpty() && !settings.blockInteractWhite.contains(
+                event.clickedBlock?.blockData?.material
+            )
+        ) {
+            event.setUseInteractedBlock(Event.Result.DENY)
+//            event.isCancelled = true
             return
         }
     }

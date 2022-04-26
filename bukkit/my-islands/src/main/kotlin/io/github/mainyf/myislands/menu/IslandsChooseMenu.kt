@@ -6,11 +6,13 @@ import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.newmclib.exts.colored
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.pagination
+import io.github.mainyf.newmclib.exts.runTaskLaterBR
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import kotlin.math.ceil
 
@@ -39,11 +41,15 @@ class IslandsChooseMenu : AbstractMenuHandler() {
         ceil(ConfigManager.schematicMap.values.let { it.size.toDouble() / ISLANDS_LIST.size.toDouble() }).toInt()
     private val currentIslandList = mutableListOf<ConfigManager.PlotSchematicConfig>()
 
+    private var ok = false
+
     override fun open(player: Player) {
         val inv = Bukkit.createInventory(createHolder(player), SIZE, Component.text("&a地皮选择".colored()))
 
         BACK_SLOT.forEach {
-            inv.setIcon(it, Material.RED_STAINED_GLASS_PANE, "返回大厅")
+            inv.setIcon(it, Material.RED_STAINED_GLASS_PANE, "返回大厅") {
+                ConfigManager.backLobbyAction.execute(player)
+            }
         }
         updateInv(inv)
 
@@ -108,6 +114,7 @@ class IslandsChooseMenu : AbstractMenuHandler() {
             player.errorMsg("你的已经拥有了自己的私人岛屿")
             return
         }
+        ok = true
         MyIslands.plotUtils.autoClaimPlot(plotPlayer) {
             val plots = MyIslands.plotAPI.getPlayerPlots(plotPlayer)
             val plot = plots.first()
@@ -117,6 +124,14 @@ class IslandsChooseMenu : AbstractMenuHandler() {
                 } else {
                     player.errorMsg("意外的错误: 0xMI0")
                 }
+            }
+        }
+    }
+
+    override fun onClose(player: Player, inv: Inventory, event: InventoryCloseEvent) {
+        if (!ok) {
+            MyIslands.INSTANCE.runTaskLaterBR(10L) {
+                IslandsChooseMenu().open(player)
             }
         }
     }

@@ -1,0 +1,97 @@
+# 赋予附魔界面title
+initItemSkillTitle1: "请在在左侧选择附魔"
+initItemSkillTitle2: "请在背包中选择需要赋予的装备"
+initItemSkillTitle3: "点击赋予附魔"
+# 附魔进阶界面title
+upgradeItemSkillTitle1: "请在背包中选择需要进阶的装备"
+upgradeItemSkillTitle2: "点击进阶附魔"
+# 附魔列表
+skillList:
+  expand:
+    name: "&a凿石"
+    lore: "&a凿石"
+  luck:
+    name: "&a福临"
+    lore: "&a福临"
+  sharp:
+    name: "&a陵劲"
+    lore: "&a陵劲"
+  power:
+    name: "&a精准"
+    lore: "&a精准"
+# 装备格子
+equipSlot:
+  initSlots: [ 13 ]
+  upgradeSlots: [ 12 ]
+  # 默认显示物品类型
+  type: AIR
+# 附魔类型格子
+enchantSlot:
+  initSlots: [ 15 ]
+  upgradeSlots: [ 14 ]
+  init:
+    type: ENCHANTED_BOOK
+    name: "暂未选择附魔"
+    lore: "暂未选择附魔"
+  upgrade:
+    type: ENCHANTED_BOOK
+    name: "请在背包中选择需要进阶的装备"
+    lore: "请在背包中选择需要进阶的装备"
+  skill:
+    expand:
+      - "itemskills:expandDesc1"
+      - "itemskills:expandDesc2"
+      - "itemskills:expandDesc3"
+    luck:
+      - "itemskills:luckDesc1"
+      - "itemskills:luckDesc2"
+      - "itemskills:luckDesc3"
+    sharp:
+      - "itemskills:sharpDesc1"
+      - "itemskills:sharpDesc2"
+      - "itemskills:sharpDesc3"
+    power:
+      - "itemskills:powerDesc1"
+      - "itemskills:powerDesc2"
+      - "itemskills:powerDesc3"
+# 材料是否满足条件格子
+materialsOfAdequacySlot:
+  initSlots: [ 21,22,23,24,25 ]
+  upgradeSlots: [ 20,21,22,23,24 ]
+  # 未选择
+  default:
+    type: AIR
+  satisfied:
+    type: GREEN_STAINED_GLASS_PANE
+    name: "&a满足条件"
+  unSatisfied:
+    type: RED_STAINED_GLASS_PANE
+    name: "&c不满足条件"
+# 材料展示格子
+materialsSlot:
+  initSlots: [ 30,31,32,33,34 ]
+  upgradeSlots: [ 29,30,31,32,33 ]
+# 材料数量展示格子
+materialsCountSlot:
+  initSlots: [ 39,40,41,42,43 ]
+  upgradeSlots: [ 38,39,40,41,42 ]
+  # 未选择
+  default:
+    type: AIR
+  selectx32:
+    type: TORCH
+    name: "x32"
+  selectx64:
+    type: TORCH
+    name: "x64"
+  selectx128:
+    type: TORCH
+    name: "x128"
+  selectx192:
+    type: TORCH
+    name: "x192"
+complete:
+  initSlots: [ 50 ]
+  upgradeSlots: [ 49 ]
+  type: GREEN_STAINED_GLASS_PANE
+  name: "&a赋予"

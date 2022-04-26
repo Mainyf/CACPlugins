@@ -52,6 +52,8 @@ global:
   pvp: true
   # 是否开启tab补全
   tabComplete: true
+  # 阻止虚空伤害
+  antiVoidDamage: true
 worlds:
   world:
     # 难度

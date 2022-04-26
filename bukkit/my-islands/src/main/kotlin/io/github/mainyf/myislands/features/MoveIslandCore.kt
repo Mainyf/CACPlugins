@@ -1,17 +1,13 @@
 package io.github.mainyf.myislands.features
 
-import com.plotsquared.bukkit.paperlib.PaperLib
 import com.plotsquared.bukkit.util.BukkitUtil
-import com.plotsquared.bukkit.util.BukkitWorld
 import com.plotsquared.core.plot.Plot
 import dev.lone.itemsadder.api.CustomBlock
 import io.github.mainyf.myislands.IslandsManager
-import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.storage.PlayerIslandData
 import io.github.mainyf.myislands.storage.StorageManager
 import io.github.mainyf.newmclib.exts.errorMsg
-import io.github.mainyf.newmclib.exts.runTaskBR
 import io.github.mainyf.newmclib.exts.successMsg
 import io.github.mainyf.newmclib.utils.Cooldown
 import org.bukkit.Bukkit
@@ -24,10 +20,7 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.util.Vector
-import java.util.UUID
-import kotlin.math.abs
-import kotlin.math.acos
-import kotlin.math.sqrt
+import java.util.*
 
 object MoveIslandCore : Listener {
 
@@ -81,12 +74,13 @@ object MoveIslandCore : Listener {
             oldLoc.block.type = Material.AIR
             StorageManager.updateCoreLoc(player.uniqueId, newLoc.toVector())
             CustomBlock.place(ConfigManager.coreId, newLoc)
-            endMoveCore(player)
-            val homeLoc = newLoc.clone().add(-4.0, -0.5, 0.5)
+            val homeLoc =
+                IslandsManager.lookAtLoc(newLoc.clone().add(-3.0, 0.0, 0.5), newLoc.clone().add(0.0, -1.0, 0.5))
             IslandsManager.setPlotHome(playerToPlot[player.uniqueId]!!, homeLoc)
-            player.teleport(lookAtLoc(homeLoc, newLoc))
+            player.teleport(homeLoc)
             player.velocity = Vector(0, 0, 0)
             player.successMsg("设置完成，新的水晶已放置，出生点已刷新")
+            endMoveCore(player)
             event.isCancelled = true
         }
     }
@@ -104,24 +98,6 @@ object MoveIslandCore : Listener {
         }
         player.sendBlockChange(loc, cBlock.baseBlockData!!)
         playerTempCoreLoc[player.uniqueId] = loc
-    }
-
-    private fun lookAtLoc(locA: Location, locB: Location): Location {
-        val xDiff = locB.x - locA.x
-        val yDiff = locB.y - locA.y
-        val zDiff = locB.z - locA.z
-
-        val distanceXZ = sqrt(xDiff * xDiff + zDiff * zDiff)
-        val distanceY = sqrt(distanceXZ * distanceXZ + yDiff * yDiff)
-        // xDiff(邻边) / distanceXZ(斜边) = cos(theta)
-        var yaw = Math.toDegrees(acos(xDiff / distanceXZ))
-        // yDiff(邻边) / distanceY(斜边) = cos(theta)
-        val pitch = Math.toDegrees(acos(yDiff / distanceY)) - 90
-//                    println(pitch)
-        if (zDiff < 0.0) {
-            yaw += abs(180.0 - yaw) * 2.0
-        }
-        return Location(locA.world, locA.x, locA.y, locA.z, yaw.toFloat() - 90f, pitch.toFloat())
     }
 
 

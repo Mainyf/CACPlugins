@@ -24,6 +24,10 @@ class CommandHandler : CommandExecutor {
                 "testI" -> {
                     StorageManager.testInsert()
                 }
+                "test" -> {
+                    val player = arg<Player>() ?: return@cmd
+                    println()
+                }
                 "mmenu" -> {
                     val player = arg<Player>() ?: return@cmd
                     MainMenu().open(player)

@@ -47,6 +47,12 @@ abstract class AbstractMenuHandler {
         iconBlockMap.remove(slot)
     }
 
+    fun Inventory.unSetIcon(slots: Iterable<Int>) {
+        slots.forEach {
+            unSetIcon(it)
+        }
+    }
+
     fun Inventory.setIcon(
         slot: Int,
         iconType: Material,
@@ -74,12 +80,42 @@ abstract class AbstractMenuHandler {
     }
 
     fun Inventory.setIcon(
+        slots: Iterable<Int>,
+        iconType: Material,
+        dName: String,
+        lore: List<String> = listOf(),
+        amount: Int = 1,
+        clickBlock: (Player) -> Unit = {}
+    ) {
+        slots.forEach {
+            setIcon(
+                it,
+                iconType, dName, lore, amount, clickBlock
+            )
+        }
+    }
+
+    fun Inventory.setIcon(
         slot: Int,
         itemStack: ItemStack,
         clickBlock: (Player) -> Unit = {}
     ) {
         setItem(slot, itemStack)
         iconBlockMap[slot] = clickBlock
+    }
+
+    fun Inventory.setIcon(
+        slots: Iterable<Int>,
+        itemStack: ItemStack,
+        clickBlock: (Player) -> Unit = {}
+    ) {
+        slots.forEach {
+            setIcon(
+                it,
+                itemStack,
+                clickBlock
+            )
+        }
     }
 
 }

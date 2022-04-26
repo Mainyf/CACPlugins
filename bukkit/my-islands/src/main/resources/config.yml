@@ -1,4 +1,6 @@
 coreId: "itemsadder:amethyst_block"
+backLobby:
+  - "message: 返回大厅"
 schematics:
   gaoshan:
     ui:

@@ -72,6 +72,7 @@ object ConfigManager {
         val antiNoPlayerPickupItem = config.getBoolean("antiNoPlayerPickupItem")
         val pvp = config.getBoolean("pvp")
         val tabComplete = config.getBoolean("tabComplete")
+        val antiVoidDamage = config.getBoolean("antiVoidDamage")
         global = WorldSettingConfig(
             difficulty,
             gameMode,
@@ -95,7 +96,8 @@ object ConfigManager {
             antiPlayerPickupOtherPlayerDropOfItem,
             antiNoPlayerPickupItem,
             pvp,
-            tabComplete
+            tabComplete,
+            antiVoidDamage
         )
     }
 
@@ -113,8 +115,8 @@ object ConfigManager {
         val antiChangeMobSpawn = config.getBoolean("antiChangeMobSpawn", global.antiChangeMobSpawn)
         val antiTramplingFarmland = config.getBoolean("antiTramplingFarmland", global.antiTramplingFarmland)
         val antiItemUse = if (config.contains("antiItemUse")) config.getStringList("antiItemUse").mapNotNull {
-                kotlin.runCatching { Material.valueOf(it.uppercase()) }.getOrNull()
-            } else global.antiItemUse
+            kotlin.runCatching { Material.valueOf(it.uppercase()) }.getOrNull()
+        } else global.antiItemUse
         val itemBlockAction = config.getMultiAction("itemBlockAction", global.itemBlockAction)
 
         val antiFly = config.getBoolean("antiFly", global.antiFly)
@@ -142,8 +144,8 @@ object ConfigManager {
         val antiPlaceBlock = config.getBoolean("antiPlaceBlock", global.antiPlaceBlock)
         val blockInteractWhite =
             if (config.contains("blockInteractWhite")) config.getStringList("blockInteractWhite").mapNotNull {
-                    kotlin.runCatching { Material.valueOf(it.uppercase()) }.getOrNull()
-                } else global.blockInteractWhite
+                kotlin.runCatching { Material.valueOf(it.uppercase()) }.getOrNull()
+            } else global.blockInteractWhite
         val antiInteractDisplayFrameAndPaint =
             config.getBoolean("antiInteractDisplayFrameAndPaint", global.antiInteractDisplayFrameAndPaint)
         val antiInteractArmorStand = config.getBoolean("antiInteractArmorStand", global.antiInteractArmorStand)
@@ -152,6 +154,7 @@ object ConfigManager {
         val antiNoPlayerPickupItem = config.getBoolean("antiNoPlayerPickupItem", global.antiNoPlayerPickupItem)
         val pvp = config.getBoolean("pvp", global.pvp)
         val tabComplete = config.getBoolean("tabComplete", global.tabComplete)
+        val antiVoidDamage = config.getBoolean("antiVoidDamage", global.antiVoidDamage)
         return WorldSettingConfig(
             difficulty,
             gameMode,
@@ -175,7 +178,8 @@ object ConfigManager {
             antiPlayerPickupOtherPlayerDropOfItem,
             antiNoPlayerPickupItem,
             pvp,
-            tabComplete
+            tabComplete,
+            antiVoidDamage
         )
     }
 
@@ -191,7 +195,7 @@ object ConfigManager {
         return if (world == null) null else getSetting(world.name)
     }
 
-    fun getSetting(worldName: String) = settingMap[worldName]
+    fun getSetting(worldName: String) = settingMap[worldName] ?: global
 
 }
 
@@ -218,7 +222,8 @@ data class WorldSettingConfig(
     val antiPlayerPickupOtherPlayerDropOfItem: Boolean,
     val antiNoPlayerPickupItem: Boolean,
     val pvp: Boolean,
-    val tabComplete: Boolean
+    val tabComplete: Boolean,
+    val antiVoidDamage: Boolean
 )
 
 enum class CommandMatchType {

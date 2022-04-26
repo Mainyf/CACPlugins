@@ -78,6 +78,7 @@ subprojects {
                 "my-islands" -> {
                     compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.0.4b.jar"))
                     compileOnly(rootProject.files("./server/bukkit/plugins/PlotSquared-Bukkit-6.6.2-Premium.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.1.3.0.jar"))
                 }
                 "bungee-settings-bukkit" -> {
                     compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.1.3.0.jar"))
@@ -107,7 +108,7 @@ subprojects {
                     dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
                 }
                 "my-islands" -> {
-                    dd.addAll(listOf("PlotSquared", "ItemsAdder", "ProtocolLib"))
+                    dd.addAll(listOf("CMI", "PlotSquared", "ItemsAdder", "ProtocolLib"))
                 }
                 "world-settings" -> {
                     dd.addAll(listOf("ProtocolLib"))

@@ -6,6 +6,7 @@ import io.github.mainyf.itemskillsplus.ItemSkillsPlus
 import io.github.mainyf.itemskillsplus.isEmpty
 import io.github.mainyf.newmclib.config.PlayParser
 import io.github.mainyf.newmclib.config.play.MultiPlay
+import io.github.mainyf.newmclib.exts.colored
 import io.github.mainyf.newmclib.exts.toMap
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -24,13 +25,16 @@ object ConfigManager {
 
     private lateinit var mainConfig: FileConfiguration
     private lateinit var skinConfig: FileConfiguration
+    private lateinit var menuConfig: FileConfiguration
 
     private val skinMap = mutableMapOf<String, Skin>()
+    lateinit var menuSlotConfig: MenuSlotConfig
+        private set
 
-    lateinit var initMenuTipsName: String
-    lateinit var initMenuTipsLore: List<String>
-    lateinit var upgradeMenuTipsName: String
-    lateinit var upgradeMenuTipsLore: List<String>
+//    lateinit var initMenuTipsName: String
+//    lateinit var initMenuTipsLore: List<String>
+//    lateinit var upgradeMenuTipsName: String
+//    lateinit var upgradeMenuTipsLore: List<String>
 
     private lateinit var levelExpression: String
     private var defaultEntityExp = 0.0
@@ -80,17 +84,23 @@ object ConfigManager {
         if (!skinFile.exists()) {
             ItemSkillsPlus.INSTANCE.saveResource("skins.yml", false)
         }
+        val menuFile = ItemSkillsPlus.INSTANCE.dataFolder.resolve("menu.yml")
+        if (!menuFile.exists()) {
+            ItemSkillsPlus.INSTANCE.saveResource("menu.yml", false)
+        }
         mainConfig = ItemSkillsPlus.INSTANCE.config
         skinConfig = YamlConfiguration.loadConfiguration(skinFile)
+        menuConfig = YamlConfiguration.loadConfiguration(menuFile)
         loadSkinConfig()
+        loadMenuConfig()
         loadMainConfig()
     }
 
     private fun loadMainConfig() {
-        initMenuTipsName = mainConfig.getString("initMenuTipsName")!!
-        initMenuTipsLore = mainConfig.getStringList("initMenuTipsLore")
-        upgradeMenuTipsName = mainConfig.getString("upgradeMenuTipsName")!!
-        upgradeMenuTipsLore = mainConfig.getStringList("upgradeMenuTipsLore")
+//        initMenuTipsName = mainConfig.getString("initMenuTipsName")!!
+//        initMenuTipsLore = mainConfig.getStringList("initMenuTipsLore")
+//        upgradeMenuTipsName = mainConfig.getString("upgradeMenuTipsName")!!
+//        upgradeMenuTipsLore = mainConfig.getStringList("upgradeMenuTipsLore")
 
         levelExpression = mainConfig.getString("exp.level")!!
         expEntityMap = mainConfig.getStringList("exp.entitys")
@@ -180,6 +190,105 @@ object ConfigManager {
         }
     }
 
+    private fun loadMenuConfig() {
+        val initItemSkillTitle1 = menuConfig.getString("initItemSkillTitle1")!!.colored()
+        val initItemSkillTitle2 = menuConfig.getString("initItemSkillTitle2")!!.colored()
+        val initItemSkillTitle3 = menuConfig.getString("initItemSkillTitle3")!!.colored()
+
+        val upgradeItemSkillTitle1 = menuConfig.getString("upgradeItemSkillTitle1")!!.colored()
+        val upgradeItemSkillTitle2 = menuConfig.getString("upgradeItemSkillTitle2")!!.colored()
+
+        val skills = mutableMapOf<String, ItemDisplayConfig>()
+        val skillListSect = menuConfig.getConfigurationSection("skillList")!!
+        skillListSect.getKeys(false).forEach {
+            skills[it] = skillListSect.getConfigurationSection(it)!!.asItemDisplay()
+        }
+        val equipSlot = menuConfig.getConfigurationSection("equipSlot")!!.let {
+            val initSlots = it.getIntegerList("initSlots")
+            val upgradeSlots = it.getIntegerList("upgradeSlots")
+            val itemDisplay = it.asItemDisplay()
+            SlotConfig(initSlots, upgradeSlots, itemDisplay)
+        }
+
+        val enchantSlot = menuConfig.getConfigurationSection("enchantSlot")!!.let {
+            val initSlots = it.getIntegerList("initSlots")
+            val upgradeSlots = it.getIntegerList("upgradeSlots")
+            val initItemDisplay = it.getConfigurationSection("init")!!.asItemDisplay()
+            val upgradeItemDisplay = it.getConfigurationSection("upgrade")!!.asItemDisplay()
+            val enchantSkills = it.getConfigurationSection("skill")!!.let { skillSect ->
+                val skillMap = mutableMapOf<String, List<ItemTypeWrapper>>()
+                skillSect.getKeys(false).forEach { key ->
+                    skillMap[key] = skillSect.getStringList(key).map { it.asItemTypeWrapper() }
+                }
+                skillMap
+            }
+            EnchantSlot(initSlots, upgradeSlots, initItemDisplay, upgradeItemDisplay, enchantSkills)
+        }
+
+        val materialsOfAdequacySlot = menuConfig.getConfigurationSection("materialsOfAdequacySlot")!!.let {
+            val initSlots = it.getIntegerList("initSlots")
+            val upgradeSlots = it.getIntegerList("upgradeSlots")
+            val default = it.getConfigurationSection("default")!!.asItemDisplay()
+            val satisfied = it.getConfigurationSection("satisfied")!!.asItemDisplay()
+            val unSatisfied = it.getConfigurationSection("unSatisfied")!!.asItemDisplay()
+            MaterialsOfAdequacySlot(initSlots, upgradeSlots, default, satisfied, unSatisfied)
+        }
+        val materialsSlot = menuConfig.getConfigurationSection("materialsSlot")!!.let {
+            val initSlots = it.getIntegerList("initSlots")
+            val upgradeSlots = it.getIntegerList("upgradeSlots")
+            SlotConfig(initSlots, upgradeSlots, ItemDisplayConfig.AIR)
+        }
+        val materialsCountSlot = menuConfig.getConfigurationSection("materialsCountSlot")!!.let {
+            val initSlots = it.getIntegerList("initSlots")
+            val upgradeSlots = it.getIntegerList("upgradeSlots")
+            val default = it.getConfigurationSection("default")!!.asItemDisplay()
+            val selectx32 = it.getConfigurationSection("selectx32")!!.asItemDisplay()
+            val selectx64 = it.getConfigurationSection("selectx64")!!.asItemDisplay()
+            val selectx128 = it.getConfigurationSection("selectx128")!!.asItemDisplay()
+            val selectx192 = it.getConfigurationSection("selectx192")!!.asItemDisplay()
+            MaterialsCountSlot(initSlots, upgradeSlots, default, selectx32, selectx64, selectx128, selectx192)
+        }
+        val completeSlot = menuConfig.getConfigurationSection("completeSlot")!!.let {
+            val initSlots = it.getIntegerList("initSlots")
+            val upgradeSlots = it.getIntegerList("upgradeSlots")
+            val itemDisplay = it.asItemDisplay()
+            SlotConfig(initSlots, upgradeSlots, itemDisplay)
+        }
+        menuSlotConfig = MenuSlotConfig(
+            initItemSkillTitle1,
+            initItemSkillTitle2,
+            initItemSkillTitle3,
+            upgradeItemSkillTitle1,
+            upgradeItemSkillTitle2,
+            skills,
+            equipSlot,
+            enchantSlot,
+            materialsOfAdequacySlot,
+            materialsSlot,
+            materialsCountSlot,
+            completeSlot
+        )
+    }
+
+//    private fun ConfigurationSection.asSlotConfig(): SlotConfig {
+//        val name = getString("name")?.colored()
+//        val lore = getStringList("lore").map { t -> t.colored() }
+//        return SlotConfig(name = name, lore = lore)
+//    }
+
+//    private fun ConfigurationSection.asMultiSlotConfig(): MultiGroupsSlotConfig {
+//        val slots = getIntegerList("slots")
+//        val groups = mutableMapOf<String, SlotConfig>()
+//        getKeys(false).forEach { key ->
+//            if (key != "slots") {
+//                val type = Material.valueOf(getString("${key}.type")!!.uppercase())
+//                val name = getString("${key}.name")?.colored()
+//                groups[key] = SlotConfig(name = name, type = type)
+//            }
+//        }
+//        return MultiGroupsSlotConfig(slots = slots, groups)
+//    }
+
     private fun getUpgradeMaterial(configSection: ConfigurationSection): List<List<Pair<String, Int>>> {
         val lines = configSection.getStringList("upgradeMaterials")
         val rs = mutableListOf<List<Pair<String, Int>>>()
@@ -264,13 +373,11 @@ object ConfigManager {
     }
 
     fun getSharpDamage(stage: Int): Double {
-        if (stage <= 0) return 0.0
-        return sharpDamageForm[stage - 1]
+        return sharpDamageForm[stage]
     }
 
     fun getPowerDamage(stage: Int): Double {
-        if (stage <= 0) return 0.0
-        return powerDamageForm[stage - 1]
+        return powerDamageForm[stage]
     }
 
     fun getLevelMaxExp(level: Int): Double {
@@ -298,28 +405,5 @@ object ConfigManager {
         return "${itemaddersNamespace}:${id}"
     }
 
-    class Skin(
-        val name: String,
-        val enabled: Boolean,
-        val equipType: String,
-        val equipments: List<EquipmentSkin>
-    )
-
-    class EquipmentSkin(
-        val customModelData: Int,
-        val effect: Map<String, SkinEffect>
-    )
-
-    class SkinEffect(
-        val type: EffectTriggerType,
-        val value: MultiPlay
-    )
-
-    enum class EffectTriggerType {
-
-        BREAK,
-        KILL
-
-    }
-
 }
+
