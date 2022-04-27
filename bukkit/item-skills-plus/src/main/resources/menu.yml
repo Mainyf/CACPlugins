@@ -8,15 +8,19 @@ upgradeItemSkillTitle2: "点击进阶附魔"
 # 附魔列表
 skillList:
   expand:
+    type: BOOK
     name: "&a凿石"
     lore: "&a凿石"
   luck:
+    type: BOOK
     name: "&a福临"
     lore: "&a福临"
   sharp:
+    type: BOOK
     name: "&a陵劲"
     lore: "&a陵劲"
   power:
+    type: BOOK
     name: "&a精准"
     lore: "&a精准"
 # 装备格子
@@ -90,7 +94,7 @@ materialsCountSlot:
   selectx192:
     type: TORCH
     name: "x192"
-complete:
+completeSlot:
   initSlots: [ 50 ]
   upgradeSlots: [ 49 ]
   type: GREEN_STAINED_GLASS_PANE

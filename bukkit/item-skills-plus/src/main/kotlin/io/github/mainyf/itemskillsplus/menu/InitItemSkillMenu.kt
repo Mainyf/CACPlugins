@@ -115,9 +115,9 @@ class InitItemSkillMenu : AbstractMenuHandler() {
             inv.setIcon(menuSlot.enchantSlot.initSlots, skill.toItemStack())
         }
 
+        var flag = true
         if (currentSkill.isNotBlank()) {
             val materials = ConfigManager.getUpgradeMaterialByName(currentSkill)[0]
-            var flag = true
             for ((index, slot) in menuSlot.materialsSlot.initSlots.withIndex()) {
                 val (id, amount) = materials.getOrNull(index) ?: break
 
@@ -143,26 +143,6 @@ class InitItemSkillMenu : AbstractMenuHandler() {
                     }).toItemStack()
                 )
             }
-            if (flag && equipItemStack != null) {
-                inv.setIcon(menuSlot.completeSlot.initSlots, menuSlot.completeSlot.itemDisplay.toItemStack()) {
-                    if (currentSkill.isBlank()) return@setIcon
-//                    val skillType = SKILL_MAP[] ?: return@setIcon
-                    val skillType = currentSkill
-                    val dataKey = SkillManager.getSkillByName(skillType)
-                    val equipItem = equipItemStack ?: return@setIcon
-                    if (!tryRemoveMaterial(it)) {
-                        updateInv(it, inv)
-                        return@setIcon
-                    }
-                    SkillManager.initItemSkill(player, dataKey, equipItem)
-                    val data = SkillManager.getItemSkill(dataKey, equipItem)
-                    SkillManager.updateItemMeta(equipItem, dataKey, data!!)
-                    equipItemStack = null
-                    ResultViewMenu(equipItem).open(it)
-                }
-            } else {
-                inv.unSetIcon(menuSlot.completeSlot.initSlots)
-            }
         } else {
             inv.setIcon(
                 menuSlot.materialsOfAdequacySlot.initSlots,
@@ -174,7 +154,26 @@ class InitItemSkillMenu : AbstractMenuHandler() {
                 menuSlot.materialsCountSlot.default.toItemStack()
             )
         }
-
+        if (flag && equipItemStack != null) {
+            inv.setIcon(menuSlot.completeSlot.initSlots, menuSlot.completeSlot.itemDisplay.toItemStack()) {
+                if (currentSkill.isBlank()) return@setIcon
+//                    val skillType = SKILL_MAP[] ?: return@setIcon
+                val skillType = currentSkill
+                val dataKey = SkillManager.getSkillByName(skillType)
+                val equipItem = equipItemStack ?: return@setIcon
+                if (!tryRemoveMaterial(it)) {
+                    updateInv(it, inv)
+                    return@setIcon
+                }
+                SkillManager.initItemSkill(player, dataKey, equipItem)
+                val data = SkillManager.getItemSkill(dataKey, equipItem)
+                SkillManager.updateItemMeta(equipItem, dataKey, data!!)
+                equipItemStack = null
+                ResultViewMenu(equipItem).open(it)
+            }
+        } else {
+            inv.unSetIcon(menuSlot.completeSlot.initSlots)
+        }
     }
 
     private fun tryRemoveMaterial(player: Player): Boolean {
@@ -229,6 +228,7 @@ class InitItemSkillMenu : AbstractMenuHandler() {
         currentSkillList.addAll(SKILL_MAP.map { it.value }.pagination(pageIndex, SKILL_SLOT_LIST.size))
         currentSkillList.forEachIndexed { index, skillName ->
             inv.setIcon(SKILL_SLOT_LIST[index], menuSlot.skills[skillName]!!.toItemStack()) {
+                if (currentSkill == skillName) return@setIcon
                 currentSkill = skillName
                 val type = ConfigManager.getSkillOnlyItemTypeByName(currentSkill)
                 if (equipItemStack?.type != type) {

@@ -1,6 +1,7 @@
 package io.github.mainyf.itemskillsplus.config
 
 import dev.lone.itemsadder.api.CustomStack
+import io.github.mainyf.newmclib.exts.colored
 import net.kyori.adventure.text.Component
 import org.apache.commons.lang3.EnumUtils
 import org.bukkit.Material
@@ -9,8 +10,8 @@ import org.bukkit.inventory.ItemStack
 
 fun ConfigurationSection.asItemDisplay(): ItemDisplayConfig {
     val typeWrapper = asItemTypeWrapper()
-    val name = getString("name")
-    val lore = getStringList("lore")
+    val name = getString("name")?.colored()
+    val lore = getStringList("lore").map { it.colored() }
     return ItemDisplayConfig(
         typeWrapper,
         name,
@@ -66,9 +67,9 @@ class ItemDisplayConfig(
 
 class ItemTypeWrapper(id: String) {
 
-    private val customStack: CustomStack? = CustomStack.getInstance(id)
+    private val customStack: CustomStack? by lazy { CustomStack.getInstance(id) }
 
-    private val material: Material = EnumUtils.getEnum(Material::class.java, id) ?: Material.AIR
+    private val material: Material by lazy { EnumUtils.getEnum(Material::class.java, id) ?: Material.AIR }
 
     fun toItemStack(): ItemStack {
         return customStack?.itemStack ?: ItemStack(material)

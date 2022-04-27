@@ -78,22 +78,26 @@ object ConfigManager {
 
     @JvmStatic
     fun load() {
-        ItemSkillsPlus.INSTANCE.saveDefaultConfig()
-        ItemSkillsPlus.INSTANCE.reloadConfig()
-        val skinFile = ItemSkillsPlus.INSTANCE.dataFolder.resolve("skins.yml")
-        if (!skinFile.exists()) {
-            ItemSkillsPlus.INSTANCE.saveResource("skins.yml", false)
+        kotlin.runCatching {
+            ItemSkillsPlus.INSTANCE.saveDefaultConfig()
+            ItemSkillsPlus.INSTANCE.reloadConfig()
+            val skinFile = ItemSkillsPlus.INSTANCE.dataFolder.resolve("skins.yml")
+            if (!skinFile.exists()) {
+                ItemSkillsPlus.INSTANCE.saveResource("skins.yml", false)
+            }
+            val menuFile = ItemSkillsPlus.INSTANCE.dataFolder.resolve("menu.yml")
+            if (!menuFile.exists()) {
+                ItemSkillsPlus.INSTANCE.saveResource("menu.yml", false)
+            }
+            mainConfig = ItemSkillsPlus.INSTANCE.config
+            skinConfig = YamlConfiguration.loadConfiguration(skinFile)
+            menuConfig = YamlConfiguration.loadConfiguration(menuFile)
+            loadSkinConfig()
+            loadMenuConfig()
+            loadMainConfig()
+        }.onFailure {
+            ItemSkillsPlus.INSTANCE.slF4JLogger.error("加载配置时出现错误", it)
         }
-        val menuFile = ItemSkillsPlus.INSTANCE.dataFolder.resolve("menu.yml")
-        if (!menuFile.exists()) {
-            ItemSkillsPlus.INSTANCE.saveResource("menu.yml", false)
-        }
-        mainConfig = ItemSkillsPlus.INSTANCE.config
-        skinConfig = YamlConfiguration.loadConfiguration(skinFile)
-        menuConfig = YamlConfiguration.loadConfiguration(menuFile)
-        loadSkinConfig()
-        loadMenuConfig()
-        loadMainConfig()
     }
 
     private fun loadMainConfig() {
@@ -160,33 +164,28 @@ object ConfigManager {
             val skinSection = skinConfig.getConfigurationSection(skinKey)!!
             val enabled = skinSection.getBoolean("enable")
             val equipType = skinSection.getString("equipType")!!
-            skinMap[skinKey] = Skin(
-                skinKey,
-                enabled,
-                equipType,
-                skinSection.getList("skin")!!.map { map ->
-                    val equipConfig = YamlConfiguration.loadConfiguration(StringReader(Yaml().dump(map)))
-                    val customModelData = equipConfig.getInt("customModelData")
-                    val effectSection = equipConfig.getConfigurationSection("effect")!!
-                    val effectMap = mutableMapOf<String, SkinEffect>()
-                    effectSection.getKeys(false).forEach { effectKey ->
-                        val type = EffectTriggerType.valueOf(
-                            effectSection.getString("${effectKey}.type")!!.uppercase(Locale.getDefault())
-                        )
-                        val multiPlay = MultiPlay()
-                        effectSection.getStringList("${effectKey}.value").forEach effectValueLoop@{
-                            val play = PlayParser.parsePlay(it)
-                            if (play == null) {
-                                println("[ItemSkillsPlus] $it 解析错误")
-                                return@effectValueLoop
-                            }
-                            multiPlay.addPlay(play)
+            skinMap[skinKey] = Skin(skinKey, enabled, equipType, skinSection.getList("skin")!!.map { map ->
+                val equipConfig = YamlConfiguration.loadConfiguration(StringReader(Yaml().dump(map)))
+                val customModelData = equipConfig.getInt("customModelData")
+                val effectSection = equipConfig.getConfigurationSection("effect")!!
+                val effectMap = mutableMapOf<String, SkinEffect>()
+                effectSection.getKeys(false).forEach { effectKey ->
+                    val type = EffectTriggerType.valueOf(
+                        effectSection.getString("${effectKey}.type")!!.uppercase(Locale.getDefault())
+                    )
+                    val multiPlay = MultiPlay()
+                    effectSection.getStringList("${effectKey}.value").forEach effectValueLoop@{
+                        val play = PlayParser.parsePlay(it)
+                        if (play == null) {
+                            println("[ItemSkillsPlus] $it 解析错误")
+                            return@effectValueLoop
                         }
-                        effectMap[effectKey] = SkinEffect(type, multiPlay)
+                        multiPlay.addPlay(play)
                     }
-                    EquipmentSkin(customModelData, effectMap)
+                    effectMap[effectKey] = SkinEffect(type, multiPlay)
                 }
-            )
+                EquipmentSkin(customModelData, effectMap)
+            })
         }
     }
 
@@ -218,7 +217,9 @@ object ConfigManager {
             val enchantSkills = it.getConfigurationSection("skill")!!.let { skillSect ->
                 val skillMap = mutableMapOf<String, List<ItemTypeWrapper>>()
                 skillSect.getKeys(false).forEach { key ->
-                    skillMap[key] = skillSect.getStringList(key).map { it.asItemTypeWrapper() }
+                    skillMap[key] = skillSect.getStringList(key).map { l ->
+                        l.asItemTypeWrapper()
+                    }
                 }
                 skillMap
             }

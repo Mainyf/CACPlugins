@@ -87,17 +87,9 @@ class ItemSkillUpgradeMenu : AbstractMenuHandler() {
             )
         }
 
+        var flag = true
         if (!equipItemStack.isEmpty()) {
             val materials = ConfigManager.getUpgradeMaterialByName(currentSkill)[currentStage + 1]
-//            for ((index, slot) in menuSlot.materialsSlot.upgradeSlots.withIndex()) {
-//                val (id, amount) = materials.getOrNull(index) ?: break
-//
-//                val itemStack = ConfigManager.getItemByUPMaterialID(id)
-////                itemStack.amount = amount
-//                inv.setIcon(slot, itemStack)
-//
-//            }
-            var flag = true
             for ((index, slot) in menuSlot.materialsSlot.upgradeSlots.withIndex()) {
                 val (id, amount) = materials.getOrNull(index) ?: break
 
@@ -124,29 +116,40 @@ class ItemSkillUpgradeMenu : AbstractMenuHandler() {
                 )
 //                inv.setIcon(MATERIAL_COUNT_SLOT_LIST[index], Material.TORCH, "x${amount}")
             }
-            if (flag && equipItemStack != null) {
-                inv.setIcon(menuSlot.completeSlot.upgradeSlots, menuSlot.completeSlot.itemDisplay.toItemStack()) {
-                    if (currentSkill.isBlank()) return@setIcon
-                    val dataKey = SkillManager.getSkillByName(currentSkill)
-                    val equipItem = equipItemStack ?: return@setIcon
-                    val data = SkillManager.getItemSkill(equipItem) ?: return@setIcon
-                    if (data.stage >= 3) return@setIcon
-                    if (data.level < data.maxLevel) return@setIcon
-                    if (!tryRemoveMaterial(it)) {
-                        updateInv(it, inv)
-                        return@setIcon
-                    }
-                    data.stage++
-                    data.exp = 0.0
-                    SkillManager.setItemSkillData(dataKey, equipItem, data)
-                    SkillManager.updateItemMeta(equipItem, dataKey, data)
-                    equipItem.itemMeta
-                    equipItemStack = null
-                    ResultViewMenu(equipItem).open(it)
+        } else {
+            inv.setIcon(
+                menuSlot.materialsOfAdequacySlot.upgradeSlots,
+                menuSlot.materialsOfAdequacySlot.default.toItemStack()
+            )
+            inv.unSetIcon(menuSlot.materialsSlot.upgradeSlots)
+            inv.setIcon(
+                menuSlot.materialsCountSlot.upgradeSlots,
+                menuSlot.materialsCountSlot.default.toItemStack()
+            )
+        }
+
+        if (flag && equipItemStack != null) {
+            inv.setIcon(menuSlot.completeSlot.upgradeSlots, menuSlot.completeSlot.itemDisplay.toItemStack()) {
+                if (currentSkill.isBlank()) return@setIcon
+                val dataKey = SkillManager.getSkillByName(currentSkill)
+                val equipItem = equipItemStack ?: return@setIcon
+                val data = SkillManager.getItemSkill(equipItem) ?: return@setIcon
+                if (data.stage >= 3) return@setIcon
+                if (data.level < data.maxLevel) return@setIcon
+                if (!tryRemoveMaterial(it)) {
+                    updateInv(it, inv)
+                    return@setIcon
                 }
-            } else {
-                inv.unSetIcon(menuSlot.completeSlot.upgradeSlots)
+                data.stage++
+                data.exp = 0.0
+                SkillManager.setItemSkillData(dataKey, equipItem, data)
+                SkillManager.updateItemMeta(equipItem, dataKey, data)
+                equipItem.itemMeta
+                equipItemStack = null
+                ResultViewMenu(equipItem).open(it)
             }
+        } else {
+            inv.unSetIcon(menuSlot.completeSlot.upgradeSlots)
         }
 
     }
