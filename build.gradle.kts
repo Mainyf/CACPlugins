@@ -79,10 +79,18 @@ subprojects {
                     compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.0.4b.jar"))
                     compileOnly(rootProject.files("./server/bukkit/plugins/PlotSquared-Bukkit-6.6.2-Premium.jar"))
                     compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.1.3.0.jar"))
+                    compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
                 }
                 "bungee-settings-bukkit" -> {
                     compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.1.3.0.jar"))
                     compileOnly(rootProject.files("./server/bukkit/plugins/PlaceholderAPI-2.11.1.jar"))
+                }
+                "player-settings" -> {
+                    embed("com.alibaba:easyexcel:3.0.5")
+                    compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
+                }
+                "command-settings" -> {
+                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.0.4b.jar"))
                 }
             }
         }
@@ -103,12 +111,14 @@ subprojects {
             apiVersion = "1.13"
 
             val dd = mutableListOf<String>()
+            val sd = mutableListOf<String>()
             when (project.name) {
                 "item-skills-plus" -> {
                     dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
                 }
                 "my-islands" -> {
                     dd.addAll(listOf("CMI", "PlotSquared", "ItemsAdder", "ProtocolLib"))
+                    sd.addAll(listOf("AuthMe"))
                 }
                 "world-settings" -> {
                     dd.addAll(listOf("ProtocolLib"))
@@ -116,9 +126,16 @@ subprojects {
                 "bungee-settings-bukkit" -> {
                     dd.addAll(listOf("CMI", "PlaceholderAPI"))
                 }
+                "player-settings" -> {
+                    sd.addAll(listOf("AuthMe"))
+                }
+                "command-settings" -> {
+                    dd.addAll(listOf("ItemsAdder"))
+                }
             }
             dd.add("NewMCLib")
             depend = dd
+            softDepend = sd
         }
 
         tasks.register<DefaultTask>("initSources") {
@@ -150,9 +167,9 @@ class $pluginName : JavaPlugin() {
 
         tasks.register<Copy>("copyPlugin") {
             group = "bukkit"
-            rootProject.file("./server/bukkit/plugins/").listFiles()?.find {
-                it.name.startsWith(project.name) && it.name.endsWith(".jar")
-            }?.delete()
+//            rootProject.file("./server/bukkit/plugins/").listFiles()?.find {
+//                it.name.startsWith(project.name) && it.name.endsWith(".jar")
+//            }?.delete()
             from(tasks.jar)
             into(rootProject.file("./server/bukkit/plugins/").absolutePath)
         }

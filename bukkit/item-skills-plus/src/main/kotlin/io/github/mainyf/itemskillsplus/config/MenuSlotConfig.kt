@@ -1,5 +1,8 @@
 package io.github.mainyf.itemskillsplus.config
 
+import io.github.mainyf.newmclib.config.ItemDisplayConfig
+import io.github.mainyf.newmclib.utils.ItemTypeWrapper
+
 class MenuSlotConfig(
     val initItemSkillTitle1: String,
     val initItemSkillTitle2: String,

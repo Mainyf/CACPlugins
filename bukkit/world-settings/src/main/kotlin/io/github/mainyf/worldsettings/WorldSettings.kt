@@ -7,9 +7,12 @@ import com.comphenix.protocol.events.PacketEvent
 import io.github.mainyf.newmclib.exts.registerCommand
 import io.github.mainyf.newmclib.exts.runTaskTimerBR
 import io.github.mainyf.worldsettings.config.ConfigManager
+import io.github.mainyf.worldsettings.config.WorldSettingConfig
 import io.github.mainyf.worldsettings.listeners.BlockListener
 import io.github.mainyf.worldsettings.listeners.PlayerListener
 import org.bukkit.Bukkit
+import org.bukkit.World
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
 class WorldSettings : JavaPlugin() {
@@ -28,6 +31,7 @@ class WorldSettings : JavaPlugin() {
         reloadConfig()
         ConfigManager.load(config)
         PlayerDropItemStorage.init(this)
+//        server.pluginManager.getPlugin("AuthMe")
         registerCommand("wsett", CommandHandler)
         Bukkit.getServer().pluginManager.registerEvents(BlockListener, this)
         Bukkit.getServer().pluginManager.registerEvents(PlayerListener, this)
@@ -85,4 +89,15 @@ class WorldSettings : JavaPlugin() {
         PlayerDropItemStorage.close()
     }
 
+}
+
+fun ignorePermAndGetWorldSettings(player: Player, world: World = player.world, block: (WorldSettingConfig) -> Unit) {
+    if (player.hasPermission(ConfigManager.ignorePermission)) return
+    val settings = ConfigManager.getSetting(world) ?: return
+    block.invoke(settings)
+}
+
+fun getWorldSettings(player: Player, world: World = player.world, block: (WorldSettingConfig) -> Unit) {
+    val settings = ConfigManager.getSetting(world) ?: return
+    block.invoke(settings)
 }

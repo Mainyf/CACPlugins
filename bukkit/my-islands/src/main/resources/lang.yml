@@ -1,0 +1,6 @@
+# 一天内重复点赞
+kudoRepeat:
+  - "message: 一天内只允许点赞一次"
+# 点赞成功
+kudoSuccess:
+  - "message: 点赞完成"

@@ -1,0 +1,78 @@
+mainMenu:
+  # 上一页
+  prevSlot:
+    slot: [ 0,9,18 ]
+    type: WHITE_STAINED_GLASS_PANE
+    name: "上一页"
+    lore:
+      - "lore #1"
+  # 下一页
+  nextSlot:
+    slot: [ 8,17,26 ]
+    type: BLACK_STAINED_GLASS_PANE
+    name: "下一页"
+    lore:
+      - "lore #1"
+  # 岛屿展示格子
+  islandViewSlot:
+    slot: [ 1,2,3,4,5,6,7,10,11,12,13,14,15,16,19,20,21,22,23,24,25 ]
+    type: STONE
+  # 切换岛屿展示列表
+  switchViewIslandSlot:
+    slot: [ 31 ]
+    type: PHANTOM_MEMBRANE
+    name: "切换岛屿展示, 当前: {filterText}"
+    lore:
+      - "lore #1"
+  # 岛屿信息
+  infoAndKudosSlot:
+    slot: [ 46 ]
+    info:
+      type: PAPER
+      name: "岛屿信息"
+      lore:
+        - "lore #1"
+    kudos:
+      type: PAPER
+      name: "点赞"
+      lore:
+        - "lore #1"
+  # 岛屿升级与返回岛屿
+  upgradeAndBackIslandSlot:
+    slot: [ 48,49,50 ]
+    upgrade:
+      type: ORANGE_STAINED_GLASS_PANE
+      name: "岛屿升级"
+      lore:
+        - "lore #1"
+    back:
+      type: ORANGE_STAINED_GLASS_PANE
+      name: "返回岛屿"
+      lore:
+        - "lore #1"
+  # 岛屿设置
+  islandSettingsSlot:
+    slot: [ 52 ]
+    type: RED_STAINED_GLASS_PANE
+    name: "岛屿设置"
+    lore:
+      - "lore #1"
+settingsMenu:
+  # 授权者
+  helpersSlot:
+    slot: [ 1,2,3,5,6,7 ]
+  # 移动核心
+  moveCoreSlot:
+    slot: [ 21 ]
+    type: YELLOW_STAINED_GLASS_PANE
+    name: "移动核心水晶"
+  # 切换岛屿状态
+  visibilitySlot:
+    slot: [ 22 ]
+    type: LIME_STAINED_GLASS_PANE
+    name: "当前展示状态: {visibility}"
+  # 重置岛屿
+  resetIslandSlot:
+    slot: [ 23 ]
+    type: BLUE_STAINED_GLASS_PANE
+    name: "重置岛屿"

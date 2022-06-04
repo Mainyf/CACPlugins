@@ -8,18 +8,42 @@ import com.plotsquared.core.plot.Plot
 import com.plotsquared.core.plot.PlotArea
 import com.plotsquared.core.services.ServicePipeline
 import com.plotsquared.core.services.plots.AutoService
+import com.plotsquared.core.util.EventDispatcher
 import com.plotsquared.core.util.SchematicHandler
 import com.plotsquared.core.util.task.AutoClaimFinishTask
 import com.plotsquared.core.util.task.RunnableVal
 import com.plotsquared.core.util.task.TaskManager
 import com.plotsquared.google.Inject
+import com.shopify.promises.Promise
 import io.github.mainyf.newmclib.exts.errorMsg
+import io.github.mainyf.newmclib.exts.runTaskLaterBR
 import org.bukkit.entity.Player
 
 class PlotUtils @Inject constructor(
     val servicePipeline: ServicePipeline,
-    val schematicHandler: SchematicHandler
+    val schematicHandler: SchematicHandler,
+    val eventDispatcher: EventDispatcher
 ) {
+
+    fun removeIsland(pp: PlotPlayer<*>, plot: Plot): Promise<Unit, Throwable> {
+        return Promise {
+            kotlin.runCatching {
+                plot.plotModificationManager.deletePlot(pp) {
+                    plot.removeRunning()
+                    this@PlotUtils.eventDispatcher.callPostDelete(plot)
+                    resolve(Unit)
+                }
+            }.onFailure {
+                it.printStackTrace()
+                reject(it)
+            }
+        }
+    }
+
+    fun getPlotByPLoc(player: Player): Plot? {
+        val plotPlayer = player.asPlotPlayer()!!
+        return plotPlayer.location.plotAbs
+    }
 
     fun paste(player: Player, plot: Plot, schematiceName: String, block: (Boolean) -> Unit) {
         TaskManager.runTaskAsync {
@@ -30,19 +54,26 @@ class PlotUtils @Inject constructor(
                 return@runTaskAsync
             }
 
-            schematicHandler.paste(
-                schematice,
-                plot,
-                0,
-                plot.area!!.minBuildHeight,
-                0,
-                false,
-                MyIslands.plotAPI.wrapPlayer(player.uniqueId),
-                object : RunnableVal<Boolean>() {
-                    override fun run(status: Boolean) {
-                        block(status)
-                    }
-                })
+            kotlin.runCatching {
+                schematicHandler.paste(
+                    schematice,
+                    plot,
+                    0,
+                    plot.area!!.minBuildHeight,
+                    0,
+                    false,
+                    MyIslands.plotAPI.wrapPlayer(player.uniqueId),
+                    object : RunnableVal<Boolean>() {
+                        override fun run(status: Boolean) {
+                            block(status)
+                        }
+                    })
+            }.onFailure {
+                it.printStackTrace()
+                MyIslands.INSTANCE.runTaskLaterBR(2 * 20L) {
+                    block(true)
+                }
+            }
         }
     }
 

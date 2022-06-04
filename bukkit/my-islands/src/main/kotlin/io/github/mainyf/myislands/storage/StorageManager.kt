@@ -1,12 +1,21 @@
 package io.github.mainyf.myislands.storage
 
-import io.github.mainyf.newmclib.serverId
+import io.github.mainyf.myislands.menu.IslandViewListType
+import io.github.mainyf.myislands.menu.IslandViewListType.*
+import io.github.mainyf.myislands.pagination
+import io.github.mainyf.newmclib.exts.pagination
+import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.storage.AbstractStorageManager
+import io.github.mainyf.newmclib.storage.newByID
+import org.bukkit.entity.Player
 import org.bukkit.util.Vector
+import org.jetbrains.exposed.dao.load
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.and
-import org.joda.time.DateTime
+import org.joda.time.LocalDate
 import java.util.*
 
 object StorageManager : AbstractStorageManager() {
@@ -14,43 +23,72 @@ object StorageManager : AbstractStorageManager() {
     override fun init() {
         super.init()
         transaction {
-            SchemaUtils.createMissingTablesAndColumns(PlayerIslandTable)
+            arrayOf(
+                PlayerIslands,
+                PlayerIslandHelpers,
+                PlayerKudoLogs
+            ).forEach {
+                SchemaUtils.createMissingTablesAndColumns(it)
+            }
         }
     }
 
     fun createPlayerIsland(uuid: UUID, coreLoc: Vector) {
         transaction {
-            PlayerIslandData.new(uuid) {
-                createTime = DateTime.now()
+            PlayerIsland.newByID(uuid) {
 
-                serverId = serverId()
                 coreX = coreLoc.blockX
                 coreY = coreLoc.blockY
                 coreZ = coreLoc.blockZ
-                visibility = false
+                visibility = IslandVisibility.ALL
                 kudos = 0
+
             }
         }
     }
 
-    fun getPlayerIsland(uuid: UUID): PlayerIslandData? {
+    fun removePlayerIsland(island: PlayerIsland) {
+        transaction {
+            island.helpers.forEach {
+                it.delete()
+            }
+//                PlayerIslandHelperData.find { PlayerIslandHelpers.island eq data.id }.forEach {
+//                    it.delete()
+//                }
+            island.delete()
+        }
+    }
+
+    fun getPlayerIsland(uuid: UUID): PlayerIsland? {
         return transaction {
-            PlayerIslandData.find { (PlayerIslandTable.id eq uuid) and (PlayerIslandTable.serverId eq serverId()) }
-                .firstOrNull()
+            PlayerIsland.findById(uuid)
         }
     }
 
-    fun setVisibility(uuid: UUID, visibility: Boolean) {
+    fun setVisibility(island: PlayerIsland, visibility: IslandVisibility) {
         transaction {
-            val data = getPlayerIsland(uuid) ?: return@transaction
-            data.visibility = visibility
+            island.visibility = visibility
         }
     }
 
-    fun addKudos(uuid: UUID, count: Int = 1) {
-        transaction {
-            val data = getPlayerIsland(uuid) ?: return@transaction
-            data.kudos += count
+    fun addKudos(source: UUID, island: PlayerIsland): Boolean {
+        return transaction {
+            val curTime = LocalDate.now().toDateTimeAtStartOfDay()
+            val kudoData = PlayerKudoLog.find {
+                (PlayerKudoLogs.island eq island.id) and (PlayerKudoLogs.kudoDate eq curTime)
+            }
+            if (!kudoData.empty()) {
+                return@transaction false
+            }
+
+            island.kudos += 1
+
+            PlayerKudoLog.newByID {
+                this.island = island.id
+                this.kudoUUID = source
+                this.kudoDate = LocalDate.now().toDateTimeAtStartOfDay()
+            }
+            true
         }
     }
 
@@ -63,12 +101,73 @@ object StorageManager : AbstractStorageManager() {
         }
     }
 
-    fun getIsLandsOrderByKudos(pageIndex: Int, pageSize: Int): List<PlayerIslandData> {
+    fun hasPermission(player: Player, owner: UUID): Boolean {
         return transaction {
-            PlayerIslandData.all()
-                .orderBy(PlayerIslandTable.kudos to SortOrder.DESC)
-                .limit(pageSize, (pageIndex.toLong() - 1L) * pageSize.toLong())
-                .toList()
+            val ownerData = getPlayerIsland(owner) ?: return@transaction false
+
+            ownerData.helpers.any { it.helperUUID == player.uuid }
+        }
+    }
+
+    fun addHelpers(island: PlayerIsland, helper: UUID) {
+        transaction {
+            PlayerIslandHelper.newByID {
+                this.island = island.id
+                this.helperUUID = helper
+            }
+        }
+    }
+
+    fun getIsLandsCount(player: Player, type: IslandViewListType): Int {
+        return transaction {
+            when (type) {
+                ALL -> PlayerIsland.count(PlayerIslands.visibility eq IslandVisibility.ALL).toInt()
+                FRIEND -> PlayerIsland.count(PlayerIslands.visibility neq IslandVisibility.NONE).toInt()
+                PERMISSION -> {
+                    val islandDatas =
+                        PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
+
+                    islandDatas.filter { iData ->
+                        iData.helpers.any {
+                            it.helperUUID == player.uuid
+                        }
+                    }.size
+                }
+            }
+        }
+    }
+
+    fun getIsLandsOrderByKudos(
+        pageIndex: Int,
+        pageSize: Int,
+        player: Player,
+        type: IslandViewListType
+    ): List<PlayerIsland> {
+        return synchronized(this) {
+            transaction {
+                when (type) {
+                    ALL -> PlayerIsland
+                        .find { PlayerIslands.visibility eq IslandVisibility.ALL }
+                        .orderBy(PlayerIslands.kudos to SortOrder.DESC)
+                        .pagination(pageIndex, pageSize)
+                        .toList()
+                    FRIEND -> PlayerIsland
+                        .find { PlayerIslands.visibility neq IslandVisibility.NONE }
+                        .orderBy(PlayerIslands.kudos to SortOrder.DESC)
+                        .pagination(pageIndex, pageSize)
+                        .toList()
+                    PERMISSION -> {
+                        val islandDatas = PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
+
+                        islandDatas.filter { iData ->
+                            iData.id.value == player.uuid || iData.helpers.any {
+                                it.helperUUID == player.uuid
+                            }
+                        }
+                            .pagination(pageIndex, pageSize)
+                    }
+                }
+            }
         }
     }
 

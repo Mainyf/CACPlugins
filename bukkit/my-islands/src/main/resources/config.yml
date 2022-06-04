@@ -1,34 +1,35 @@
 coreId: "itemsadder:amethyst_block"
+islandHelperMaxCount: 6
 backLobby:
-  - "message: 返回大厅"
+  - "console: cmi server spawn {player}"
 schematics:
   gaoshan:
     ui:
       name: "高山"
       lore:
         - "高山地形"
-    core: -96,-175,-84
+    core: -77,-70,-198
   hupo:
     ui:
       name: "湖泊"
       lore:
         - "湖泊地形"
-    core: 20,20,20
+    core: -75,-103,-99
   pingyuan:
     ui:
       name: "平原"
       lore:
         - "平原地形"
-    core: 20,20,20
+    core: -99,-73,-111
   shamo:
     ui:
       name: "沙漠"
       lore:
         - "沙漠地形"
-    core: 20,20,20
+    core: -63,-66,-105
   xueshan:
     ui:
       name: "雪山"
       lore:
         - "雪山地形"
-    core: 20,20,20
+    core: -92,-52,-218

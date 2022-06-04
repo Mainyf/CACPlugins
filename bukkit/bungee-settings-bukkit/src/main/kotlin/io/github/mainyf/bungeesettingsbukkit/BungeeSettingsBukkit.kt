@@ -28,6 +28,8 @@ class BungeeSettingsBukkit : JavaPlugin() {
         storage = NoCacheStorage.mysql(GlobalCommandCache::class)
         registerCommand("glDis") { sender, _, _, args ->
             cmdParser(sender, args) cmd@{
+                if (!sender.isOp) return@cmd
+
                 val type = arg<String>() ?: return@cmd
                 when (type) {
                     "stp" -> {

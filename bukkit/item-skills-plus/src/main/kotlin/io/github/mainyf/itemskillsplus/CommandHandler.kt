@@ -18,16 +18,17 @@ import kotlin.system.measureTimeMillis
 class CommandHandler : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, cmd: Command, label: String, args: Array<String>): Boolean {
+        if (!sender.isOp) return false
         cmdParser(sender, args) cmd@{
             val type = arg<String>() ?: return@cmd
             when (type) {
-                "testI" -> {
-                    StorageManager.testInsert()
-                }
-                "test" -> {
-                    val player = arg<Player>() ?: return@cmd
-                    println()
-                }
+//                "testI" -> {
+//                    StorageManager.testInsert()
+//                }
+//                "test" -> {
+//                    val player = arg<Player>() ?: return@cmd
+//                    println()
+//                }
                 "mmenu" -> {
                     val player = arg<Player>() ?: return@cmd
                     MainMenu().open(player)

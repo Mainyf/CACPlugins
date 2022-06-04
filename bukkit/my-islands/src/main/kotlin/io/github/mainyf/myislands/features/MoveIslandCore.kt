@@ -4,8 +4,9 @@ import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.plot.Plot
 import dev.lone.itemsadder.api.CustomBlock
 import io.github.mainyf.myislands.IslandsManager
+import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.config.ConfigManager
-import io.github.mainyf.myislands.storage.PlayerIslandData
+import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.myislands.storage.StorageManager
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.successMsg
@@ -25,7 +26,7 @@ import java.util.*
 object MoveIslandCore : Listener {
 
     private val cooldown = Cooldown()
-    private val moveingCorePlayer = mutableMapOf<UUID, PlayerIslandData>()
+    private val moveingCorePlayer = mutableMapOf<UUID, PlayerIsland>()
     private val playerToPlot = mutableMapOf<UUID, Plot>()
     private val playerTempCoreLoc = mutableMapOf<UUID, Location>()
 
@@ -33,7 +34,31 @@ object MoveIslandCore : Listener {
         return moveingCorePlayer.containsKey(uuid)
     }
 
-    fun startMoveCore(player: Player, islandData: PlayerIslandData, plot: Plot) {
+    fun tryStartMoveCore(player: Player) {
+        val plot = MyIslands.plotUtils.getPlotByPLoc(player)
+        if (hasMoveingCore(player.uniqueId)) {
+            player.errorMsg("你正在移动你的核心")
+            return
+        }
+        if (plot == null) {
+            player.errorMsg("你的脚下没有地皮")
+            return
+        }
+        val owner = plot.owner
+        if (owner != player.uniqueId) {
+            player.errorMsg("你不是脚下地皮的主人")
+            return
+        }
+        val islandData = StorageManager.getPlayerIsland(player.uniqueId)
+        if (islandData == null) {
+            player.errorMsg("意外的错误: 0xMI1")
+            return
+        }
+        startMoveCore(player, islandData, plot)
+        player.successMsg("开始移动核心水晶")
+    }
+
+    fun startMoveCore(player: Player, islandData: PlayerIsland, plot: Plot) {
         moveingCorePlayer[player.uniqueId] = islandData
         playerToPlot[player.uniqueId] = plot
     }
@@ -82,6 +107,10 @@ object MoveIslandCore : Listener {
             player.successMsg("设置完成，新的水晶已放置，出生点已刷新")
             endMoveCore(player)
             event.isCancelled = true
+        }
+        if (event.action == Action.RIGHT_CLICK_AIR || event.action == Action.RIGHT_CLICK_BLOCK) {
+            endMoveCore(player)
+            player.successMsg("结束移动核心水晶")
         }
     }
 

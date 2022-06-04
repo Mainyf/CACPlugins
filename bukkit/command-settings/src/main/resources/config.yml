@@ -1,0 +1,11 @@
+1:
+  demandItems:
+    - 'bread|10'
+    - 'itemskills:eqMaterial1|10'
+  noDemandActions:
+    - 'message: &c ◆ &7你的背包物品不足'
+  actions:
+    - 'sound: ENTITY_PLAYER_LEVELUP,1,2'
+    - 'console: money take {player} 300'
+  plays:
+    - 'sound: ENTITY_PLAYER_LEVELUP,1,2'

@@ -4,10 +4,14 @@ import com.udojava.evalex.Expression
 import dev.lone.itemsadder.api.CustomStack
 import io.github.mainyf.itemskillsplus.ItemSkillsPlus
 import io.github.mainyf.itemskillsplus.isEmpty
+import io.github.mainyf.newmclib.config.ItemDisplayConfig
 import io.github.mainyf.newmclib.config.PlayParser
+import io.github.mainyf.newmclib.config.asItemDisplay
+import io.github.mainyf.newmclib.config.asItemTypeWrapper
 import io.github.mainyf.newmclib.config.play.MultiPlay
 import io.github.mainyf.newmclib.exts.colored
 import io.github.mainyf.newmclib.exts.toMap
+import io.github.mainyf.newmclib.utils.ItemTypeWrapper
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
@@ -42,7 +46,7 @@ object ConfigManager {
     private var defaultBlockExp = 0.0
     private lateinit var expBlockMap: Map<String, Double>
 
-    private var itemaddersNamespace = "itemskills"
+//    private var itemaddersNamespace = "itemskills"
 
     var expandEnable = false
     val expandItemType = Material.NETHERITE_PICKAXE
@@ -117,7 +121,7 @@ object ConfigManager {
         defaultBlockExp = expBlockMap.getOrDefault("other", 0.0)
         expBlockMap = expBlockMap.filter { it.key != "other" }
 
-        itemaddersNamespace = mainConfig.getString("itemaddersNamespace") ?: itemaddersNamespace
+//        itemaddersNamespace = mainConfig.getString("itemaddersNamespace") ?: itemaddersNamespace
 
         mainConfig.getConfigurationSection("equipments.expand")!!.let { section ->
             expandEnable = section.getBoolean("enabled")
@@ -297,7 +301,7 @@ object ConfigManager {
             val list = mutableListOf<Pair<String, Int>>()
             val pair = line.split(",")
             pair.map {
-                val (id, amount) = it.split(":")
+                val (id, amount) = it.split("|")
                 list.add(id to amount.toInt())
             }
             rs.add(list)
@@ -403,7 +407,8 @@ object ConfigManager {
     }
 
     fun getFullID(id: String): String {
-        return "${itemaddersNamespace}:${id}"
+//        return "${itemaddersNamespace}:${id}"
+        return id
     }
 
 }

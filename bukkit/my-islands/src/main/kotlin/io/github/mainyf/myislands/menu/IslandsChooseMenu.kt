@@ -44,7 +44,7 @@ class IslandsChooseMenu : AbstractMenuHandler() {
     private var ok = false
 
     override fun open(player: Player) {
-        val inv = Bukkit.createInventory(createHolder(player), SIZE, Component.text("&a地皮选择".colored()))
+        val inv = Bukkit.createInventory(createHolder(player), SIZE, Component.text("&a岛屿选择".colored()))
 
         BACK_SLOT.forEach {
             inv.setIcon(it, Material.RED_STAINED_GLASS_PANE, "返回大厅") {

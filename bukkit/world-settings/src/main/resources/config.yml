@@ -1,60 +1,88 @@
 debug: true
 ignore-permission: worldsettings.admin
-global:
-  # 难度
-  difficulty: EASY
-  # 游戏模式
-  gameMode: SURVIVAL
-  # 世界规则(不会和全局的合并)
-  gameRules:
-    keepInventory: true
-  # 禁止创造传送门
-  antiCreatePortal: true
-  # 禁止修改刷怪笼
-  antiChangeMobSpawn: true
-  # 禁止踩踏农田
-  antiTramplingFarmland: true
-  # 阻止使用物品(不会和全局的合并)
-  antiItemUse:
-    - DIAMOND_SWORD
-  itemBlockAction:
-    - "message: 该物品无法在此世界使用"
-  # 禁止飞行
-  antiFly: true
-  flyBlockAction:
-    - "message: 当前世界不允许飞行"
-  # 禁止伤害非敌对生物
-  antiDamageFriendEntityLiving: true
-  # 命令白名单(不会和全局的合并)
-  commandWhite:
-    - "start: /cmd1"
-    - "like: /cmd2"
-  commandBlockAction:
-    - "message: 该命令无法在此世界执行"
-  # 禁止鼠标有物品的情况下拾取物品
-  antiCursorNoEmptyPickupItem: true
-  # 禁止破坏方块
-  antiBreakBlock: true
-  # 禁止放置方块
-  antiPlaceBlock: true
-  # 可互动的方块(不会和全局的合并)
-  blockInteractWhite:
-    - CRAFTING_TABLE
-  # 禁止与展示框和画互动
-  antiInteractDisplayFrameAndPaint: true
-  # 禁止与盔甲架互动
-  antiInteractArmorStand: true
-  # 禁止玩家拾取其他玩家掉落的物品
-  antiPlayerPickupOtherPlayerDropOfItem: true
-  # 禁止非玩家生物拾取物品
-  antiNoPlayerPickupItem: true
-  # 是否开启玩家之间的损伤
-  pvp: true
-  # 是否开启tab补全
-  tabComplete: true
-  # 阻止虚空伤害
-  antiVoidDamage: true
-worlds:
-  world:
+gloablServer:
+  global:
     # 难度
-    difficulty: NORMAL
+    difficulty: EASY
+    # 游戏模式
+    gameMode: SURVIVAL
+    # 世界规则(不会和全局的合并)
+    gameRules:
+      keepInventory: true
+    # 禁止创造传送门
+    antiCreatePortal: true
+    # 禁止修改刷怪笼
+    antiChangeMobSpawn: true
+    # 禁止踩踏农田
+    antiTramplingFarmland: true
+    # 阻止使用物品(不会和全局的合并)
+    antiItemUse:
+      - DIAMOND_SWORD
+    itemBlockAction:
+      - "message: 该物品无法在此世界使用"
+    # 禁止飞行
+    antiFly: true
+    flyBlockAction:
+      - "message: 当前世界不允许飞行"
+    # 禁止伤害非敌对生物
+    antiDamageFriendEntityLiving: true
+    # 命令白名单(不会和全局的合并)
+    commandWhite:
+      - "start: /cmd1"
+      - "like: /cmd2"
+    commandBlockAction:
+      - "message: 该命令无法在此世界执行"
+    # 禁止鼠标有物品的情况下拾取物品
+    antiCursorNoEmptyPickupItem: true
+    # 禁止破坏方块
+    antiBreakBlock: true
+    # 禁止放置方块
+    antiPlaceBlock: true
+    # 可互动的方块(不会和全局的合并)
+    blockInteractWhite:
+      - CRAFTING_TABLE
+    # 禁止与展示框和画互动
+    antiInteractDisplayFrameAndPaint: true
+    # 禁止与盔甲架互动
+    antiInteractArmorStand: true
+    # 禁止玩家拾取其他玩家掉落的物品
+    antiPlayerPickupOtherPlayerDropOfItem: true
+    pickupItemAction:
+      - "message: 此世界禁止拾取其他玩家丢弃的物品"
+    # 禁止非玩家生物拾取物品
+    antiNoPlayerPickupItem: true
+    # 是否开启玩家之间的损伤
+    pvp: true
+    # 是否开启tab补全
+    tabComplete: true
+    # 阻止虚空伤害
+    antiVoidDamage: true
+    # 重生时的动作
+    respawnAction:
+      - "message: 你重生了"
+    # 进入服务器时的动作
+    joinServerAction:
+      - "message: 你进入了此服务器"
+  worlds:
+    world:
+      difficulty: NORMAL
+
+servers:
+  # 服务器id
+  default:
+    global:
+      difficulty: NORMAL
+      gameMode: SURVIVAL
+    worlds:
+      world:
+        difficulty: NORMAL
+        gameMode: SURVIVAL
+  # 服务器id
+  default2:
+    global:
+      difficulty: NORMAL
+      gameMode: SURVIVAL
+    worlds:
+      world:
+        difficulty: NORMAL
+        gameMode: SURVIVAL
