@@ -1,20 +1,22 @@
 package io.github.mainyf.myislands.storage
 
+import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.menu.IslandViewListType
 import io.github.mainyf.myislands.menu.IslandViewListType.*
-import io.github.mainyf.myislands.pagination
 import io.github.mainyf.newmclib.exts.pagination
 import io.github.mainyf.newmclib.exts.uuid
+import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.storage.AbstractStorageManager
 import io.github.mainyf.newmclib.storage.newByID
+import io.github.mainyf.newmclib.utils.Heads
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
-import org.jetbrains.exposed.dao.load
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.joda.time.LocalDate
 import java.util.*
 
@@ -30,6 +32,21 @@ object StorageManager : AbstractStorageManager() {
             ).forEach {
                 SchemaUtils.createMissingTablesAndColumns(it)
             }
+        }
+        transaction {
+            val list = PlayerIsland.all()
+            var count = 0
+            list.forEach {
+                val offlineData = it.id.value.asOfflineData() ?: return@forEach
+                val pName = offlineData.name
+                count++
+                kotlin.runCatching {
+                    Heads.initPlayerHead(pName)
+                }.onFailure { e ->
+                    MyIslands.LOGGER.error("初始化玩家 $pName 头颅数据时出现异常", e)
+                }
+            }
+            MyIslands.LOGGER.info("成功初始化 $count 个岛屿玩家头颅数据")
         }
     }
 
@@ -51,6 +68,9 @@ object StorageManager : AbstractStorageManager() {
         transaction {
             island.helpers.forEach {
                 it.delete()
+            }
+            PlayerKudoLogs.deleteWhere {
+                PlayerKudoLogs.island eq island.id
             }
 //                PlayerIslandHelperData.find { PlayerIslandHelpers.island eq data.id }.forEach {
 //                    it.delete()

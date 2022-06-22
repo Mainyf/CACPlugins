@@ -1,35 +1,42 @@
-coreId: "itemsadder:amethyst_block"
-islandHelperMaxCount: 6
+debug: true
+coreId: "plot:plot_main"
+islandHelperMaxCount: 4
 backLobby:
   - "console: cmi server spawn {player}"
 schematics:
-  gaoshan:
-    ui:
-      name: "高山"
-      lore:
-        - "高山地形"
-    core: -77,-70,-198
   hupo:
+    iaIcons: '0:offset_-174::view_plot_types_0:'
     ui:
       name: "湖泊"
       lore:
         - "湖泊地形"
     core: -75,-103,-99
-  pingyuan:
-    ui:
-      name: "平原"
-      lore:
-        - "平原地形"
-    core: -99,-73,-111
   shamo:
+    iaIcons: '1:offset_-5::view_plot_types_1:'
     ui:
       name: "沙漠"
       lore:
         - "沙漠地形"
     core: -63,-66,-105
   xueshan:
+    iaIcons: '2:offset_-5::view_plot_types_2:'
     ui:
       name: "雪山"
       lore:
         - "雪山地形"
     core: -92,-52,-218
+
+  pingyuan:
+    iaIcons: '0:offset_-174::view_plot_types_3:'
+    ui:
+      name: "平原"
+      lore:
+        - "平原地形"
+    core: -99,-73,-111
+  gaoshan:
+    iaIcons: '1:offset_-5::view_plot_types_4:'
+    ui:
+      name: "高山"
+      lore:
+        - "高山地形"
+    core: -77,-70,-198

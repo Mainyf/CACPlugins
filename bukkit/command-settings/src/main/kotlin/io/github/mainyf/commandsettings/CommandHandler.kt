@@ -41,6 +41,7 @@ class CommandHandler : CommandExecutor {
 
     private fun trySendAction(player: Player, action: ItemAction) {
         var flag = true
+
         for ((type, amount) in action.demandItems) {
             val itemCount = player.countByItem { it.equalsByIaNamespaceID(type) }
             if (itemCount < amount) {

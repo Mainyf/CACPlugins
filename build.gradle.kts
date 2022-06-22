@@ -2,7 +2,7 @@ import java.util.regex.Pattern
 
 plugins {
     id("java")
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.7.0"
     id("net.minecrell.plugin-yml.bukkit") version "0.5.1"
 }
 
@@ -15,13 +15,16 @@ allprojects {
         maven {
             url = uri("https://hub.spigotmc.org/nexus/content/repositories/public")
         }
+        maven {
+            url = uri("https://repo.codemc.org/repository/maven-releases")
+        }
         mavenCentral()
         jcenter()
     }
-
 }
 
 subprojects {
+
     apply {
         plugin("java")
         plugin("org.jetbrains.kotlin.jvm")
@@ -56,6 +59,10 @@ subprojects {
 
     configurations.implementation.get().extendsFrom(embed)
 
+    afterEvaluate {
+        configurations.implementation.get()
+    }
+
     dependencies {
         if (hasBungeeCord(project)) {
             embed("org.jetbrains.kotlin:kotlin-stdlib")
@@ -66,38 +73,66 @@ subprojects {
             implementation("org.jetbrains.kotlin:kotlin-stdlib")
             implementation("io.netty:netty-all:4.1.68.Final")
             compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
+            compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
             implementation("io.github.mainyf:newmclib-craftbukkit:1.7.2")
             compileOnly(rootProject.files("./server/bukkit/plugins/ProtocolLib.jar"))
 
             when (project.name) {
                 "item-skills-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
-                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.0.4b.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0b-beta4.jar"))
                     compileOnly(rootProject.files("./server/bukkit/plugins/PlaceholderAPI-2.11.1.jar"))
                 }
                 "my-islands" -> {
-                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.0.4b.jar"))
-                    compileOnly(rootProject.files("./server/bukkit/plugins/PlotSquared-Bukkit-6.6.2-Premium.jar"))
+//                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
+
+                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0b-beta4.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/PlotSquared-Bukkit-6.9.0-Premium.jar"))
+//                    compileOnly(rootProject.files("./libs/PlotSquared-Bukkit-6.6.2-Premium.jar"))
                     compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.1.3.0.jar"))
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
+                    compileOnly(rootProject.files("./libs/datafixerupper-4.1.27.jar"))
+                    compileOnly(rootProject.files("./libs/SkinsRestorer.jar"))
                 }
                 "bungee-settings-bukkit" -> {
                     compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.1.3.0.jar"))
                     compileOnly(rootProject.files("./server/bukkit/plugins/PlaceholderAPI-2.11.1.jar"))
+                }
+                "player-account" -> {
+                    embed("com.aliyun:alibabacloud-dysmsapi20170525:1.0.1")
                 }
                 "player-settings" -> {
                     embed("com.alibaba:easyexcel:3.0.5")
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
                 }
                 "command-settings" -> {
-                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.0.4b.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0b-beta4.jar"))
+                }
+                "mcrmb-migration" -> {
+                    compileOnly(rootProject.files("./server/bukkit/plugins/MCRMB-2.0b19-12fe19a.jar"))
                 }
             }
         }
     }
 
     tasks.jar {
-        from(embed.map(::zipTree))
+        if (project.name == "player-account") {
+//            from(provider {
+//                val fatJarDir = project.projectDir.resolve("build/tmp/lib")
+//                fatJarDir.listFiles()?.forEach { file ->
+//                    file.delete()
+//                }
+//                embed.toList().forEach {
+//                    val libFile = fatJarDir.resolve(it.name)
+//                    it.copyTo(libFile, true)
+//                }
+//                fatJarDir
+//            })
+            from(embed)
+        } else {
+            from(embed.map(::zipTree))
+        }
+//        from(embed.map(::zipTree))
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
@@ -132,6 +167,9 @@ subprojects {
                 "command-settings" -> {
                     dd.addAll(listOf("ItemsAdder"))
                 }
+                "mcrmb-migration" -> {
+                    dd.addAll(listOf("Mcrmb"))
+                }
             }
             dd.add("NewMCLib")
             depend = dd
@@ -139,6 +177,7 @@ subprojects {
         }
 
         tasks.register<DefaultTask>("initSources") {
+            group = "bukkit"
             doLast {
                 val pluginName = lineToUpper(project.name)
                 val packageName = "io/github/mainyf/${lineToLower(project.name)}"
@@ -178,7 +217,9 @@ class $pluginName : JavaPlugin() {
             dependsOn(tasks.findByName("copyPlugin"))
             classpath = rootProject.files("./server/bukkit/paper-1.18.2-239.jar")
             mainClass.set("io.papermc.paperclip.Paperclip")
-            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
+            val jvmArgsText = "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
+//            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
+            jvmArgs = jvmArgsText.split(" ")
             args = listOf("nogui")
             workingDir = rootProject.file("./server/bukkit")
             standardOutput = System.out
@@ -214,7 +255,6 @@ class $pluginName : JavaPlugin() {
             description = "runs the bukkit server"
         }
     }
-
 
 }
 

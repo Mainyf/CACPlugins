@@ -45,6 +45,7 @@ object PlayerListener : Listener {
         val player = event.player
         ignorePermAndGetWorldSettings(player) { settings ->
             val command = event.message
+            if (settings.commandWhite.isEmpty()) return@ignorePermAndGetWorldSettings
             var cancel = true
             settings.commandWhite.forEach { (type, cmd) ->
                 when (type) {

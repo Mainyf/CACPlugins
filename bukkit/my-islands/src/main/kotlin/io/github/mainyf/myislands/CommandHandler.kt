@@ -2,9 +2,8 @@ package io.github.mainyf.myislands
 
 import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.features.MoveIslandCore
-import io.github.mainyf.myislands.menu.IslandsMainMenu
 import io.github.mainyf.myislands.menu.IslandsChooseMenu
-import io.github.mainyf.myislands.storage.StorageManager
+import io.github.mainyf.myislands.menu.IslandsMainMenu
 import io.github.mainyf.newmclib.command.cmdParser
 import io.github.mainyf.newmclib.exts.asUUIDFromByte
 import io.github.mainyf.newmclib.exts.errorMsg
@@ -22,34 +21,22 @@ class CommandHandler : CommandExecutor {
         cmdParser(sender, args) {
             val type = arg<String>() ?: return@cmdParser
             when (type) {
+                "demo" -> {
+
+                }
                 "reload" -> {
                     ConfigManager.load()
                     sender.successMsg("[MyIsLands] 重载成功")
                 }
+                "test" -> {
+                    val target = arg<Player>() ?: return@cmdParser
+                    val block = target.getTargetBlock(6) ?: return@cmdParser
+                    println("isBuildable: ${block.isBuildable}")
+                    println("isSolid: ${block.isSolid}")
+                }
                 "moveCore" -> {
                     val target = arg<Player>() ?: return@cmdParser
-//                    val plotPlayer = MyIslands.plotAPI.wrapPlayer(target.uniqueId)!!
-                    val plot = MyIslands.plotUtils.getPlotByPLoc(target)
-                    if (MoveIslandCore.hasMoveingCore(target.uniqueId)) {
-                        target.errorMsg("你正在移动你的核心")
-                        return@cmdParser
-                    }
-                    if (plot == null) {
-                        target.errorMsg("你的脚下没有地皮")
-                        return@cmdParser
-                    }
-                    val owner = plot.owner
-                    if (owner != target.uniqueId) {
-                        target.errorMsg("你不是脚下地皮的主人")
-                        return@cmdParser
-                    }
-                    val islandData = StorageManager.getPlayerIsland(target.uniqueId)
-                    if (islandData == null) {
-                        target.errorMsg("意外的错误: 0xMI1")
-                        return@cmdParser
-                    }
-                    MoveIslandCore.startMoveCore(target, islandData, plot)
-                    target.successMsg("开始移动核心水晶")
+                    MoveIslandCore.tryStartMoveCore(target)
                 }
                 "endMove" -> {
                     val target = arg<Player>() ?: return@cmdParser
@@ -58,6 +45,7 @@ class CommandHandler : CommandExecutor {
                         return@cmdParser
                     }
                     MoveIslandCore.endMoveCore(target)
+                    MoveIslandCore.removePlayerLater20Tick(target)
                     target.successMsg("结束移动核心水晶")
                 }
                 "coreLoc" -> {
@@ -82,7 +70,7 @@ class CommandHandler : CommandExecutor {
                     if (MyIslands.plotAPI.getPlayerPlots(plotPlayer).isNotEmpty()) {
                         return@cmdParser
                     }
-                    IslandsChooseMenu().open(target)
+                    IslandsChooseMenu(true, IslandsManager::chooseIslandSchematic).open(target)
                 }
                 "menu" -> {
                     val target = arg<Player>() ?: return@cmdParser
@@ -97,7 +85,7 @@ class CommandHandler : CommandExecutor {
                         target.errorMsg("你已经领取了一个地皮")
                         return@cmdParser
                     }
-                    MyIslands.plotUtils.autoClaimPlot(plotPlayer) {
+                    MyIslands.plotUtils.autoClaimPlot(target, plotPlayer) {
                         target.successMsg("领取成功")
                     }
                 }
@@ -146,8 +134,9 @@ class CommandHandler : CommandExecutor {
                         target.msg("你的脚下没有岛屿")
                         return@cmdParser
                     }
-                    IslandsManager.removeIsland(pp, plot)
-                    target.msg("删除成功")
+                    IslandsManager.removeIsland(pp, plot).whenComplete {
+                        target.msg("删除成功")
+                    }
                 }
             }
         }

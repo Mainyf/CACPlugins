@@ -31,21 +31,21 @@ class PlayerLively(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
 
 //    var onlineMinutes by PlayerLivelyTable.onlineMinutes
 
-    var dayOnlines by PlayerDayOnline via PlayerLivelyToDayOnlines
+//    var dayOnlines by PlayerDayOnline via PlayerLivelyToDayOnlines
 
     var lastLoginDate by PlayerLivelys.lastLoginDate
 
 }
 
-object PlayerLivelyToDayOnlines : Table("t_PlayerLivelyToDayOnline") {
-
-    val lively = reference("lively", PlayerLivelys)
-
-    val dayOnline = reference("day_online", PlayerDayOnlines)
-
-    override val primaryKey = PrimaryKey(lively, dayOnline)
-
-}
+//object PlayerLivelyToDayOnlines : Table("t_PlayerLivelyToDayOnline") {
+//
+//    val lively = reference("lively", PlayerLivelys)
+//
+//    val dayOnline = reference("day_online", PlayerDayOnlines)
+//
+//    override val primaryKey = PrimaryKey(lively, dayOnline)
+//
+//}
 
 object PlayerDayOnlines : BaseTable("t_PlayerDayOnline") {
 

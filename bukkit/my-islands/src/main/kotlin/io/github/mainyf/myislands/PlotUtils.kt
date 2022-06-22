@@ -2,10 +2,12 @@ package io.github.mainyf.myislands
 
 import com.plotsquared.core.PlotSquared
 import com.plotsquared.core.database.DBFunc
+import com.plotsquared.core.permissions.PermissionHandler.PermissionHandlerCapability
 import com.plotsquared.core.player.PlayerMetaDataKeys
 import com.plotsquared.core.player.PlotPlayer
 import com.plotsquared.core.plot.Plot
 import com.plotsquared.core.plot.PlotArea
+import com.plotsquared.core.plot.world.PlotAreaManager
 import com.plotsquared.core.services.ServicePipeline
 import com.plotsquared.core.services.plots.AutoService
 import com.plotsquared.core.util.EventDispatcher
@@ -22,7 +24,8 @@ import org.bukkit.entity.Player
 class PlotUtils @Inject constructor(
     val servicePipeline: ServicePipeline,
     val schematicHandler: SchematicHandler,
-    val eventDispatcher: EventDispatcher
+    val eventDispatcher: EventDispatcher,
+    val plotAreaManager: PlotAreaManager
 ) {
 
     fun removeIsland(pp: PlotPlayer<*>, plot: Plot): Promise<Unit, Throwable> {
@@ -77,8 +80,33 @@ class PlotUtils @Inject constructor(
         }
     }
 
-    fun autoClaimPlot(plotPlayer: PlotPlayer<*>, schematic: String? = null, block: () -> Unit) {
-        val playerPlotArea = plotPlayer.applicablePlotArea
+    fun autoClaimPlot(player: Player, plotPlayer: PlotPlayer<*>, schematic: String? = null, block: () -> Unit) {
+        var playerPlotArea = plotPlayer.applicablePlotArea
+//        var playerPlotArea: PlotArea? = null
+        if (playerPlotArea == null) {
+            val permissionHandler = PlotSquared.platform().permissionHandler()
+            if (permissionHandler.hasCapability(PermissionHandlerCapability.PER_WORLD_PERMISSIONS)) {
+                val allPlotAreas = this.plotAreaManager.allPlotAreas
+                for (plotArea in allPlotAreas) {
+                    if (plotPlayer.hasPermission(plotArea.worldName, "plots.auto")) {
+                        if (playerPlotArea != null) {
+                            playerPlotArea = null
+                            break
+                        }
+                        playerPlotArea = plotArea
+                    }
+                }
+            }
+
+            if (this.plotAreaManager.allPlotAreas.size == 1) {
+                playerPlotArea = this.plotAreaManager.allPlotAreas[0]
+            }
+
+            if (playerPlotArea == null) {
+                player.errorMsg("出现意外错误: MI9，请报告给管理员")
+                return
+            }
+        }
         val plots = servicePipeline.pump(
             AutoService.AutoQuery(
                 plotPlayer,

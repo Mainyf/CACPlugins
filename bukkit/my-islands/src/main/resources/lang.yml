@@ -1,6 +1,34 @@
 # 一天内重复点赞
-kudoRepeat:
-  - "message: 一天内只允许点赞一次"
+kudoRepeat: "一天内只允许点赞一次"
 # 点赞成功
-kudoSuccess:
-  - "message: 点赞完成"
+kudoSuccess: "点赞完成"
+# 在没有权限的岛屿拾取物品
+pickupByNonHelperIsland: []
+dropItemByNonHelperIsland: []
+antiPlayerBreakCore: "你无法破坏此方块"
+
+alreadyMoveingCore: "你正在移动你的核心"
+playerLocNotPlot: "你的脚下没有岛屿"
+playerNotPlotOwner: "你不是脚下地皮的主人"
+tryMoveCoreButPlayerNotHaveIsland: "意外的错误: 0xMI1"
+startMoveCore: "开始移动核心水晶"
+endMoveCore: "结束移动核心水晶"
+moveCoreSuccess: "设置完成，新的水晶已放置，出生点已刷新"
+coreNotPlaceOutIsland: "你不能把水晶设置在岛屿外部"
+
+noIslandPermission: "你没有该岛屿的授权"
+playerNoPlot: "你没有岛屿"
+otherPlayerNoPlot: "此玩家没有岛屿"
+
+permissionCountMax: "授权者数量不能超过 6"
+addPermissionSuccess: "已经添加此授权者"
+
+# 获取地皮插件玩家数据时出现问题
+plotPluginPlayerCacheError: "未知错误 MI0x1"
+
+alreadyOwnIsland: "你已经拥有了自己的私人岛屿"
+# 加载岛屿预设时出现错误
+loadIslandPresetError: "意外的错误: 0xMI0"
+
+initIslandCore: "岛屿水晶已放置"
+islandClaimSuccess: "成功领取你的私人岛屿"

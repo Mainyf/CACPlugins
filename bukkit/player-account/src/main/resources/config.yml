@@ -1,0 +1,7 @@
+# 区域
+# cn-shanghai, cn-shenzhen, cn-chengdu, cn-hangzhou, cn-
+regionID: "cn-shanghai"
+accessKeyId: "LTAI5tDdC7LbrKgwT25h94J2"
+accessKeySecret: "TZ8twtkEpnc9p4rEOi2lI81UUyAlaH"
+signName: "阿里云短信测试"
+templateCode: "SMS_154950909"

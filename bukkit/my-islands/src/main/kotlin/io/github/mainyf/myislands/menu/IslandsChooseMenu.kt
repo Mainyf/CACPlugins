@@ -3,11 +3,11 @@ package io.github.mainyf.myislands.menu
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.config.ConfigManager
-import io.github.mainyf.newmclib.exts.colored
-import io.github.mainyf.newmclib.exts.errorMsg
-import io.github.mainyf.newmclib.exts.pagination
-import io.github.mainyf.newmclib.exts.runTaskLaterBR
+import io.github.mainyf.newmclib.config.IaIcon
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
+import io.github.mainyf.newmclib.menu.ConfirmMenu
+import io.github.mainyf.newmclib.utils.Cooldown
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -16,122 +16,122 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import kotlin.math.ceil
 
-class IslandsChooseMenu : AbstractMenuHandler() {
-
-    companion object {
-
-        const val SIZE = 6 * 9
-
-        val ISLANDS_LIST = listOf(
-            listOf(9, 10, 11, 18, 19, 20),
-            listOf(12, 13, 14, 21, 22, 23),
-            listOf(15, 16, 17, 24, 25, 26)
-        )
-
-        val PREV_SLOT = listOf(37, 38)
-
-        val NEXT_SLOT = listOf(42, 43)
-
-        val BACK_SLOT = listOf(40, 49)
-
-    }
+class IslandsChooseMenu(
+    var antiClose: Boolean = true,
+    val block: (IslandsChooseMenu, Player, ConfigManager.PlotSchematicConfig) -> Unit
+) :
+    AbstractMenuHandler() {
 
     private var pageIndex = 1
     private val maxPageIndex =
-        ceil(ConfigManager.schematicMap.values.let { it.size.toDouble() / ISLANDS_LIST.size.toDouble() }).toInt()
+        ceil(ConfigManager.schematicMap.values.let { it.size.toDouble() / ConfigManager.islandChooseConfig.islandListSlot.slot.size.toDouble() }).toInt()
     private val currentIslandList = mutableListOf<ConfigManager.PlotSchematicConfig>()
 
-    private var ok = false
+    var ok = false
 
     override fun open(player: Player) {
-        val inv = Bukkit.createInventory(createHolder(player), SIZE, Component.text("&a岛屿选择".colored()))
+        this.cooldownTime = ConfigManager.islandChooseConfig.cooldown
+        updateList()
+        val inv = Bukkit.createInventory(
+            createHolder(player),
+            ConfigManager.islandChooseConfig.row * 9,
+            Component.text(updateTitle(player).colored())
+        )
 
-        BACK_SLOT.forEach {
-            inv.setIcon(it, Material.RED_STAINED_GLASS_PANE, "返回大厅") {
-                ConfigManager.backLobbyAction.execute(player)
-            }
-        }
         updateInv(inv)
 
         player.openInventory(inv)
     }
 
-    private fun updateInv(inv: Inventory) {
-        ISLANDS_LIST.forEach { slotList ->
-            slotList.forEach {
-                inv.unSetIcon(it)
-            }
+    override fun updateTitle(player: Player): String {
+        val chooseMenuConfig = ConfigManager.islandChooseConfig
+        val icons = mutableListOf<IaIcon>()
+        icons.addAll(chooseMenuConfig.prevSlot.itemDisplay!!.iaIcons.icons())
+        icons.addAll(chooseMenuConfig.nextSlot.itemDisplay!!.iaIcons.icons())
+        icons.addAll(chooseMenuConfig.backSlot.itemDisplay!!.iaIcons.icons())
+        currentIslandList.map {
+            icons.addAll(it.iaIcons.icons())
         }
-        currentIslandList.clear()
-        currentIslandList.addAll(ConfigManager.schematicMap.values.toList().pagination(pageIndex, ISLANDS_LIST.size))
-        currentIslandList.forEachIndexed { index, islandSchematic ->
-            val slotList = ISLANDS_LIST[index]
-            slotList.forEach { slot ->
-                val material = when (index) {
-                    0 -> Material.LIGHT_BLUE_STAINED_GLASS_PANE
-                    1 -> Material.LIME_STAINED_GLASS_PANE
-                    2 -> Material.ORANGE_STAINED_GLASS_PANE
-                    else -> Material.BLUE_STAINED_GLASS_PANE
-                }
-                inv.setIcon(
-                    slot,
-                    material,
-                    islandSchematic.ui.name.colored(),
-                    islandSchematic.ui.lore.map { it.colored() }) {
-                    chooseIslandSchematic(it, islandSchematic)
-                }
-            }
-        }
-        PREV_SLOT.forEach {
-            if (pageIndex > 1) {
-                inv.setIcon(it, Material.WHITE_STAINED_GLASS_PANE, "上一页") {
-                    pageIndex--
-                    updateInv(inv)
-                }
-            } else {
-                inv.unSetIcon(it)
-            }
-        }
-        NEXT_SLOT.forEach {
-            if (pageIndex < maxPageIndex) {
-                inv.setIcon(it, Material.BLACK_STAINED_GLASS_PANE, "下一页") {
-                    pageIndex++
-                    updateInv(inv)
-                }
-            } else {
-                inv.unSetIcon(it)
-            }
-        }
+        val title = "${chooseMenuConfig.background} ${icons.sortedBy { it.priority }.joinToString(" ") { it.value }}"
+//        val title = menuConfig.background
+        player.setOpenInventoryTitle(title)
+        return title
     }
 
-    private fun chooseIslandSchematic(player: Player, plotSchematic: ConfigManager.PlotSchematicConfig) {
-        val plotPlayer = MyIslands.plotAPI.wrapPlayer(player.uniqueId)
-        if (plotPlayer == null) {
-            player.errorMsg("未知错误，请重试")
-            return
-        }
-        if (MyIslands.plotAPI.getPlayerPlots(plotPlayer).isNotEmpty()) {
-            player.errorMsg("你的已经拥有了自己的私人岛屿")
-            return
-        }
-        ok = true
-        MyIslands.plotUtils.autoClaimPlot(plotPlayer) {
-            val plots = MyIslands.plotAPI.getPlayerPlots(plotPlayer)
-            val plot = plots.first()
-            MyIslands.plotUtils.paste(player, plot, plotSchematic.name) {
-                if (it) {
-                    IslandsManager.createPlayerIsland(player, plot, plotSchematic)
-                } else {
-                    player.errorMsg("意外的错误: 0xMI0")
+    private fun updateList() {
+        val chooseMenuConfig = ConfigManager.islandChooseConfig
+        val islandListSlot = chooseMenuConfig.islandListSlot.slot
+        currentIslandList.clear()
+        currentIslandList.addAll(ConfigManager.schematicMap.values.toList().pagination(pageIndex, islandListSlot.size))
+    }
+
+    private fun updateInv(inv: Inventory) {
+        val chooseMenuConfig = ConfigManager.islandChooseConfig
+        val islandListSlot = chooseMenuConfig.islandListSlot.slot
+        inv.clearIcon()
+        updateList()
+        currentIslandList.forEachIndexed { index, islandSchematic ->
+            val slotList = islandListSlot[index]
+            val ui = islandSchematic.ui
+            slotList.forEach { slot ->
+                inv.setIcon(
+                    slot,
+                    chooseMenuConfig.islandListSlot.itemDisplay!!.toItemStack {
+                        itemMeta = itemMeta.apply {
+                            displayName(Component.text(ui.name.colored()))
+                            lore(ui.lore.map { Component.text(it.colored()) })
+                        }
+                    }
+                ) {
+                    cooldown.invoke(it.uuid, chooseMenuConfig.cooldown, {
+                        chooseMenuConfig.islandListSlot.action?.execute(it)
+                        val old = antiClose
+                        antiClose = false
+                        ConfirmMenu(
+                            { p ->
+                                block.invoke(this, it, islandSchematic)
+                                p.closeInventory()
+                            },
+                            { p ->
+                                IslandsChooseMenu(old, IslandsManager::chooseIslandSchematic).open(p)
+                            }
+                        ).open(it)
+                    })
                 }
             }
+        }
+
+        inv.setIcon(chooseMenuConfig.prevSlot.slot, chooseMenuConfig.prevSlot.itemDisplay!!.toItemStack()) {
+            if (pageIndex > 1) {
+                cooldown.invoke(it.uuid, chooseMenuConfig.cooldown, {
+                    chooseMenuConfig.prevSlot.action?.execute(it)
+                    pageIndex--
+                    updateInv(inv)
+                })
+            }
+        }
+        inv.setIcon(chooseMenuConfig.nextSlot.slot, chooseMenuConfig.nextSlot.itemDisplay!!.toItemStack()) {
+            if (pageIndex < maxPageIndex) {
+                cooldown.invoke(it.uuid, chooseMenuConfig.cooldown, {
+                    chooseMenuConfig.nextSlot.action?.execute(it)
+                    pageIndex++
+                    updateInv(inv)
+                })
+            }
+        }
+        inv.setIcon(chooseMenuConfig.backSlot.slot, chooseMenuConfig.backSlot.itemDisplay!!.toItemStack()) {
+            cooldown.invoke(it.uuid, chooseMenuConfig.cooldown, {
+                chooseMenuConfig.backSlot.action?.execute(it)
+                ConfigManager.backLobbyAction.execute(it)
+            })
         }
     }
 
     override fun onClose(player: Player, inv: Inventory, event: InventoryCloseEvent) {
+        if (!antiClose) return
         if (!ok) {
             MyIslands.INSTANCE.runTaskLaterBR(10L) {
-                IslandsChooseMenu().open(player)
+                IslandsChooseMenu(antiClose, IslandsManager::chooseIslandSchematic).open(player)
             }
         }
     }

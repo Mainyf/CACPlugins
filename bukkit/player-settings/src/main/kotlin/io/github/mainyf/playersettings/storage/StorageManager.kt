@@ -1,22 +1,16 @@
 package io.github.mainyf.playersettings.storage
 
-import com.alibaba.excel.EasyExcel
 import io.github.mainyf.newmclib.exts.formatYMDHMS
 import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.serverId
 import io.github.mainyf.newmclib.storage.AbstractStorageManager
-import io.github.mainyf.newmclib.storage.BaseTable
 import io.github.mainyf.newmclib.storage.insertByID
 import io.github.mainyf.newmclib.storage.newByID
 import io.github.mainyf.playersettings.PlayerSettings
-import io.github.mainyf.playersettings.storage.excel.RegisterCountIndexData
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.jetbrains.exposed.dao.Entity
-import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
-import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import java.io.File
@@ -40,13 +34,16 @@ object StorageManager : AbstractStorageManager() {
                 PlayerMessageLogs,
                 PlayerLivelys,
                 PlayerDayOnlines,
-                PlayerLivelyToDayOnlines,
+//                PlayerLivelyToDayOnlines,
 
                 CommandExecuteLogs,
                 PlayerRegisterLogs
             ).forEach {
                 SchemaUtils.createMissingTablesAndColumns(it)
             }
+
+            exec("ALTER TABLE ${PlayerMessageLogs.tableName} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+            exec("ALTER TABLE ${PlayerCommandLogs.tableName} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
         }
     }
 
@@ -150,11 +147,11 @@ object StorageManager : AbstractStorageManager() {
                     this.createTime = DateTime.now()
 
                     this.registerDate = DateTime.now()
-                    this.dayOnlines = SizedCollection(dayOnlines)
+//                    this.dayOnlines = SizedCollection(dayOnlines)
                     this.lastLoginDate = DateTime.now()
                 }
             } else {
-                data.dayOnlines = SizedCollection(dayOnlines)
+//                data.dayOnlines = SizedCollection(dayOnlines)
             }
             data
         }

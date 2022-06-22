@@ -7,11 +7,13 @@ import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.features.MoveIslandCore
 import io.github.mainyf.myislands.listeners.AuthListeners
 import io.github.mainyf.myislands.listeners.NoAuthListeners
+import io.github.mainyf.myislands.listeners.PlayerListeners
 import io.github.mainyf.myislands.storage.StorageManager
+import io.github.mainyf.newmclib.exts.isPluginEnabled
+import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.newmclib.exts.registerCommand
 import io.github.mainyf.newmclib.exts.uuid
 import org.apache.logging.log4j.LogManager
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -26,7 +28,6 @@ class MyIslands : JavaPlugin() {
         lateinit var plotAPI: PlotAPI
 
         lateinit var plotUtils: PlotUtils
-
     }
 
 
@@ -39,9 +40,11 @@ class MyIslands : JavaPlugin() {
         val commandHandler = injector.getInstance(CommandHandler::class.java)
         plotUtils = injector.getInstance(PlotUtils::class.java)
 
-        Bukkit.getServer().pluginManager.registerEvents(MoveIslandCore, this)
+        MoveIslandCore.init()
+        pluginManager().registerEvents(MoveIslandCore, this)
+        pluginManager().registerEvents(PlayerListeners, this)
         registerCommand("myislands", commandHandler)
-        if (server.pluginManager.getPlugin("AuthMe") != null) {
+        if (isPluginEnabled("AuthMe")) {
             LOGGER.info("检测到安装了登录插件，操作变更")
             server.pluginManager.registerEvents(AuthListeners, this)
         } else {

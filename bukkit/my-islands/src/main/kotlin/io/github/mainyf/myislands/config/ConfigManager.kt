@@ -3,15 +3,16 @@
 package io.github.mainyf.myislands.config
 
 import io.github.mainyf.myislands.MyIslands
-import io.github.mainyf.newmclib.config.ActionParser
+import io.github.mainyf.newmclib.config.*
 import io.github.mainyf.newmclib.config.action.MultiAction
-import io.github.mainyf.newmclib.config.asItemDisplay
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.util.Vector
 
 object ConfigManager {
+
+    var debug = false
 
     private lateinit var mainConfigFile: FileConfiguration
     private lateinit var menuConfigFile: FileConfiguration
@@ -25,6 +26,7 @@ object ConfigManager {
 
     lateinit var mainMenuConfig: IslandMainMenuConfig
     lateinit var settingsMenuConfig: IslandSettingsMenuConfig
+    lateinit var islandChooseConfig: IslandChooseMenuConfig
 
     fun load() {
         MyIslands.INSTANCE.saveDefaultConfig()
@@ -55,26 +57,46 @@ object ConfigManager {
     private fun loadMenuConfig() {
         val mainMenuSect = menuConfigFile.getConfigurationSection("mainMenu")!!
         val settingsMenuSect = menuConfigFile.getConfigurationSection("settingsMenu")!!
+        val chooseMenuSect = menuConfigFile.getConfigurationSection("chooseMenu")!!
         mainMenuConfig = IslandMainMenuConfig(
-            mainMenuSect.asSlotConfig("prevSlot"),
-            mainMenuSect.asSlotConfig("nextSlot"),
-            mainMenuSect.asSlotConfig("islandViewSlot"),
-            mainMenuSect.asSlotConfig("switchViewIslandSlot"),
+            mainMenuSect.getLong("cooldown"),
+            mainMenuSect.getInt("row"),
+            mainMenuSect.getString("background")!!,
+            mainMenuSect.asDefaultSlotConfig("prevSlot"),
+            mainMenuSect.asDefaultSlotConfig("nextSlot"),
+            mainMenuSect.asDefaultSlotConfig("islandViewSlot"),
+            mainMenuSect.asDefaultSlotConfig("switchViewIslandSlot"),
             mainMenuSect.asInfoAndKudosSlotConfig("infoAndKudosSlot"),
             mainMenuSect.asUpgradeAndBackIslandSlotSlotConfig("upgradeAndBackIslandSlot"),
-            mainMenuSect.asSlotConfig("islandSettingsSlot")
+            mainMenuSect.asDefaultSlotConfig("islandSettingsSlot")
         )
         settingsMenuConfig = IslandSettingsMenuConfig(
-            settingsMenuSect.asSlotConfig("helpersSlot"),
-            settingsMenuSect.asSlotConfig("moveCoreSlot"),
-            settingsMenuSect.asSlotConfig("visibilitySlot"),
-            settingsMenuSect.asSlotConfig("resetIslandSlot")
+            settingsMenuSect.getLong("cooldown"),
+            settingsMenuSect.getInt("row"),
+            settingsMenuSect.getString("background")!!,
+            settingsMenuSect.asDefaultSlotConfig("helpersSlot"),
+            settingsMenuSect.asDefaultSlotConfig("moveCoreSlot"),
+            settingsMenuSect.asDefaultSlotConfig("visibilitySlot"),
+            settingsMenuSect.asDefaultSlotConfig("resetIslandSlot")
+        )
+        islandChooseConfig = IslandChooseMenuConfig(
+            chooseMenuSect.getLong("cooldown"),
+            chooseMenuSect.getInt("row"),
+            chooseMenuSect.getString("background")!!,
+            chooseMenuSect.asIslandPresetSlotConfig("islandListSlot"),
+            chooseMenuSect.asDefaultSlotConfig("prevSlot"),
+            chooseMenuSect.asDefaultSlotConfig("nextSlot"),
+            chooseMenuSect.asDefaultSlotConfig("backSlot")
         )
     }
 
-    private fun ConfigurationSection.asSlotConfig(key: String): SlotConfig {
+    private fun ConfigurationSection.asIslandPresetSlotConfig(key: String): IslandPresetSlotConfig {
         return getConfigurationSection(key)!!.let {
-            SlotConfig(it.getIntegerList("slot"), it.asItemDisplay())
+            IslandPresetSlotConfig(
+                it.get("slot") as List<List<Int>>,
+                it.asItemDisplay(),
+                ActionParser.parseAction(it, "actions", false)
+            )
         }
     }
 
@@ -83,7 +105,9 @@ object ConfigManager {
             InfoAndKudosSlotConfig(
                 it.getIntegerList("slot"),
                 it.getConfigurationSection("info")!!.asItemDisplay(),
-                it.getConfigurationSection("kudos")!!.asItemDisplay()
+                it.getConfigurationSection("kudos")!!.asItemDisplay(),
+                ActionParser.parseAction(it, "infoAction", false),
+                ActionParser.parseAction(it, "kudosAction", false)
             )
         }
     }
@@ -93,12 +117,15 @@ object ConfigManager {
             UpgradeAndBackIslandSlotSlotConfig(
                 it.getIntegerList("slot"),
                 it.getConfigurationSection("upgrade")!!.asItemDisplay(),
-                it.getConfigurationSection("back")!!.asItemDisplay()
+                it.getConfigurationSection("back")!!.asItemDisplay(),
+                ActionParser.parseAction(it, "upgradeAction", false),
+                ActionParser.parseAction(it, "backAction", false)
             )
         }
     }
 
     private fun loadMainConfig() {
+        debug = mainConfigFile.getBoolean("debug", false)
         coreId = mainConfigFile.getString("coreId") ?: "itemsadder:amethyst_block"
         backLobbyAction = ActionParser.parseAction(mainConfigFile.getStringList("backLobby"))!!
         islandHelperMaxCount = mainConfigFile.getInt("islandHelperMaxCount", 6)
@@ -115,6 +142,7 @@ object ConfigManager {
                 Vector(x, y, z)
             }
             schematicMap[schematicKey] = PlotSchematicConfig(
+                schematicSection.asIaIcons(),
                 schematicKey,
                 PlotSchematicUIConfig(uiName, uiLore),
                 core
@@ -123,6 +151,7 @@ object ConfigManager {
     }
 
     class PlotSchematicConfig(
+        val iaIcons: IaIcons,
         val name: String,
         val ui: PlotSchematicUIConfig,
         val core: Vector

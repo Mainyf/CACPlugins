@@ -1,26 +1,40 @@
 mainMenu:
+  # 点击速度限制
+  cooldown: 500
+  # ia背景图片
+  row: 6
+  background: ':offset_-8::view_plot:'
   # 上一页
   prevSlot:
-    slot: [ 0,9,18 ]
-    type: WHITE_STAINED_GLASS_PANE
+    slot: [ 28 ]
+    iaIcons: ''
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    type: itemsadder:air
     name: "上一页"
     lore:
       - "lore #1"
   # 下一页
   nextSlot:
-    slot: [ 8,17,26 ]
-    type: BLACK_STAINED_GLASS_PANE
+    slot: [ 34 ]
+    iaIcons: ''
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    type: itemsadder:air
     name: "下一页"
     lore:
       - "lore #1"
   # 岛屿展示格子
   islandViewSlot:
     slot: [ 1,2,3,4,5,6,7,10,11,12,13,14,15,16,19,20,21,22,23,24,25 ]
-    type: STONE
+    type: itemsadder:air
   # 切换岛屿展示列表
   switchViewIslandSlot:
     slot: [ 31 ]
-    type: PHANTOM_MEMBRANE
+    iaIcons:
+      all: '0:offset_-102::view_plot_listype_0:'
+      friend: '0:offset_-102::view_plot_listype_1:'
+      permission: '0:offset_-102::view_plot_listype_2:'
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    type: itemsadder:air
     name: "切换岛屿展示, 当前: {filterText}"
     lore:
       - "lore #1"
@@ -28,51 +42,114 @@ mainMenu:
   infoAndKudosSlot:
     slot: [ 46 ]
     info:
-      type: PAPER
+      iaIcons: '1:offset_-77::view_plot_info_0:'
+      type: itemsadder:air
       name: "岛屿信息"
       lore:
         - "lore #1"
     kudos:
-      type: PAPER
+      iaIcons: '1:offset_-77::view_plot_info_1:'
+      type: itemsadder:air
       name: "点赞"
       lore:
         - "lore #1"
+    infoactions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    kudosactions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
   # 岛屿升级与返回岛屿
   upgradeAndBackIslandSlot:
     slot: [ 48,49,50 ]
     upgrade:
-      type: ORANGE_STAINED_GLASS_PANE
+      iaIcons: '2:offset_16::view_plot_home_0:'
+      type: itemsadder:air
       name: "岛屿升级"
       lore:
         - "lore #1"
     back:
-      type: ORANGE_STAINED_GLASS_PANE
+      iaIcons: '2:offset_16::view_plot_home_1:'
+      type: itemsadder:air
       name: "返回岛屿"
       lore:
         - "lore #1"
+    upgradeactions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    backactions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
   # 岛屿设置
   islandSettingsSlot:
     slot: [ 52 ]
-    type: RED_STAINED_GLASS_PANE
+    iaIcons:
+      permission: '3:offset_17::view_plot_set_0:'
+      unfamiliar: '3:offset_17::view_plot_set_1:'
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    type: itemsadder:air
     name: "岛屿设置"
     lore:
       - "lore #1"
 settingsMenu:
+  # 点击速度限制
+  cooldown: 500
+  row: 3
+  background: ':offset_-8::view_plot_set:'
   # 授权者
   helpersSlot:
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
     slot: [ 1,2,3,5,6,7 ]
   # 移动核心
   moveCoreSlot:
-    slot: [ 21 ]
-    type: YELLOW_STAINED_GLASS_PANE
+    iaIcons: ''
+    slot: [ 20 ]
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    type: itemsadder:air
     name: "移动核心水晶"
   # 切换岛屿状态
   visibilitySlot:
+    iaIcons:
+      all: '0:offset_-102::view_plot_set_listype_0:'
+      permission: '0:offset_-102::view_plot_set_listype_1:'
+      none: '0:offset_-102::view_plot_set_listype_2:'
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
     slot: [ 22 ]
-    type: LIME_STAINED_GLASS_PANE
+    type: itemsadder:air
     name: "当前展示状态: {visibility}"
   # 重置岛屿
   resetIslandSlot:
-    slot: [ 23 ]
-    type: BLUE_STAINED_GLASS_PANE
+    iaIcons: ''
+    slot: [ 24 ]
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    type: itemsadder:air
     name: "重置岛屿"
+chooseMenu:
+  # 点击速度限制
+  cooldown: 500
+  row: 4
+  background: ':offset_-8::view_plot_types:'
+  # 岛屿预设列表
+  islandListSlot:
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    slot: [ [ 0, 1, 2, 9, 10, 11 ], [ 3, 4, 5, 12, 13, 14 ], [ 6, 7, 8, 15, 16, 17 ] ]
+    type: itemsadder:air
+  # 上一页
+  prevSlot:
+    slot: [ 29 ]
+    iaIcons: ''
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    type: itemsadder:air
+    name: "上一页"
+    lore:
+      - "lore #1"
+  # 下一页
+  nextSlot:
+    slot: [ 33 ]
+    iaIcons: ''
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    type: itemsadder:air
+    name: "下一页"
+    lore:
+      - "lore #1"
+  backSlot:
+    slot: [ 31 ]
+    iaIcons: ''
+    actions: ["sound: BLOCK_NOTE_BLOCK_BELL,1,1"]
+    type: itemsadder:air
+    name: "返回大厅"
+    lore:
+      - "lore #1"
+
