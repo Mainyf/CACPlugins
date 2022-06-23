@@ -1,6 +1,7 @@
 package io.github.mainyf.myislands.features
 
 import com.comphenix.protocol.PacketType
+import com.comphenix.protocol.events.PacketEvent
 import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.plot.Plot
 import dev.lone.itemsadder.api.CustomFurniture
@@ -13,6 +14,7 @@ import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.myislands.storage.StorageManager
 import io.github.mainyf.newmclib.exts.runTaskBR
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
+import io.github.mainyf.newmclib.exts.submitTask
 import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.hooks.registerPacketListener
 import io.github.mainyf.newmclib.nms.sendEntityDestroy
@@ -30,6 +32,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
 
@@ -42,12 +45,14 @@ object MoveIslandCore : Listener {
 
     private val playerSetLater20tick = mutableSetOf<UUID>()
 
+    val playerCoreRemove = mutableSetOf<UUID>()
+
     fun init() {
         MyIslands.INSTANCE.registerPacketListener(PacketType.Play.Client.ARM_ANIMATION) { event ->
             val enumHand = event.packet.modifier.read(0) as? EnumHand
             if (enumHand == EnumHand.a) {
                 MyIslands.INSTANCE.runTaskBR {
-                    handlePlayerInteract(event.player)
+                    handlePlayerInteract(event.player, event)
                 }
             }
         }
@@ -142,7 +147,7 @@ object MoveIslandCore : Listener {
         removePlayerLater20Tick(player)
     }
 
-    private fun handlePlayerInteract(player: Player): Boolean {
+    private fun handlePlayerInteract(player: Player, event: PacketEvent): Boolean {
         if (!moveingCorePlayer.containsKey(player.uniqueId)) return false
         if (!playerToPlot.containsKey(player.uniqueId)) return false
         val islandData = StorageManager.getPlayerIsland(player.uniqueId) ?: return false
@@ -155,11 +160,15 @@ object MoveIslandCore : Listener {
             endMoveCore(player)
             removePlayerLater20Tick(player)
             player.sendLang("endMoveCore")
+            event.isCancelled = true
 //            player.successMsg("结束移动核心水晶")
 //            event.isCancelled = true
             return true
         }
         if (!playerTempCoreLoc.containsKey(player.uniqueId)) return false
+
+        event.isCancelled = true
+
         val (newLoc, entityID) = playerTempCoreLoc[player.uniqueId]!!
         val world = Bukkit.getWorld("plotworld")!!
         val oldLoc = Location(
@@ -173,7 +182,13 @@ object MoveIslandCore : Listener {
             eLoc.blockX == oldLoc.blockX && eLoc.blockY == oldLoc.blockY && eLoc.blockZ == oldLoc.blockZ
         }.forEach {
             if (it is ArmorStand) {
-                CustomFurniture.remove(it, false)
+                playerCoreRemove.add(player.uuid)
+                it.equipment.helmet = ItemStack(Material.AIR)
+                CustomFurniture.remove(it, true)
+                it.remove()
+                MyIslands.INSTANCE.submitTask(delay = 20L) {
+                    playerCoreRemove.remove(player.uuid)
+                }
             }
         }
         deleteEntity(player, entityID)

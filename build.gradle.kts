@@ -74,8 +74,9 @@ subprojects {
             implementation("io.netty:netty-all:4.1.68.Final")
             compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
             compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
-            implementation("io.github.mainyf:newmclib-craftbukkit:1.7.2")
+            implementation("io.github.mainyf:newmclib-craftbukkit:1.7.2:")
             compileOnly(rootProject.files("./server/bukkit/plugins/ProtocolLib.jar"))
+            compileOnly(rootProject.files("./server/bukkit/plugins/CommandAPI-8.4.0.jar"))
 
             when (project.name) {
                 "item-skills-plus" -> {

@@ -1,5 +1,6 @@
 package io.github.mainyf.playersettings
 
+import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.registerCommand
 import io.github.mainyf.newmclib.exts.runTaskTimerBR
@@ -27,17 +28,17 @@ class PlayerSettings : JavaPlugin() {
         INSTANCE = this
         ConfigManager.load()
         StorageManager.init()
-        registerCommand("pst", CommandHandler())
-        registerCommand("sop", CommandExecutor { sender, command, label, args ->
-            val target = sender as? Player ?: return@CommandExecutor false
-            if (!ConfigManager.opWhiteList.contains(target.name)) {
-                sender.errorMsg("玩家: ${target.name} 不在白名单中")
-                return@CommandExecutor false
+        CommandHandler.init()
+        CommandHandler.register()
+        apiCommand("sop") {
+            withRequirement { if (it is Player) ConfigManager.opWhiteList.contains(it.name) else false }
+            executePlayer {
+                val target = sender as? Player ?: return@executePlayer
+                target.isOp = true
+                sender.successMsg("已赋予玩家 ${target.name} op权限")
             }
-            target.isOp = true
-            sender.successMsg("已赋予玩家 ${target.name} op权限")
-            return@CommandExecutor false
-        })
+                .register()
+        }
         server.pluginManager.registerEvents(PlayerListener, this)
         if (server.pluginManager.getPlugin("AuthMe") != null) {
             LOG.info("检测到安装了登录插件，注册与登录数据监控已启动")
@@ -47,6 +48,7 @@ class PlayerSettings : JavaPlugin() {
             Bukkit.getOnlinePlayers().forEach {
                 if (it.isOp && !ConfigManager.opWhiteList.contains(it.name)) {
                     it.isOp = false
+                    LOG.info("玩家: ${it.name} 不在op白名单中，已取消op")
                 }
             }
         }

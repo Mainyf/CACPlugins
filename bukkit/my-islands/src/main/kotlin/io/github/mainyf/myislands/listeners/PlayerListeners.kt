@@ -4,8 +4,10 @@ import dev.lone.itemsadder.api.CustomFurniture
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.config.sendLang
+import io.github.mainyf.myislands.features.MoveIslandCore
 import io.github.mainyf.myislands.menu.IslandsMainMenu
 import io.github.mainyf.newmclib.exts.getShooterPlayer
+import io.github.mainyf.newmclib.exts.uuid
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -22,6 +24,15 @@ object PlayerListeners : Listener {
         if (event.entity is ArmorStand) {
             val furniture = CustomFurniture.byAlreadySpawned(event.entity as ArmorStand)
             if (furniture != null) {
+                val damager = event.damager
+                if (damager is Player && MoveIslandCore.playerCoreRemove.contains(damager.uuid)) {
+                    val plot = MyIslands.plotUtils.getPlotByPLoc(damager)
+                    if (plot != null && plot.owner == damager.uuid) {
+                        MoveIslandCore.playerCoreRemove.remove(damager.uuid)
+                        return
+                    }
+                }
+
                 event.damager.getShooterPlayer()?.sendLang("antiPlayerBreakCore")
                 event.isCancelled = true
             }

@@ -13,6 +13,7 @@ class CommandSettings : JavaPlugin() {
     override fun onEnable() {
         INSTANCE = this
         ConfigManager.load()
-        this.registerCommand("cset", CommandHandler())
+        CommandHandler.init()
+        CommandHandler.register()
     }
 }

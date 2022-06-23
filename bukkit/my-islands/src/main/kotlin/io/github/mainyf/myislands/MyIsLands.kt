@@ -37,13 +37,13 @@ class MyIslands : JavaPlugin() {
         ConfigManager.load()
         StorageManager.init()
         val injector = PlotSquared.platform().injector()
-        val commandHandler = injector.getInstance(CommandHandler::class.java)
         plotUtils = injector.getInstance(PlotUtils::class.java)
 
         MoveIslandCore.init()
         pluginManager().registerEvents(MoveIslandCore, this)
         pluginManager().registerEvents(PlayerListeners, this)
-        registerCommand("myislands", commandHandler)
+        CommandHandler.init()
+        CommandHandler.register()
         if (isPluginEnabled("AuthMe")) {
             LOGGER.info("检测到安装了登录插件，操作变更")
             server.pluginManager.registerEvents(AuthListeners, this)

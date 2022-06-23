@@ -4,8 +4,10 @@ import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketAdapter
 import com.comphenix.protocol.events.PacketEvent
+import dev.jorel.commandapi.CommandAPI
 import io.github.mainyf.newmclib.exts.registerCommand
 import io.github.mainyf.newmclib.exts.runTaskTimerBR
+import io.github.mainyf.newmclib.exts.submitTask
 import io.github.mainyf.worldsettings.config.ConfigManager
 import io.github.mainyf.worldsettings.config.WorldSettingConfig
 import io.github.mainyf.worldsettings.listeners.BlockListener
@@ -32,10 +34,14 @@ class WorldSettings : JavaPlugin() {
         ConfigManager.load(config)
         PlayerDropItemStorage.init(this)
 //        server.pluginManager.getPlugin("AuthMe")
-        registerCommand("wsett", CommandHandler)
+        CommandHandler.init()
+        CommandHandler.register()
         Bukkit.getServer().pluginManager.registerEvents(BlockListener, this)
         Bukkit.getServer().pluginManager.registerEvents(PlayerListener, this)
-        runTaskTimerBR(20L, 20L) {
+        submitTask(
+            delay = 20L,
+            period = 20L
+        ) {
             Bukkit.getWorlds().forEach {
                 val settings = ConfigManager.getSetting(it) ?: return@forEach
                 if (it.difficulty != settings.difficulty) {
@@ -55,7 +61,10 @@ class WorldSettings : JavaPlugin() {
                 }
             }
         }
-        runTaskTimerBR(5 * 20L, 5 * 20L) {
+        submitTask(
+            delay = 5 * 20L,
+            period = 5 * 20L
+        ) {
             Bukkit.getWorlds().forEach {
                 val settings = ConfigManager.getSetting(it) ?: return@forEach
                 settings.gameRules.forEach { (rule, value) ->
@@ -85,6 +94,7 @@ class WorldSettings : JavaPlugin() {
     }
 
     override fun onDisable() {
+        CommandAPI.unregister(CommandHandler.name)
         ProtocolLibrary.getProtocolManager().removePacketListener(packetListener)
         PlayerDropItemStorage.close()
     }

@@ -38,6 +38,10 @@ object ConfigManager {
         }
     }
 
+    fun getActionNames(): Collection<String> {
+        return actionMap.keys
+    }
+
     fun getAction(id: String): ItemAction? {
         return actionMap[id]
     }

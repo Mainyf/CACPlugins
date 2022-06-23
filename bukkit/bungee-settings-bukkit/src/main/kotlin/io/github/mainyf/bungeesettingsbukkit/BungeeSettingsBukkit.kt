@@ -1,7 +1,13 @@
 package io.github.mainyf.bungeesettingsbukkit
 
 import com.Zrips.CMI.events.CMIPlayerTeleportEvent
+import dev.jorel.commandapi.arguments.ArgumentSuggestions
+import dev.jorel.commandapi.arguments.DoubleArgument
+import dev.jorel.commandapi.arguments.LocationArgument
+import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.cmdParser
+import io.github.mainyf.newmclib.command.playerArguments
+import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.dsl.event
 import io.github.mainyf.newmclib.dsl.events
 import io.github.mainyf.newmclib.exts.*
@@ -26,46 +32,66 @@ class BungeeSettingsBukkit : JavaPlugin() {
 
     override fun onEnable() {
         storage = NoCacheStorage.mysql(GlobalCommandCache::class)
-        registerCommand("glDis") { sender, _, _, args ->
-            cmdParser(sender, args) cmd@{
-                if (!sender.isOp) return@cmd
-
-                val type = arg<String>() ?: return@cmd
-                when (type) {
-                    "stp" -> {
-                        val player = arg<Player>() ?: return@cmd
-                        val serverName = arg<String>() ?: return@cmd
-                        val world = arg<String>() ?: return@cmd
-                        val x = arg<Double>() ?: return@cmd
-                        val y = arg<Double>() ?: return@cmd
-                        val z = arg<Double>() ?: return@cmd
-                        val yaw = arg<Float>() ?: player.location.yaw
-                        val pitch = arg<Float>() ?: player.location.pitch
-                        player.sendPluginMessage(this@BungeeSettingsBukkit, CHANNEL_NAME, Unpooled.buffer().apply {
-                            writeString("tp")
-                            writeUUID(player.uniqueId)
-                            writeString(serverName)
-                            writeString(world)
-                            writeDouble(x)
-                            writeDouble(y)
-                            writeDouble(z)
-                            writeFloat(yaw)
-                            writeFloat(pitch)
-                        }.toByteArray())
-                    }
-                    "cmd" -> {
-                        val serverName = arg<String>() ?: return@cmd
-                        val cmd = arg(start = 2) ?: return@cmd
-                        storage.add(GlobalCommandCache(serverName, cmd))
-                    }
-//                    "cmdAll" -> {
-//                        val cmd = arg(start = 1) ?: return@cmd
-//                        storage.add(GlobalCommandCache("all", cmd))
-//                    }
+        apiCommand("bcDis") {
+            withAliases("glDis", "bcd")
+            onlyOP()
+            "stp" {
+                withArguments(
+                    playerArguments("玩家名"),
+                    stringArguments("服务器名", "请输入服务器名"),
+                    stringArguments("世界", "请输入世界名"),
+                    DoubleArgument("x").replaceSuggestions(ArgumentSuggestions.strings { arrayOf("请输入x坐标") }),
+                    DoubleArgument("y").replaceSuggestions(ArgumentSuggestions.strings { arrayOf("请输入y坐标") }),
+                    DoubleArgument("z").replaceSuggestions(ArgumentSuggestions.strings { arrayOf("请输入z坐标") })
+                )
+                executeOP {
+                    sender.msg(args.toString())
                 }
             }
-            false
+            "cmd" {
+
+            }
         }
+//        registerCommand("glDis") { sender, _, _, args ->
+//            cmdParser(sender, args) cmd@{
+//                if (!sender.isOp) return@cmd
+//
+//                val type = arg<String>() ?: return@cmd
+//                when (type) {
+//                    "stp" -> {
+//                        val player = arg<Player>() ?: return@cmd
+//                        val serverName = arg<String>() ?: return@cmd
+//                        val world = arg<String>() ?: return@cmd
+//                        val x = arg<Double>() ?: return@cmd
+//                        val y = arg<Double>() ?: return@cmd
+//                        val z = arg<Double>() ?: return@cmd
+//                        val yaw = arg<Float>() ?: player.location.yaw
+//                        val pitch = arg<Float>() ?: player.location.pitch
+//                        player.sendPluginMessage(this@BungeeSettingsBukkit, CHANNEL_NAME, Unpooled.buffer().apply {
+//                            writeString("tp")
+//                            writeUUID(player.uniqueId)
+//                            writeString(serverName)
+//                            writeString(world)
+//                            writeDouble(x)
+//                            writeDouble(y)
+//                            writeDouble(z)
+//                            writeFloat(yaw)
+//                            writeFloat(pitch)
+//                        }.toByteArray())
+//                    }
+//                    "cmd" -> {
+//                        val serverName = arg<String>() ?: return@cmd
+//                        val cmd = arg(start = 2) ?: return@cmd
+//                        storage.add(GlobalCommandCache(serverName, cmd))
+//                    }
+////                    "cmdAll" -> {
+////                        val cmd = arg(start = 1) ?: return@cmd
+////                        storage.add(GlobalCommandCache("all", cmd))
+////                    }
+//                }
+//            }
+//            false
+//        }
         server.messenger.registerOutgoingPluginChannel(this, CHANNEL_NAME)
         server.messenger.registerIncomingPluginChannel(
             this, CHANNEL_NAME
