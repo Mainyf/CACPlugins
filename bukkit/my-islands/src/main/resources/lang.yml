@@ -32,3 +32,5 @@ loadIslandPresetError: "意外的错误: 0xMI0"
 
 initIslandCore: "岛屿水晶已放置"
 islandClaimSuccess: "成功领取你的私人岛屿"
+islandPlayerAbsEmpty: "你的岛屿上没有玩家"
+addIslandHelperSuccess: "添加授权者成功"

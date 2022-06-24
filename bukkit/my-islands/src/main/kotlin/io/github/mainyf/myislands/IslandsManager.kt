@@ -1,12 +1,10 @@
 package io.github.mainyf.myislands
 
 import com.plotsquared.bukkit.paperlib.PaperLib
-import com.plotsquared.bukkit.player.BukkitPlayer
 import com.plotsquared.core.location.BlockLoc
 import com.plotsquared.core.player.PlotPlayer
 import com.plotsquared.core.plot.Plot
 import com.shopify.promises.Promise
-import com.shopify.promises.then
 import dev.lone.itemsadder.api.CustomFurniture
 import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.config.sendLang
@@ -23,9 +21,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.util.Vector
 import java.util.*
-import kotlin.math.abs
-import kotlin.math.acos
-import kotlin.math.sqrt
 
 object IslandsManager {
 
@@ -50,11 +45,34 @@ object IslandsManager {
         }
     }
 
+    fun addHelpers(player: Player, island: PlayerIsland, helperUUID: UUID) {
+        StorageManager.transaction {
+            if ((island.helpers.toList().size ?: 0) >= 6) {
+                player.sendLang("permissionCountMax")
+//                    player.msg("授权者数量不能超过 6")
+                return@transaction
+            }
+            if (island.helpers.any { it.helperUUID == helperUUID }) {
+                player.sendLang("addPermissionSuccess")
+//                    player.msg("已经添加此授权者")
+                return@transaction
+            }
+            StorageManager.addHelpers(island, helperUUID)
+        }
+    }
+
     fun getIslandHelpers(uuid: UUID): List<UUID> {
         return StorageManager.transaction {
             val data = StorageManager.getPlayerIsland(uuid)
             if (data == null) return@transaction emptyList()
             data.helpers.map { it.helperUUID }
+        }
+    }
+
+    fun getIslandHelpers(island: PlayerIsland?): List<UUID> {
+        return StorageManager.transaction {
+            if (island == null) return@transaction emptyList()
+            island.helpers.map { it.helperUUID }
         }
     }
 
@@ -153,7 +171,7 @@ object IslandsManager {
             }
             Log.debugP(player, "检测到玩家没有领取过地皮，正在打开领取菜单")
             MyIslands.INSTANCE.runTaskLaterBR(10L) {
-                IslandsChooseMenu(true, IslandsManager::chooseIslandSchematic).open(player)
+                IslandsChooseMenu(antiClose = true, block = IslandsManager::chooseIslandSchematic).open(player)
             }
         }
     }

@@ -40,6 +40,6 @@ class PlayerIsland(uuid: EntityID<UUID>) : BaseEntity(PlayerIslands, uuid) {
 enum class IslandVisibility(val text: String, val count: Int) {
     ALL("所有人", 0),
     PERMISSION("好友&授权者", 1),
-    NONE("任何人不可见", 2)
+    NONE("无人", 2)
 
 }

@@ -35,19 +35,17 @@ class IslandsMainMenu : AbstractMenuHandler() {
     private var plotAbs: Plot? = null
     private var hasPermission = false
 
-    companion object {
-
-        val cooldown = Cooldown()
-
-    }
-
     override fun open(player: Player) {
         this.cooldownTime = ConfigManager.mainMenuConfig.cooldown
         updateMaxPageIndex(player)
         islandAbs = IslandsManager.getIslandAbs(player)
         plotAbs = MyIslands.plotUtils.getPlotByPLoc(player)
         hasPermission = IslandsManager.hasPermissionByFeet(player)
-        val inv = Bukkit.createInventory(createHolder(player), ConfigManager.mainMenuConfig.row * 9, Component.text(updateTitle(player).colored()))
+        val inv = Bukkit.createInventory(
+            createHolder(player),
+            ConfigManager.mainMenuConfig.row * 9,
+            Component.text(updateTitle(player).colored())
+        )
 
         updateInv(player, inv)
         player.openInventory(inv)
@@ -98,96 +96,96 @@ class IslandsMainMenu : AbstractMenuHandler() {
         inv.clearIcon()
         val menuConfig = ConfigManager.mainMenuConfig
         inv.setIcon(menuConfig.prevSlot) {
-            cooldown.invoke(it.uuid, menuConfig.cooldown, {
-                menuConfig.prevSlot.action?.execute(it)
-                if (pageIndex > 1) {
-                    pageIndex--
-                    updateInvIslandList(player, inv)
-                }
-            })
+            menuConfig.prevSlot.action?.execute(it)
+            if (pageIndex > 1) {
+                pageIndex--
+                updateInvIslandList(player, inv)
+            }
         }
         inv.setIcon(menuConfig.nextSlot) {
-            cooldown.invoke(it.uuid, menuConfig.cooldown, {
-                menuConfig.nextSlot.action?.execute(it)
-                if (pageIndex < maxPageIndex) {
-                    pageIndex++
-                    updateInvIslandList(player, inv)
-                }
-            })
+            menuConfig.nextSlot.action?.execute(it)
+            if (pageIndex < maxPageIndex) {
+                pageIndex++
+                updateInvIslandList(player, inv)
+            }
         }
         inv.setIcon(menuConfig.switchViewIslandSlot, {
             setDisplayName(getDisplayName().tvar("filterText", viewIslandType.text))
         }) {
-            cooldown.invoke(it.uuid, menuConfig.cooldown, {
-                menuConfig.switchViewIslandSlot.action?.execute(it)
-                viewIslandTypeIndex++
-                if (viewIslandTypeIndex > values().size - 1) {
-                    viewIslandTypeIndex = 0
-                }
-                updateMaxPageIndex(player)
+            menuConfig.switchViewIslandSlot.action?.execute(it)
+            viewIslandTypeIndex++
+            if (viewIslandTypeIndex > values().size - 1) {
+                viewIslandTypeIndex = 0
+            }
+            updateMaxPageIndex(player)
 //            maxPageIndex = StorageManager.getIsLandsCount(player, viewIslandType)
-                pageIndex = 1
-                updateInv(it, inv)
-            })
+            pageIndex = 1
+            updateInv(it, inv)
         }
         val iakSlot = menuConfig.infoAndKudosSlot
         if (hasPermission) {
-            inv.setIcon(iakSlot.slot, iakSlot.info.toItemStack()) {
-                cooldown.invoke(it.uuid, menuConfig.cooldown, {
-                    iakSlot.infoAction?.execute(it)
+            inv.setIcon(iakSlot.slot, iakSlot.info.toItemStack {
+                lore(lore()?.map { comp ->
+                    Component.text(
+                        comp.text()
+                            .tvar("owner", plotAbs?.owner?.asOfflineData()?.name ?: "空")
+                            .tvar(
+                                "helpers",
+                                IslandsManager.getIslandHelpers(islandAbs).let { list ->
+                                    if (list.isEmpty()) "空" else list.joinToString(",") {
+                                        it.asOfflineData()?.name ?: "空"
+                                    }
+                                }
+                            )
+                            .tvar("kudos", "${islandAbs?.kudos ?: "空"}")
+                    )
                 })
+            }) {
+                iakSlot.infoAction?.execute(it)
             }
         } else {
             inv.setIcon(iakSlot.slot, iakSlot.kudos.toItemStack()) {
-                cooldown.invoke(it.uuid, menuConfig.cooldown, {
-                    iakSlot.kudosAction?.execute(it)
-                    if (islandAbs != null) {
-                        IslandsManager.addKudoToIsland(islandAbs!!, it)
-                    }
-                })
+                iakSlot.kudosAction?.execute(it)
+                if (islandAbs != null) {
+                    IslandsManager.addKudoToIsland(islandAbs!!, it)
+                }
             }
         }
         val uabSlot = menuConfig.upgradeAndBackIslandSlot
         if (hasPermission) {
             inv.setIcon(uabSlot.slot, uabSlot.upgrade.toItemStack()) {
-                cooldown.invoke(it.uuid, menuConfig.cooldown, {
-                    uabSlot.upgradeAction?.execute(it)
-                })
+                uabSlot.upgradeAction?.execute(it)
             }
         } else {
             inv.setIcon(uabSlot.slot, uabSlot.back.toItemStack()) {
-                cooldown.invoke(it.uuid, menuConfig.cooldown, {
-                    uabSlot.backAction?.execute(it)
-                    PlotQuery
-                        .newQuery()
-                        .ownedBy(it.uuid)
-                        .asSet()
-                        .firstOrNull()
-                        .let { plot ->
-                            if (plot == null) {
-                                it.sendLang("playerNoPlot")
+                uabSlot.backAction?.execute(it)
+                PlotQuery
+                    .newQuery()
+                    .ownedBy(it.uuid)
+                    .asSet()
+                    .firstOrNull()
+                    .let { plot ->
+                        if (plot == null) {
+                            it.sendLang("playerNoPlot")
 //                            it.errorMsg("你没有岛屿")
-                                return@let
-                            }
-                            plot.getHome { loc ->
-                                it.teleport(BukkitUtil.adapt(loc))
-                            }
+                            return@let
                         }
-                })
+                        plot.getHome { loc ->
+                            it.teleport(BukkitUtil.adapt(loc))
+                        }
+                    }
             }
         }
         inv.setIcon(menuConfig.islandSettingsSlot) {
-            cooldown.invoke(it.uuid, menuConfig.cooldown, {
-                menuConfig.islandSettingsSlot.action?.execute(it)
-                if (islandAbs != null && plotAbs != null) {
-                    if (!hasPermission) {
-                        it.sendLang("noIslandPermission")
+            menuConfig.islandSettingsSlot.action?.execute(it)
+            if (islandAbs != null && plotAbs != null) {
+                if (!hasPermission) {
+                    it.sendLang("noIslandPermission")
 //                    it.errorMsg("你没有该岛屿的授权")
-                        return@invoke
-                    }
-                    IslandsSettingsMenu(islandAbs!!, plotAbs!!).open(it)
+                    return@setIcon
                 }
-            })
+                IslandsSettingsMenu(islandAbs!!, plotAbs!!).open(it)
+            }
         }
     }
 
@@ -206,24 +204,22 @@ class IslandsMainMenu : AbstractMenuHandler() {
             skullItem.setDisplayName(offlinePlayer)
 
             inv.setIcon(viewListSlots.slot[i], skullItem) {
-                cooldown.invoke(it.uuid, ConfigManager.mainMenuConfig.cooldown, {
-                    viewListSlots.action?.execute(it)
-                    PlotQuery
-                        .newQuery()
-                        .ownedBy(islandData.id.value)
-                        .asSet()
-                        .firstOrNull()
-                        .let { plot ->
-                            if (plot == null) {
-                                it.sendLang("otherPlayerNoPlot")
+                viewListSlots.action?.execute(it)
+                PlotQuery
+                    .newQuery()
+                    .ownedBy(islandData.id.value)
+                    .asSet()
+                    .firstOrNull()
+                    .let { plot ->
+                        if (plot == null) {
+                            it.sendLang("otherPlayerNoPlot")
 //                            it.errorMsg("此玩家没有岛屿")
-                                return@let
-                            }
-                            plot.getHome { loc ->
-                                it.teleport(BukkitUtil.adapt(loc))
-                            }
+                            return@let
                         }
-                })
+                        plot.getHome { loc ->
+                            it.teleport(BukkitUtil.adapt(loc))
+                        }
+                    }
             }
         }
     }

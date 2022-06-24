@@ -42,7 +42,7 @@ object CommandHandler : APICommand("myislands") {
                     val range = args[0] as Double
                     val entitys = player.getNearbyEntities(range, range, range)
                     entitys.forEach {
-                        if(it is ArmorStand) {
+                        if (it is ArmorStand) {
                             it.remove()
                         }
                     }
@@ -95,7 +95,7 @@ object CommandHandler : APICommand("myislands") {
                     if (MyIslands.plotAPI.getPlayerPlots(plotPlayer).isNotEmpty()) {
                         return@executeOP
                     }
-                    IslandsChooseMenu(true, IslandsManager::chooseIslandSchematic).open(target)
+                    IslandsChooseMenu(antiClose = true, block = IslandsManager::chooseIslandSchematic).open(target)
                 }
             }
             "menu" {

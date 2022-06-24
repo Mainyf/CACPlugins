@@ -1,6 +1,5 @@
 package io.github.mainyf.myislands.features
 
-import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.events.PacketEvent
 import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.plot.Plot
@@ -12,16 +11,14 @@ import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.myislands.storage.StorageManager
-import io.github.mainyf.newmclib.exts.runTaskBR
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
 import io.github.mainyf.newmclib.exts.submitTask
 import io.github.mainyf.newmclib.exts.uuid
-import io.github.mainyf.newmclib.hooks.registerPacketListener
+import io.github.mainyf.newmclib.nms.addLeftClickListener
 import io.github.mainyf.newmclib.nms.sendEntityDestroy
 import io.github.mainyf.newmclib.nms.sendEntityMeta
 import io.github.mainyf.newmclib.nms.sendSpawnArmorStand
 import io.github.mainyf.newmclib.utils.Cooldown
-import net.minecraft.world.EnumHand
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -48,27 +45,9 @@ object MoveIslandCore : Listener {
     val playerCoreRemove = mutableSetOf<UUID>()
 
     fun init() {
-        MyIslands.INSTANCE.registerPacketListener(PacketType.Play.Client.ARM_ANIMATION) { event ->
-            val enumHand = event.packet.modifier.read(0) as? EnumHand
-            if (enumHand == EnumHand.a) {
-                MyIslands.INSTANCE.runTaskBR {
-                    handlePlayerInteract(event.player, event)
-                }
-            }
+        MyIslands.INSTANCE.addLeftClickListener { player, packetEvent ->
+            handlePlayerInteract(player, packetEvent)
         }
-//        protocolManager().addPacketListener(object :
-//            PacketAdapter(MyIslands.INSTANCE, PacketType.Play.Client.ARM_ANIMATION) {
-//
-//            override fun onPacketReceiving(event: PacketEvent) {
-//                val enumHand = event.packet.modifier.read(0) as? EnumHand
-//                if (enumHand == EnumHand.a) {
-//                    MyIslands.INSTANCE.runTaskBR {
-//                        handlePlayerInteract(event.player)
-//                    }
-//                }
-//            }
-//
-//        })
     }
 
     fun hasMoveingCore(uuid: UUID): Boolean {

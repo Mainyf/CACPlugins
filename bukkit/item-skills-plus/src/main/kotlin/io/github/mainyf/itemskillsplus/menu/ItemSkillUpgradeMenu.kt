@@ -2,6 +2,7 @@ package io.github.mainyf.itemskillsplus.menu
 
 import io.github.mainyf.itemskillsplus.*
 import io.github.mainyf.itemskillsplus.config.ConfigManager
+import io.github.mainyf.newmclib.exts.setOpenInventoryTitle
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material

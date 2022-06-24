@@ -1,10 +1,12 @@
 package io.github.mainyf.myislands.menu
 
+import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.plot.Plot
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.asPlotPlayer
 import io.github.mainyf.myislands.config.ConfigManager
+import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.myislands.features.MoveIslandCore
 import io.github.mainyf.myislands.storage.IslandVisibility.*
 import io.github.mainyf.myislands.storage.PlayerIsland
@@ -26,6 +28,7 @@ class IslandsSettingsMenu(
 ) : AbstractMenuHandler() {
 
     override fun open(player: Player) {
+        this.cooldownTime = ConfigManager.settingsMenuConfig.cooldown
         val inv = Bukkit.createInventory(
             createHolder(player),
             ConfigManager.settingsMenuConfig.row * 9,
@@ -38,7 +41,6 @@ class IslandsSettingsMenu(
     }
 
     override fun updateTitle(player: Player): String {
-        this.cooldownTime = ConfigManager.settingsMenuConfig.cooldown
         val menuConfig = ConfigManager.settingsMenuConfig
         val icons = mutableListOf<IaIcon>()
         icons.addAll(menuConfig.moveCoreSlot.itemDisplay!!.iaIcons.icons())
@@ -77,13 +79,15 @@ class IslandsSettingsMenu(
         }
         inv.setIcon(resetIslandSlot.slot, resetIslandSlot.itemDisplay!!.toItemStack()) { p ->
             resetIslandSlot.action?.execute(p)
-            IslandsChooseMenu(false) { chooseMenu, player, schematicConfig ->
+            IslandsChooseMenu(false, { chooseMenu, player, schematicConfig ->
                 IslandsManager.resetIsland(p.asPlotPlayer()!!, plot).whenComplete {
                     MyIslands.INSTANCE.runTaskLaterBR(2 * 20L) {
                         IslandsManager.chooseIslandSchematic(chooseMenu, player, schematicConfig)
                     }
                 }
-            }.open(p)
+            }, {
+                IslandsSettingsMenu(this.island, this.plot).open(it)
+            }).open(p)
         }
         updateHelper(player, inv)
     }
@@ -92,7 +96,17 @@ class IslandsSettingsMenu(
         val settingsMenuConfig = ConfigManager.settingsMenuConfig
 
         val helpersSlot = settingsMenuConfig.helpersSlot.slot
-        inv.setIcon(helpersSlot, ItemStack(Material.BARRIER))
+        inv.setIcon(helpersSlot, settingsMenuConfig.helpersSlot.itemDisplay!!.toItemStack()) {
+            settingsMenuConfig.helpersSlot.emptyAction?.execute(it)
+            val players = onlinePlayers().filter { p ->
+                p.uuid != plot.owner && plot.area!!.contains(BukkitUtil.adaptComplete(it.location))
+            }
+            if (players.isEmpty()) {
+                it.sendLang("islandPlayerAbsEmpty")
+                return@setIcon
+            }
+            IslandsHelperSelectMenu(this.island, this.plot, players).open(it)
+        }
         val helpers = IslandsManager.getIslandHelpers(island.id.value)
 
         for (i in helpers.indices) {

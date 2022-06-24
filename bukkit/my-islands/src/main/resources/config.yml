@@ -1,42 +1,37 @@
 debug: true
 coreId: "plot:plot_main"
-islandHelperMaxCount: 4
+islandHelperMaxCount: 7
 backLobby:
   - "console: cmi server spawn {player}"
 schematics:
   hupo:
     iaIcons: '0:offset_-174::view_plot_types_0:'
     ui:
-      name: "湖泊"
-      lore:
-        - "湖泊地形"
+      name: " &c&l> &3湖泊"
+      lore: []
     core: -75,-103,-99
   shamo:
     iaIcons: '1:offset_-5::view_plot_types_1:'
     ui:
-      name: "沙漠"
-      lore:
-        - "沙漠地形"
+      name: " &c&l> &3沙漠"
+      lore: []
     core: -63,-66,-105
   xueshan:
     iaIcons: '2:offset_-5::view_plot_types_2:'
     ui:
-      name: "雪山"
-      lore:
-        - "雪山地形"
+      name: " &c&l> &3雪山"
+      lore: []
     core: -92,-52,-218
 
   pingyuan:
     iaIcons: '0:offset_-174::view_plot_types_3:'
     ui:
-      name: "平原"
-      lore:
-        - "平原地形"
+      name: " &c&l> &3平原"
+      lore: []
     core: -99,-73,-111
   gaoshan:
     iaIcons: '1:offset_-5::view_plot_types_4:'
     ui:
-      name: "高山"
-      lore:
-        - "高山地形"
-    core: -77,-70,-198
+      name: " &c&l> &3高山"
+      lore: []
+    core: -80,-69,-203

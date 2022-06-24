@@ -9,6 +9,7 @@ import org.bukkit.Bukkit
 object CommandHandler : APICommand("wsett") {
 
     fun init() {
+
         withPermission("${WorldSettings.INSTANCE.name}.command")
         apply {
             "reload" {

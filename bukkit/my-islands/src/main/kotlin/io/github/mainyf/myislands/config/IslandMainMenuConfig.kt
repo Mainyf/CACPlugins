@@ -21,7 +21,7 @@ class IslandSettingsMenuConfig(
     val cooldown: Long,
     val row: Int,
     val background: String,
-    val helpersSlot: DefaultSlotConfig,
+    val helpersSlot: IslandHelperSlotConfig,
     val moveCoreSlot: DefaultSlotConfig,
     val visibilitySlot: DefaultSlotConfig,
     val resetIslandSlot: DefaultSlotConfig
@@ -34,7 +34,32 @@ class IslandChooseMenuConfig(
     val islandListSlot: IslandPresetSlotConfig,
     val prevSlot: DefaultSlotConfig,
     val nextSlot: DefaultSlotConfig,
+    val backSlot: IslandChooseBackSlotConfig
+)
+
+class IslandHelperSelectMenuConfig(
+    val cooldown: Long,
+    val row: Int,
+    val background: String,
+    val playerListSlot: DefaultSlotConfig,
+    val prevSlot: DefaultSlotConfig,
+    val nextSlot: DefaultSlotConfig,
     val backSlot: DefaultSlotConfig
+)
+
+class IslandChooseBackSlotConfig(
+    val slot: List<Int>,
+    val backCity: ItemDisplayConfig,
+    val backPrev: ItemDisplayConfig,
+    val backCityAction: MultiAction?,
+    val backPrevAction: MultiAction?
+)
+
+class IslandHelperSlotConfig(
+    val slot: List<Int>,
+    val itemDisplay: ItemDisplayConfig?,
+    val action: MultiAction?,
+    val emptyAction: MultiAction?,
 )
 
 class IslandPresetSlotConfig(
