@@ -29,6 +29,8 @@ object ConfigManager {
     lateinit var chooseMenuConfig: IslandChooseMenuConfig
     lateinit var helperSelectMenuConfig: IslandHelperSelectMenuConfig
 
+    var moveCoreAction: MultiAction? = null
+
     fun load() {
         MyIslands.INSTANCE.saveDefaultConfig()
         MyIslands.INSTANCE.reloadConfig()
@@ -182,6 +184,7 @@ object ConfigManager {
                 core
             )
         }
+        moveCoreAction = ActionParser.parseAction(mainConfigFile.getStringList("moveCoreAction"))!!
     }
 
     class PlotSchematicConfig(

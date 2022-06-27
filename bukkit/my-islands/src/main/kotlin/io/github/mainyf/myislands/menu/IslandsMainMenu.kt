@@ -2,7 +2,6 @@ package io.github.mainyf.myislands.menu
 
 import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.plot.Plot
-import com.plotsquared.core.util.query.PlotQuery
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.config.ConfigManager
@@ -34,6 +33,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
     private var islandAbs: PlayerIsland? = null
     private var plotAbs: Plot? = null
     private var hasPermission = false
+    private var hasOwner = false
 
     override fun open(player: Player) {
         this.cooldownTime = ConfigManager.mainMenuConfig.cooldown
@@ -41,6 +41,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
         islandAbs = IslandsManager.getIslandAbs(player)
         plotAbs = MyIslands.plotUtils.getPlotByPLoc(player)
         hasPermission = IslandsManager.hasPermissionByFeet(player)
+        hasOwner = plotAbs?.owner == player.uuid
         val inv = Bukkit.createInventory(
             createHolder(player),
             ConfigManager.mainMenuConfig.row * 9,
@@ -123,28 +124,16 @@ class IslandsMainMenu : AbstractMenuHandler() {
             updateInv(it, inv)
         }
         val iakSlot = menuConfig.infoAndKudosSlot
-        if (hasPermission) {
+        if (hasOwner) {
             inv.setIcon(iakSlot.slot, iakSlot.info.toItemStack {
-                lore(lore()?.map { comp ->
-                    Component.text(
-                        comp.text()
-                            .tvar("owner", plotAbs?.owner?.asOfflineData()?.name ?: "空")
-                            .tvar(
-                                "helpers",
-                                IslandsManager.getIslandHelpers(islandAbs).let { list ->
-                                    if (list.isEmpty()) "空" else list.joinToString(",") {
-                                        it.asOfflineData()?.name ?: "空"
-                                    }
-                                }
-                            )
-                            .tvar("kudos", "${islandAbs?.kudos ?: "空"}")
-                    )
-                })
+                lore(lore()?.let { replaceVarByLoreList(it) })
             }) {
                 iakSlot.infoAction?.execute(it)
             }
         } else {
-            inv.setIcon(iakSlot.slot, iakSlot.kudos.toItemStack()) {
+            inv.setIcon(iakSlot.slot, iakSlot.kudos.toItemStack {
+                lore(lore()?.let { replaceVarByLoreList(it) })
+            }) {
                 iakSlot.kudosAction?.execute(it)
                 if (islandAbs != null) {
                     IslandsManager.addKudoToIsland(islandAbs!!, it)
@@ -152,22 +141,17 @@ class IslandsMainMenu : AbstractMenuHandler() {
             }
         }
         val uabSlot = menuConfig.upgradeAndBackIslandSlot
-        if (hasPermission) {
+        if (hasOwner) {
             inv.setIcon(uabSlot.slot, uabSlot.upgrade.toItemStack()) {
                 uabSlot.upgradeAction?.execute(it)
             }
         } else {
             inv.setIcon(uabSlot.slot, uabSlot.back.toItemStack()) {
                 uabSlot.backAction?.execute(it)
-                PlotQuery
-                    .newQuery()
-                    .ownedBy(it.uuid)
-                    .asSet()
-                    .firstOrNull()
+                MyIslands.plotUtils.findPlot(it.uuid)
                     .let { plot ->
                         if (plot == null) {
                             it.sendLang("playerNoPlot")
-//                            it.errorMsg("你没有岛屿")
                             return@let
                         }
                         plot.getHome { loc ->
@@ -181,11 +165,32 @@ class IslandsMainMenu : AbstractMenuHandler() {
             if (islandAbs != null && plotAbs != null) {
                 if (!hasPermission) {
                     it.sendLang("noIslandPermission")
-//                    it.errorMsg("你没有该岛屿的授权")
                     return@setIcon
                 }
                 IslandsSettingsMenu(islandAbs!!, plotAbs!!).open(it)
             }
+        }
+    }
+
+    private fun replaceVarByLoreList(
+        lore: List<Component>,
+        plot: Plot = plotAbs!!,
+        islandData: PlayerIsland = islandAbs!!
+    ): List<Component> {
+        return lore.map { comp ->
+            Component.text(
+                comp.text()
+                    .tvar("owner", plot.owner?.asOfflineData()?.name ?: "空")
+                    .tvar(
+                        "helpers",
+                        IslandsManager.getIslandHelpers(islandData).let { list ->
+                            if (list.isEmpty()) "空" else list.joinToString(",") {
+                                it.asOfflineData()?.name ?: "空"
+                            }
+                        }
+                    )
+                    .tvar("kudos", "${islandData.heatValue}")
+            )
         }
     }
 
@@ -200,16 +205,17 @@ class IslandsMainMenu : AbstractMenuHandler() {
                 break
             }
             val offlinePlayer = islandData.id.value.asOfflineData()?.name ?: ""
-            val skullItem = Heads.getPlayerHead(offlinePlayer)
-            skullItem.setDisplayName(offlinePlayer)
+            val skullItem = Heads.getPlayerHead(offlinePlayer).clone()
+            val plot = MyIslands.plotUtils.findPlot(islandData.id.value)!!
 
-            inv.setIcon(viewListSlots.slot[i], skullItem) {
+            inv.setIcon(viewListSlots.slot[i], viewListSlots.itemDisplay!!.toItemStack(skullItem) {
+                val meta = itemMeta
+                meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer)))
+                meta.lore(replaceVarByLoreList(meta.lore()!!, plot, islandData))
+                this.itemMeta = meta
+            }) {
                 viewListSlots.action?.execute(it)
-                PlotQuery
-                    .newQuery()
-                    .ownedBy(islandData.id.value)
-                    .asSet()
-                    .firstOrNull()
+                MyIslands.plotUtils.findPlot(islandData.id.value)
                     .let { plot ->
                         if (plot == null) {
                             it.sendLang("otherPlayerNoPlot")

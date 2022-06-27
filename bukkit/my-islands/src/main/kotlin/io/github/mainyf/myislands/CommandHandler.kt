@@ -10,6 +10,7 @@ import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.successMsg
+import io.github.mainyf.newmclib.exts.uuid
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 
@@ -52,7 +53,7 @@ object CommandHandler : APICommand("myislands") {
                 withArguments(playerArguments("玩家名"))
                 executeOP {
                     val target = args[0] as Player
-                    MoveIslandCore.tryStartMoveCore(target)
+                    MoveIslandCore.tryStartMoveCore(target, MyIslands.plotUtils.getPlotByPLoc(target)!!)
                 }
             }
             "endMove" {

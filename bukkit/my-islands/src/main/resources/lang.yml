@@ -1,27 +1,37 @@
 # 一天内重复点赞
-kudoRepeat: "一天内只允许点赞一次"
+kudoRepeat: "&c&l！&4今天已经为这个岛屿点赞。"
 # 点赞成功
-kudoSuccess: "点赞完成"
+kudoSuccess: "&c&l！&4感谢你为这个岛屿点赞。"
 # 在没有权限的岛屿拾取物品
 pickupByNonHelperIsland: []
+# 在非授权岛屿丢物品
 dropItemByNonHelperIsland: []
-antiPlayerBreakCore: "你无法破坏此方块"
+# 破坏岛屿核心
+antiPlayerBreakCore: []
 
-alreadyMoveingCore: "你正在移动你的核心"
+alreadyMoveingCore: "&c&l！&4水晶正在被移动，不可重复操作"
 playerLocNotPlot: "你的脚下没有岛屿"
-playerNotPlotOwner: "你不是脚下地皮的主人"
+noOwnerMoveCore: "&c&l！&4你不是岛屿主人，无法移动水晶"
 tryMoveCoreButPlayerNotHaveIsland: "意外的错误: 0xMI1"
-startMoveCore: "开始移动核心水晶"
-endMoveCore: "结束移动核心水晶"
-moveCoreSuccess: "设置完成，新的水晶已放置，出生点已刷新"
-coreNotPlaceOutIsland: "你不能把水晶设置在岛屿外部"
-
-noIslandPermission: "你没有该岛屿的授权"
+startMoveCore: []
+moveCoreToOutIsland: []
+endMoveCore:
+  - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  - "title: ,&3取消&b核心水晶&3的移动,10,30,10"
+  - "actionbar: &r,&r"
+moveCoreSuccess:
+  - "sound: ENTITY_PUFFER_FISH_BLOW_UP,1,2"
+  - "title: ,&3成功把&b核心水晶&3设置在当前位置,10,30,10"
+  - "actionbar: &r,&r"
+islandPlayerAbsEmpty: "&c&l！&4你的岛屿上没有可授权的玩家"
+addIslandHelperSuccess: "&c&l！&4成功添加 &c{player} &4为授权者。"
+beAddIslandHelperSuccess: "&c&l！&4你成功被玩家 {player} 添加为授权者。"
+noOwnerOpenHelperSelectMenu: "&c&l！&4只有岛屿主人可以添加授权。"
+noOwnerResetIslands: "你不是岛屿主人，无法重置岛屿"
+noIslandPermission: "&c&l！&4你没有这个岛屿的授权。"
 playerNoPlot: "你没有岛屿"
-otherPlayerNoPlot: "此玩家没有岛屿"
-
-permissionCountMax: "授权者数量不能超过 6"
-addPermissionSuccess: "已经添加此授权者"
+otherPlayerNoPlot: "&c&l！&4没有找到这个岛屿。"
+repeatAddPermission: "&c&l！&4玩家 &c{player} &4已经是授权者。"
 
 # 获取地皮插件玩家数据时出现问题
 plotPluginPlayerCacheError: "未知错误 MI0x1"
@@ -30,7 +40,8 @@ alreadyOwnIsland: "你已经拥有了自己的私人岛屿"
 # 加载岛屿预设时出现错误
 loadIslandPresetError: "意外的错误: 0xMI0"
 
-initIslandCore: "岛屿水晶已放置"
-islandClaimSuccess: "成功领取你的私人岛屿"
-islandPlayerAbsEmpty: "你的岛屿上没有玩家"
-addIslandHelperSuccess: "添加授权者成功"
+islandIniting:
+  - "title: ,&e正在加载你的岛屿,10,100,10"
+initIslandCore: "岛屿水晶已经成功放置"
+islandClaimSuccess:
+  - "title: ,&e已领取私人岛屿,10,30,10"

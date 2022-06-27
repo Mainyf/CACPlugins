@@ -1,6 +1,5 @@
 package io.github.mainyf.myislands.menu
 
-import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.plot.Plot
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.config.ConfigManager
@@ -13,7 +12,6 @@ import io.github.mainyf.newmclib.utils.Heads
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import kotlin.math.ceil
 
@@ -97,18 +95,16 @@ class IslandsHelperSelectMenu(
             val slot = menuConfig.playerListSlot.slot.getOrNull(index) ?: return@forEachIndexed
             val skullItem = Heads.getPlayerHead(p.name)
             skullItem.setDisplayName(p.name)
+            val pName = p.name
             val uuid = p.uuid
             inv.setIcon(slot, skullItem) {
                 menuConfig.playerListSlot.action?.execute(it)
-                IslandsManager.addHelpers(player, island, uuid)
-                it.sendLang("addIslandHelperSuccess")
+                IslandsManager.addHelpers(plot, player, island, uuid)
+                it.sendLang("addIslandHelperSuccess", mapOf("{player}" to pName))
+                p.sendLang("beAddIslandHelperSuccess", mapOf("{player}" to it.name))
                 IslandsSettingsMenu(island, plot).open(it)
             }
         }
-    }
-
-    override fun onClick(slot: Int, player: Player, inv: Inventory, event: InventoryClickEvent) {
-        println("slot $slot")
     }
 
 }

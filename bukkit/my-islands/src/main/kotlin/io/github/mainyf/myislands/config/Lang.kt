@@ -6,6 +6,7 @@ import io.github.mainyf.newmclib.config.LangUtils
 import io.github.mainyf.newmclib.config.action.MultiAction
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.entity.Player
 
 object Lang {
 
@@ -18,8 +19,14 @@ object Lang {
 
 }
 
-fun CommandSender.sendLang(key: String) {
+fun CommandSender.sendLang(key: String, vararg data: Any) {
     if (Lang.map.containsKey(key)) {
-        Lang.map[key]?.execute(this)
+//        val list = data.toMutableList()
+//        if (list.isEmpty() && this is Player) {
+//            list.add(mapOf(
+//                "{player}" to this.name
+//            ))
+//        }
+        Lang.map[key]?.execute(this, *data)
     }
 }

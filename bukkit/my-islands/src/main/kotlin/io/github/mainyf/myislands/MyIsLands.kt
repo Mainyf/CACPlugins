@@ -9,10 +9,7 @@ import io.github.mainyf.myislands.listeners.AuthListeners
 import io.github.mainyf.myislands.listeners.NoAuthListeners
 import io.github.mainyf.myislands.listeners.PlayerListeners
 import io.github.mainyf.myislands.storage.StorageManager
-import io.github.mainyf.newmclib.exts.isPluginEnabled
-import io.github.mainyf.newmclib.exts.pluginManager
-import io.github.mainyf.newmclib.exts.registerCommand
-import io.github.mainyf.newmclib.exts.uuid
+import io.github.mainyf.newmclib.exts.*
 import org.apache.logging.log4j.LogManager
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
@@ -49,6 +46,11 @@ class MyIslands : JavaPlugin() {
             server.pluginManager.registerEvents(AuthListeners, this)
         } else {
             server.pluginManager.registerEvents(NoAuthListeners, this)
+        }
+        submitTask(period = 20L) {
+            onlinePlayers().forEach { player ->
+                IslandsManager.checkPlayerPlotTrust(player)
+            }
         }
     }
 

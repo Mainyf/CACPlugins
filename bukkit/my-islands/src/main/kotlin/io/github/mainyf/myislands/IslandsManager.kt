@@ -8,11 +8,13 @@ import com.shopify.promises.Promise
 import dev.lone.itemsadder.api.CustomFurniture
 import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.config.sendLang
+import io.github.mainyf.myislands.exceptions.IslandException
 import io.github.mainyf.myislands.menu.IslandsChooseMenu
 import io.github.mainyf.myislands.storage.IslandVisibility
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.myislands.storage.StorageManager
 import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.VectorUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -26,38 +28,37 @@ object IslandsManager {
 
     private val joinPlayers = mutableMapOf<UUID, Plot>()
 
-    fun addHelpers(player: Player, helperUUID: UUID) {
-        StorageManager.transaction {
-            val island = StorageManager.getPlayerIsland(player.uuid)
-            if (island != null) {
-                if ((island.helpers.toList().size ?: 0) >= 6) {
-                    player.sendLang("permissionCountMax")
-//                    player.msg("授权者数量不能超过 6")
-                    return@transaction
-                }
-                if (island.helpers.any { it.helperUUID == helperUUID }) {
-                    player.sendLang("addPermissionSuccess")
-//                    player.msg("已经添加此授权者")
-                    return@transaction
-                }
-                StorageManager.addHelpers(island, helperUUID)
-            }
-        }
-    }
+//    fun addHelpers(player: Player, helperUUID: UUID) {
+//        StorageManager.transaction {
+//            val island = StorageManager.getPlayerIsland(player.uuid)
+//            if (island != null) {
+//                if ((island.helpers.toList().size ?: 0) >= 6) {
+//                    player.sendLang("permissionCountMax")
+////                    player.msg("授权者数量不能超过 6")
+//                    return@transaction
+//                }
+//                if (island.helpers.any { it.helperUUID == helperUUID }) {
+//                    player.sendLang("addPermissionSuccess")
+////                    player.msg("已经添加此授权者")
+//                    return@transaction
+//                }
+//                StorageManager.addHelpers(island, helperUUID)
+//            }
+//        }
+//    }
 
-    fun addHelpers(player: Player, island: PlayerIsland, helperUUID: UUID) {
+    fun addHelpers(plot: Plot, player: Player, island: PlayerIsland, helperUUID: UUID) {
         StorageManager.transaction {
-            if ((island.helpers.toList().size ?: 0) >= 6) {
-                player.sendLang("permissionCountMax")
-//                    player.msg("授权者数量不能超过 6")
-                return@transaction
+            if (island.helpers.toList().size >= 6) {
+                throw IslandException("${player.name} 尝试添加授权者，但授权者已满")
             }
             if (island.helpers.any { it.helperUUID == helperUUID }) {
-                player.sendLang("addPermissionSuccess")
+                player.sendLang("repeatAddPermission", mapOf("{player}" to (helperUUID.asOfflineData()?.name ?: "空")))
 //                    player.msg("已经添加此授权者")
                 return@transaction
             }
             StorageManager.addHelpers(island, helperUUID)
+            plot.addTrusted(helperUUID)
         }
     }
 
@@ -200,6 +201,7 @@ object IslandsManager {
             return
         }
         chooseMenu.ok = true
+        player.sendLang("islandIniting")
         MyIslands.plotUtils.autoClaimPlot(player, plotPlayer) {
             val plots = MyIslands.plotAPI.getPlayerPlots(plotPlayer)
             val plot = plots.first()
@@ -269,6 +271,15 @@ object IslandsManager {
                 loc.pitch
             )
         )
+    }
+
+    fun checkPlayerPlotTrust(player: Player) {
+        val plot = MyIslands.plotUtils.findPlot(player.uuid) ?: return
+        val helpers = getIslandHelpers(player.uuid)
+        helpers.forEach {
+            if (plot.trusted.contains(it)) return
+            plot.addTrusted(it)
+        }
     }
 
 }

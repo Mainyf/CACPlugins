@@ -1,5 +1,6 @@
 package io.github.mainyf.myislands
 
+import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.PlotSquared
 import com.plotsquared.core.database.DBFunc
 import com.plotsquared.core.permissions.PermissionHandler.PermissionHandlerCapability
@@ -12,14 +13,17 @@ import com.plotsquared.core.services.ServicePipeline
 import com.plotsquared.core.services.plots.AutoService
 import com.plotsquared.core.util.EventDispatcher
 import com.plotsquared.core.util.SchematicHandler
+import com.plotsquared.core.util.query.PlotQuery
 import com.plotsquared.core.util.task.AutoClaimFinishTask
 import com.plotsquared.core.util.task.RunnableVal
 import com.plotsquared.core.util.task.TaskManager
 import com.plotsquared.google.Inject
 import com.shopify.promises.Promise
+import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
 import org.bukkit.entity.Player
+import java.util.UUID
 
 class PlotUtils @Inject constructor(
     val servicePipeline: ServicePipeline,
@@ -163,6 +167,14 @@ class PlotUtils @Inject constructor(
         }) {
             this.claimSingle(plotPlayer, plot, plotArea, schematic, block)
         }
+    }
+
+    fun findPlot(uuid: UUID): Plot? {
+        return PlotQuery
+            .newQuery()
+            .ownedBy(uuid)
+            .asSet()
+            .firstOrNull()
     }
 
 }

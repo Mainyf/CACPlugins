@@ -8,30 +8,33 @@ schematics:
     iaIcons: '0:offset_-174::view_plot_types_0:'
     ui:
       name: " &c&l> &3湖泊"
-      lore: []
+      lore: [ ]
     core: -75,-103,-99
   shamo:
     iaIcons: '1:offset_-5::view_plot_types_1:'
     ui:
       name: " &c&l> &3沙漠"
-      lore: []
+      lore: [ ]
     core: -63,-66,-105
   xueshan:
     iaIcons: '2:offset_-5::view_plot_types_2:'
     ui:
       name: " &c&l> &3雪山"
-      lore: []
+      lore: [ ]
     core: -92,-52,-218
 
   pingyuan:
     iaIcons: '0:offset_-174::view_plot_types_3:'
     ui:
       name: " &c&l> &3平原"
-      lore: []
+      lore: [ ]
     core: -99,-73,-111
   gaoshan:
     iaIcons: '1:offset_-5::view_plot_types_4:'
     ui:
       name: " &c&l> &3高山"
-      lore: []
+      lore: [ ]
     core: -80,-69,-203
+moveCoreAction:
+  - "title: ,&3使用&b左键确认&3核心水晶位置,0,20,10"
+  - "actionbar: &6&l使用 &e&lShift+左键 &6&l取消移动"

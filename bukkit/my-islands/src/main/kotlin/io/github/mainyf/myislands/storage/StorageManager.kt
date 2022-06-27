@@ -177,14 +177,21 @@ object StorageManager : AbstractStorageManager() {
                         .pagination(pageIndex, pageSize)
                         .toList()
                     PERMISSION -> {
-                        val islandDatas = PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
-
-                        islandDatas.filter { iData ->
-                            iData.id.value == player.uuid || iData.helpers.any {
-                                it.helperUUID == player.uuid
-                            }
+                        val list = mutableListOf<PlayerIsland>()
+                        val islandData = getPlayerIsland(player.uuid)
+                        if (islandData != null) {
+                            val helpers = islandData.helpers.map { it.helperUUID }
+                            list.addAll(PlayerIsland.find { (PlayerIslands.visibility neq IslandVisibility.NONE) and (PlayerIslands.id inList helpers) })
                         }
-                            .pagination(pageIndex, pageSize)
+//                        val islandDatas = PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
+//
+//                        islandDatas.filter { iData ->
+//                            /*iData.id.value == player.uuid || */iData.helpers.any {
+//                            it.helperUUID == player.uuid
+//                        }
+//                        }
+
+                        list.pagination(pageIndex, pageSize)
                     }
                 }
             }

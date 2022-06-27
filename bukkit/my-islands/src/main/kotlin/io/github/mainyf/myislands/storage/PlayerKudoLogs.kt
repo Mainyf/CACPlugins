@@ -1,14 +1,13 @@
 package io.github.mainyf.myislands.storage
 
-import io.github.mainyf.newmclib.serverId
 import io.github.mainyf.newmclib.storage.BaseEntity
 import io.github.mainyf.newmclib.storage.BaseTable
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.jodatime.date
-import java.util.UUID
+import java.util.*
 
-object PlayerKudoLogs : BaseTable("t_PlayerKudos_${serverId()}") {
+object PlayerKudoLogs : BaseTable("t_PlayerKudos", true) {
 
     val island = reference("island", PlayerIslands)
 

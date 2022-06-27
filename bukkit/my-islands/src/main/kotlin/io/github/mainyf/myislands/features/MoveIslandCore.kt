@@ -7,10 +7,13 @@ import dev.lone.itemsadder.api.CustomFurniture
 import dev.lone.itemsadder.api.CustomStack
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
+import io.github.mainyf.myislands.asPlotPlayer
 import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.config.sendLang
+import io.github.mainyf.myislands.exceptions.IslandException
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.myislands.storage.StorageManager
+import io.github.mainyf.newmclib.exts.onlinePlayers
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
 import io.github.mainyf.newmclib.exts.submitTask
 import io.github.mainyf.newmclib.exts.uuid
@@ -48,6 +51,16 @@ object MoveIslandCore : Listener {
         MyIslands.INSTANCE.addLeftClickListener { player, packetEvent ->
             handlePlayerInteract(player, packetEvent)
         }
+        MyIslands.INSTANCE.submitTask(
+            delay = 0,
+            period = 20
+        ) {
+            onlinePlayers().forEach {
+                if (moveingCorePlayer.containsKey(it.uuid)) {
+                    ConfigManager.moveCoreAction?.execute(it)
+                }
+            }
+        }
     }
 
     fun hasMoveingCore(uuid: UUID): Boolean {
@@ -58,25 +71,32 @@ object MoveIslandCore : Listener {
         return playerSetLater20tick.contains(uuid)
     }
 
-    fun tryStartMoveCore(player: Player) {
-        val plot = MyIslands.plotUtils.getPlotByPLoc(player)
-        if (hasMoveingCore(player.uniqueId)) {
+    fun tryStartMoveCore(player: Player, plot: Plot) {
+        if (moveingCorePlayer.values.any {
+                it.id.value == player.uuid
+            }) {
             player.sendLang("alreadyMoveingCore")
-//            player.errorMsg("你正在移动你的核心")
             return
         }
-        if (plot == null) {
-            player.sendLang("playerLocNotPlot")
-//            player.errorMsg("你的脚下没有地皮")
-            return
-        }
-        val owner = plot.owner
-        if (owner != player.uniqueId) {
-            player.sendLang("playerNotPlotOwner")
-//            player.errorMsg("你不是脚下地皮的主人")
-            return
-        }
-        val islandData = StorageManager.getPlayerIsland(player.uniqueId)
+
+//        val plot = MyIslands.plotUtils.getPlotByPLoc(player)
+//        if (hasMoveingCore(player.uniqueId)) {
+//            player.sendLang("alreadyMoveingCore")
+////            player.errorMsg("你正在移动你的核心")
+//            return
+//        }
+//        if (plot == null) {
+//            player.sendLang("playerLocNotPlot")
+////            player.errorMsg("你的脚下没有地皮")
+//            return
+//        }
+//        val owner = plot.owner
+//        if (owner != player.uniqueId) {
+//            player.sendLang("noOwnerMoveCore")
+////            player.errorMsg("你不是脚下地皮的主人")
+//            return
+//        }
+        val islandData = StorageManager.getPlayerIsland(plot.owner!!)
         if (islandData == null) {
             player.sendLang("tryMoveCoreButPlayerNotHaveIsland")
 //            player.errorMsg("意外的错误: 0xMI1")
@@ -108,6 +128,9 @@ object MoveIslandCore : Listener {
         val player = event.player
         if (!moveingCorePlayer.containsKey(player.uniqueId)) return
         cooldown.invoke(player.uniqueId, 100L, {
+            if (!checkPlayerLoc(player)) {
+                return@invoke
+            }
             val block = event.player.getTargetBlock(6)
             if (block != null && block.type != Material.AIR) {
                 placeFakeBlock(player, block.location.add(0.5, 1.0, 0.5))
@@ -126,10 +149,21 @@ object MoveIslandCore : Listener {
         removePlayerLater20Tick(player)
     }
 
+    private fun checkPlayerLoc(player: Player): Boolean {
+        val plotAbsOwner = player.asPlotPlayer()?.location?.plotAbs?.owner
+        if (plotAbsOwner != playerToPlot[player.uuid]?.ownerAbs) {
+            player.sendLang("moveCoreToOutIsland")
+            endMoveCore(player)
+            removePlayerLater20Tick(player)
+            return false
+        }
+        return true
+    }
+
     private fun handlePlayerInteract(player: Player, event: PacketEvent): Boolean {
         if (!moveingCorePlayer.containsKey(player.uniqueId)) return false
         if (!playerToPlot.containsKey(player.uniqueId)) return false
-        val islandData = StorageManager.getPlayerIsland(player.uniqueId) ?: return false
+        val islandData = moveingCorePlayer[player.uuid] ?: return false
         if (player.isSneaking) {
             if (playerTempCoreLoc.containsKey(player.uuid)) {
                 playerTempCoreLoc.remove(player.uuid)?.second?.let {
@@ -146,6 +180,9 @@ object MoveIslandCore : Listener {
         }
         if (!playerTempCoreLoc.containsKey(player.uniqueId)) return false
 
+        if (!checkPlayerLoc(player)) {
+            return false
+        }
         event.isCancelled = true
 
         val (newLoc, entityID) = playerTempCoreLoc[player.uniqueId]!!
@@ -172,7 +209,7 @@ object MoveIslandCore : Listener {
         }
         deleteEntity(player, entityID)
 //            oldLoc.block.type = Material.AIR
-        StorageManager.updateCoreLoc(player.uniqueId, newLoc.toVector())
+        StorageManager.updateCoreLoc(islandData.id.value, newLoc.toVector())
         IslandsManager.setupPlotCore(newLoc)
 //            CustomBlock.place(ConfigManager.coreId, newLoc)
         val homeLoc = IslandsManager.getHomeLoc(newLoc)
@@ -199,12 +236,10 @@ object MoveIslandCore : Listener {
 //            loc.clone().add(0.0, 0.0, 0.0)
 //        )
 
-        val plot = playerToPlot[player.uniqueId]!!
-        if (!plot.area!!.contains(BukkitUtil.adaptComplete(loc))) {
-            player.sendLang("coreNotPlaceOutIsland")
-//            player.errorMsg("你不能把水晶设置在岛屿外部")
-            return
-        }
+//        val plot = playerToPlot[player.uniqueId]!!
+//        if (!plot.area!!.contains(BukkitUtil.adaptComplete(loc))) {
+//            throw IslandException("${player.name} 把水晶设置在岛屿外部")
+//        }
 
         if (playerTempCoreLoc.containsKey(player.uuid)) {
             val (prevLoc, _) = playerTempCoreLoc[player.uuid]!!

@@ -1,6 +1,5 @@
 package io.github.mainyf.myislands.menu
 
-import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.plot.Plot
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
@@ -17,17 +16,20 @@ import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.Heads
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.ItemStack
+import java.util.*
 
 class IslandsSettingsMenu(
     val island: PlayerIsland,
     val plot: Plot
 ) : AbstractMenuHandler() {
 
+    private val helpers = mutableListOf<UUID>()
+
     override fun open(player: Player) {
+        this.helpers.clear()
+        this.helpers.addAll(IslandsManager.getIslandHelpers(island.id.value))
         this.cooldownTime = ConfigManager.settingsMenuConfig.cooldown
         val inv = Bukkit.createInventory(
             createHolder(player),
@@ -51,6 +53,10 @@ class IslandsSettingsMenu(
         }
         icons.addAll(menuConfig.resetIslandSlot.itemDisplay!!.iaIcons.icons())
 
+        repeat(7) {
+            icons.add(menuConfig.helpersSlot.itemDisplay!!.iaIcons["v${it + 1}"]!!)
+        }
+
         val title = "${menuConfig.background} ${icons.sortedBy { it.priority }.joinToString(" ") { it.value }}"
 //        val title = menuConfig.background
         player.setOpenInventoryTitle(title)
@@ -63,7 +69,7 @@ class IslandsSettingsMenu(
         val moveCoreSlot = settingsMenuConfig.moveCoreSlot
         inv.setIcon(moveCoreSlot.slot, moveCoreSlot.itemDisplay!!.toItemStack()) {
             moveCoreSlot.action?.execute(it)
-            MoveIslandCore.tryStartMoveCore(it)
+            MoveIslandCore.tryStartMoveCore(it, plot)
             it.closeInventory()
         }
         val visibilitySlot = settingsMenuConfig.visibilitySlot
@@ -78,6 +84,10 @@ class IslandsSettingsMenu(
             updateInv(player, inv)
         }
         inv.setIcon(resetIslandSlot.slot, resetIslandSlot.itemDisplay!!.toItemStack()) { p ->
+            if (plot.owner != p.uuid) {
+                p.sendLang("noOwnerResetIslands")
+                return@setIcon
+            }
             resetIslandSlot.action?.execute(p)
             IslandsChooseMenu(false, { chooseMenu, player, schematicConfig ->
                 IslandsManager.resetIsland(p.asPlotPlayer()!!, plot).whenComplete {
@@ -98,8 +108,12 @@ class IslandsSettingsMenu(
         val helpersSlot = settingsMenuConfig.helpersSlot.slot
         inv.setIcon(helpersSlot, settingsMenuConfig.helpersSlot.itemDisplay!!.toItemStack()) {
             settingsMenuConfig.helpersSlot.emptyAction?.execute(it)
+            if (plot.owner != it.uuid) {
+                it.sendLang("noOwnerOpenHelperSelectMenu")
+                return@setIcon
+            }
             val players = onlinePlayers().filter { p ->
-                p.uuid != plot.owner && plot.area!!.contains(BukkitUtil.adaptComplete(it.location))
+                p.uuid != plot.owner && !helpers.contains(p.uuid) && p.asPlotPlayer()?.location?.plotAbs?.owner == plot.owner
             }
             if (players.isEmpty()) {
                 it.sendLang("islandPlayerAbsEmpty")
@@ -107,7 +121,6 @@ class IslandsSettingsMenu(
             }
             IslandsHelperSelectMenu(this.island, this.plot, players).open(it)
         }
-        val helpers = IslandsManager.getIslandHelpers(island.id.value)
 
         for (i in helpers.indices) {
             val helper = helpers[i]
