@@ -24,6 +24,8 @@ object ConfigManager {
     val schematicMap = mutableMapOf<String, PlotSchematicConfig>()
     var islandHelperMaxCount = 6
 
+    var resetCooldown = 1L
+
     lateinit var mainMenuConfig: IslandMainMenuConfig
     lateinit var settingsMenuConfig: IslandSettingsMenuConfig
     lateinit var chooseMenuConfig: IslandChooseMenuConfig
@@ -63,9 +65,7 @@ object ConfigManager {
         val chooseMenuSect = menuConfigFile.getConfigurationSection("chooseMenu")!!
         val helperSelectMenuSect = menuConfigFile.getConfigurationSection("helperSelectMenu")!!
         mainMenuConfig = IslandMainMenuConfig(
-            mainMenuSect.getLong("cooldown"),
-            mainMenuSect.getInt("row"),
-            mainMenuSect.getString("background")!!,
+            mainMenuSect.asMenuSettingsConfig(),
             mainMenuSect.asDefaultSlotConfig("prevSlot"),
             mainMenuSect.asDefaultSlotConfig("nextSlot"),
             mainMenuSect.asDefaultSlotConfig("islandViewSlot"),
@@ -75,27 +75,21 @@ object ConfigManager {
             mainMenuSect.asDefaultSlotConfig("islandSettingsSlot")
         )
         settingsMenuConfig = IslandSettingsMenuConfig(
-            settingsMenuSect.getLong("cooldown"),
-            settingsMenuSect.getInt("row"),
-            settingsMenuSect.getString("background")!!,
+            mainMenuSect.asMenuSettingsConfig(),
             settingsMenuSect.asIslandHelperSlotConfig("helpersSlot"),
             settingsMenuSect.asDefaultSlotConfig("moveCoreSlot"),
             settingsMenuSect.asDefaultSlotConfig("visibilitySlot"),
             settingsMenuSect.asDefaultSlotConfig("resetIslandSlot")
         )
         chooseMenuConfig = IslandChooseMenuConfig(
-            chooseMenuSect.getLong("cooldown"),
-            chooseMenuSect.getInt("row"),
-            chooseMenuSect.getString("background")!!,
+            mainMenuSect.asMenuSettingsConfig(),
             chooseMenuSect.asIslandPresetSlotConfig("islandListSlot"),
             chooseMenuSect.asDefaultSlotConfig("prevSlot"),
             chooseMenuSect.asDefaultSlotConfig("nextSlot"),
             chooseMenuSect.asIslandChooseBackSlotConfig("backSlot")
         )
         helperSelectMenuConfig = IslandHelperSelectMenuConfig(
-            helperSelectMenuSect.getLong("cooldown"),
-            helperSelectMenuSect.getInt("row"),
-            helperSelectMenuSect.getString("background")!!,
+            mainMenuSect.asMenuSettingsConfig(),
             helperSelectMenuSect.asDefaultSlotConfig("playerListSlot"),
             helperSelectMenuSect.asDefaultSlotConfig("prevSlot"),
             helperSelectMenuSect.asDefaultSlotConfig("nextSlot"),
@@ -107,6 +101,7 @@ object ConfigManager {
         return getConfigurationSection(key)!!.let {
             IslandHelperSlotConfig(
                 it.getIntegerList("slot"),
+                it.asItemDisplay(),
                 it.getConfigurationSection("empty")!!.asItemDisplay(),
                 ActionParser.parseAction(it, "actions", false),
                 ActionParser.parseAction(it, "empty.actions", false)
@@ -165,6 +160,7 @@ object ConfigManager {
         coreId = mainConfigFile.getString("coreId") ?: "itemsadder:amethyst_block"
         backLobbyAction = ActionParser.parseAction(mainConfigFile.getStringList("backLobby"))!!
         islandHelperMaxCount = mainConfigFile.getInt("islandHelperMaxCount", 6)
+        resetCooldown = mainConfigFile.getLong("resetCooldown", 1)!!
         val schematicListSection = mainConfigFile.getConfigurationSection("schematics")!!
         schematicListSection.getKeys(false).forEach { schematicKey ->
             val schematicSection = schematicListSection.getConfigurationSection(schematicKey)!!

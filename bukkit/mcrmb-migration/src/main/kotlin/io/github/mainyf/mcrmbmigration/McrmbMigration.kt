@@ -1,23 +1,17 @@
 package io.github.mainyf.mcrmbmigration
 
 import com.google.gson.Gson
-import com.mcrmb.PayApi
 import io.github.mainyf.mcrmbmigration.storage.StorageManager
 import io.github.mainyf.newmclib.command.apiCommand
-import io.github.mainyf.newmclib.command.cmdParser
 import io.github.mainyf.newmclib.command.stringArguments
-import io.github.mainyf.newmclib.exts.errorMsg
-import io.github.mainyf.newmclib.exts.msg
-import io.github.mainyf.newmclib.exts.registerCommand
-import io.github.mainyf.newmclib.exts.successMsg
+import io.github.mainyf.newmclib.exts.*
 import org.apache.logging.log4j.LogManager
-import org.bukkit.command.Command
+import org.black_ixx.playerpoints.PlayerPoints
 import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.util.*
+import kotlin.collections.find
 
 class McrmbMigration : JavaPlugin() {
 
@@ -28,6 +22,9 @@ class McrmbMigration : JavaPlugin() {
     private val pointList = mutableListOf<Point>()
 
     override fun onEnable() {
+        saveDefaultConfig()
+        reloadConfig()
+        Lang.load(config)
         StorageManager.init()
         loadConfig()
         apiCommand("getoldpoints") {
@@ -36,24 +33,23 @@ class McrmbMigration : JavaPlugin() {
             executePlayer {
                 val player = sender
                 val password = args[0] as String
-//                if (password == null) {
-//                    player.errorMsg("命令示例: /getoldpoints <密码> 领取你的点券补贴")
-//                    return@executePlayer
-//                }
                 if (StorageManager.hasClaimed(player)) {
-                    player.errorMsg("你已经领取过了")
+                    player.sendLang("alreadyClaim")
                     return@executePlayer
                 }
 
                 val point = pointList.find { it.id == player.name && it.password == password }
                 if (point == null) {
-                    player.errorMsg("你没有可领的点券补贴或密码错误")
+                    player.sendLang("noPointClaim")
                     return@executePlayer
                 }
-                if (PayApi.Manual(player.name, 2, point.value.toInt().toString(), "玩家点券补偿")) {
+                if (PlayerPoints.getInstance().api.give(player.uuid, point.value.toInt())) {
                     StorageManager.onPlayerClaimOldPoint(player, point.value)
+                    player.sendLang("claimSuccess")
+                    LOGGER.info("&c玩家 ${player.name} 点券补偿 ${point.value} 成功。")
                 } else {
-                    LOGGER.info("&c玩家 ${player.name} 点券补偿 ${point.value} 失败，")
+                    player.sendLang("claimFail")
+                    LOGGER.info("&c玩家 ${player.name} 点券补偿 ${point.value} 失败。")
                 }
             }
         }.register()

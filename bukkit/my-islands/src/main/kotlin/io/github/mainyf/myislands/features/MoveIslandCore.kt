@@ -72,9 +72,7 @@ object MoveIslandCore : Listener {
     }
 
     fun tryStartMoveCore(player: Player, plot: Plot) {
-        if (moveingCorePlayer.values.any {
-                it.id.value == player.uuid
-            }) {
+        if (playerToPlot.values.any { it == plot }) {
             player.sendLang("alreadyMoveingCore")
             return
         }
@@ -96,7 +94,7 @@ object MoveIslandCore : Listener {
 ////            player.errorMsg("你不是脚下地皮的主人")
 //            return
 //        }
-        val islandData = StorageManager.getPlayerIsland(plot.owner!!)
+        val islandData = IslandsManager.getIslandData(plot.owner!!)
         if (islandData == null) {
             player.sendLang("tryMoveCoreButPlayerNotHaveIsland")
 //            player.errorMsg("意外的错误: 0xMI1")

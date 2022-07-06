@@ -16,36 +16,33 @@ import io.github.mainyf.myislands.storage.StorageManager
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.VectorUtils
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.util.Vector
+import org.joda.time.DateTime
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
+import kotlin.collections.any
 
 object IslandsManager {
 
     private val joinPlayers = mutableMapOf<UUID, Plot>()
 
-//    fun addHelpers(player: Player, helperUUID: UUID) {
-//        StorageManager.transaction {
-//            val island = StorageManager.getPlayerIsland(player.uuid)
-//            if (island != null) {
-//                if ((island.helpers.toList().size ?: 0) >= 6) {
-//                    player.sendLang("permissionCountMax")
-////                    player.msg("授权者数量不能超过 6")
-//                    return@transaction
-//                }
-//                if (island.helpers.any { it.helperUUID == helperUUID }) {
-//                    player.sendLang("addPermissionSuccess")
-////                    player.msg("已经添加此授权者")
-//                    return@transaction
-//                }
-//                StorageManager.addHelpers(island, helperUUID)
-//            }
-//        }
-//    }
+    fun removeHelpers(plot: Plot, player: Player, island: PlayerIsland, helperUUID: UUID) {
+        StorageManager.transaction {
+            if (!island.helpers.toList().any { it.helperUUID == helperUUID }) {
+                throw IslandException("${player.name} 尝试删除授权者 $helperUUID,但是这个授权者并不是他的授权者")
+            }
+            StorageManager.removeHelpers(island, helperUUID)
+            plot.removeTrusted(helperUUID)
+        }
+    }
 
     fun addHelpers(plot: Plot, player: Player, island: PlayerIsland, helperUUID: UUID) {
         StorageManager.transaction {
@@ -53,7 +50,7 @@ object IslandsManager {
                 throw IslandException("${player.name} 尝试添加授权者，但授权者已满")
             }
             if (island.helpers.any { it.helperUUID == helperUUID }) {
-                player.sendLang("repeatAddPermission", mapOf("{player}" to (helperUUID.asOfflineData()?.name ?: "空")))
+                player.sendLang("repeatAddPermission", mapOf("{player}" to (helperUUID.asOfflineData()?.name ?: "无")))
 //                    player.msg("已经添加此授权者")
                 return@transaction
             }
@@ -64,7 +61,7 @@ object IslandsManager {
 
     fun getIslandHelpers(uuid: UUID): List<UUID> {
         return StorageManager.transaction {
-            val data = StorageManager.getPlayerIsland(uuid)
+            val data = getIslandData(uuid)
             if (data == null) return@transaction emptyList()
             data.helpers.map { it.helperUUID }
         }
@@ -81,11 +78,13 @@ object IslandsManager {
         StorageManager.setVisibility(island, visibility)
     }
 
-    fun addKudoToIsland(island: PlayerIsland, player: Player) {
-        if (!StorageManager.addKudos(player.uuid, island)) {
+    fun addKudoToIsland(island: PlayerIsland, player: Player): Boolean {
+        return if (!StorageManager.addKudos(player.uuid, island)) {
             player.sendLang("kudoRepeat")
+            false
         } else {
             player.sendLang("kudoSuccess")
+            true
         }
     }
 
@@ -96,11 +95,11 @@ object IslandsManager {
 //                resolve(Unit)
 //            }
 //        }
-        return removeIsland(pp, plot)
+        return removeIsland(pp, plot, true)
     }
 
-    fun removeIsland(pp: PlotPlayer<*>, plot: Plot): Promise<Unit, java.lang.Exception> {
-        val data = StorageManager.getPlayerIsland(pp.uuid)
+    fun removeIsland(pp: PlotPlayer<*>, plot: Plot, hasReset: Boolean = false): Promise<Unit, java.lang.Exception> {
+        val data = getIslandData(pp.uuid)
         return Promise {
             if (data != null) {
                 val loc =
@@ -111,25 +110,40 @@ object IslandsManager {
                         data.coreZ.toDouble()
                     )
                 PaperLib.getChunkAtAsync(loc, true).thenAccept {
-                    MyIslands.INSTANCE.runTaskBR {
+                    MyIslands.INSTANCE.submitTask {
                         loc.block.type = Material.AIR
-                        MyIslands.plotUtils.removeIsland(pp, plot).whenComplete {
-                            StorageManager.removePlayerIsland(data)
+                        MyIslands.plotUtils.removePlot(pp, plot).whenComplete {
+                            StorageManager.removePlayerIsland(data, hasReset)
                             resolve(Unit)
                         }
                     }
                 }
             } else {
-                MyIslands.plotUtils.removeIsland(pp, plot)
+                MyIslands.plotUtils.removePlot(pp, plot)
                 resolve(Unit)
             }
         }
     }
 
+    fun getIslandData(player: Player): PlayerIsland? {
+        return getIslandData(player.uuid)
+    }
+
+    fun getIslandLastResetDate(islandData: PlayerIsland?): LocalDateTime? {
+        return StorageManager.transaction {
+            val millis = islandData?.resetCooldown?.firstOrNull()?.prevTime?.millis ?: return@transaction null
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneOffset.systemDefault())
+        }
+    }
+
+    fun getIslandData(uuid: UUID): PlayerIsland? {
+        return StorageManager.getPlayerIsland(uuid)
+    }
+
     fun getIslandAbs(player: Player): PlayerIsland? {
         val plot = MyIslands.plotUtils.getPlotByPLoc(player)
         if (plot == null || plot.owner == null) return null
-        return StorageManager.getPlayerIsland(plot.owner!!)
+        return getIslandData(plot.owner!!)
     }
 
     fun hasPermissionByFeet(player: Player): Boolean {
@@ -144,14 +158,14 @@ object IslandsManager {
     }
 
     fun tryOpenPlayerIslandMenu(player: Player, join: Boolean = true) {
-        MyIslands.INSTANCE.runTaskLaterBR(20L) {
+        MyIslands.INSTANCE.submitTask(delay = 20L) {
             val plotPlayer = MyIslands.plotAPI.wrapPlayer(player.uuid)
             Log.debugP(player, "获取地皮玩家数据")
             if (plotPlayer == null) {
                 Log.debugP(player, "无法获取地皮玩家数据")
                 player.sendLang("plotPluginPlayerCacheError")
 //                player.errorMsg("未知错误 MI0x1")
-                return@runTaskLaterBR
+                return@submitTask
             }
             Log.debugP(player, "已获取到地皮玩家数据，开始获取玩家拥有的地皮")
             val plots = MyIslands.plotAPI.getPlayerPlots(plotPlayer)
@@ -163,15 +177,15 @@ object IslandsManager {
                     joinPlayers[player.uuid] = plots.first()
                 }
                 Log.debugP(player, "准备传送玩家前往地皮")
-                MyIslands.INSTANCE.runTaskLaterBR(10L) {
+                MyIslands.INSTANCE.submitTask(delay = 10L) {
                     plots.first().getHome {
                         plotPlayer.teleport(it)
                     }
                 }
-                return@runTaskLaterBR
+                return@submitTask
             }
             Log.debugP(player, "检测到玩家没有领取过地皮，正在打开领取菜单")
-            MyIslands.INSTANCE.runTaskLaterBR(10L) {
+            MyIslands.INSTANCE.submitTask(delay = 10L) {
                 IslandsChooseMenu(antiClose = true, block = IslandsManager::chooseIslandSchematic).open(player)
             }
         }
@@ -201,7 +215,6 @@ object IslandsManager {
             return
         }
         chooseMenu.ok = true
-        player.sendLang("islandIniting")
         MyIslands.plotUtils.autoClaimPlot(player, plotPlayer) {
             val plots = MyIslands.plotAPI.getPlayerPlots(plotPlayer)
             val plot = plots.first()
@@ -229,9 +242,9 @@ object IslandsManager {
             x.toDouble(), y.toDouble(), z.toDouble()
         )
         PaperLib.getChunkAtAsync(loc, true).thenAccept {
-            MyIslands.INSTANCE.runTaskBR {
+            MyIslands.INSTANCE.submitTask {
                 loc.add(0.5, 0.0, 0.5)
-                MyIslands.INSTANCE.runTaskLaterBR(3 * 20L) {
+                MyIslands.INSTANCE.submitTask(delay = 3 * 20L) {
                     setupPlotCore(loc)
                     player.sendLang("initIslandCore")
 //                    player.successMsg("岛屿水晶已放置")
@@ -248,6 +261,7 @@ object IslandsManager {
 
     fun getHomeLoc(loc: Location): Location {
         return VectorUtils.lookAtLoc(loc.clone().add(0.0, 0.0, -3.5), loc.clone().add(0.0, -1.0, 0.5))
+            .add(0.0, 0.0, -0.5)
     }
 
     fun setupPlotCore(loc: Location): CustomFurniture {
@@ -279,6 +293,33 @@ object IslandsManager {
         helpers.forEach {
             if (plot.trusted.contains(it)) return
             plot.addTrusted(it)
+        }
+    }
+
+    fun checkIslandHeatsAttenuation() {
+        StorageManager.updateHeat()
+    }
+
+    fun replaceVarByLoreList(
+        lore: List<Component>,
+        plot: Plot,
+        islandData: PlayerIsland?
+    ): List<Component> {
+        return lore.map { comp ->
+            Component.text(
+                comp.text()
+                    .tvar("owner", plot.owner?.asOfflineData()?.name ?: "无")
+                    .tvar(
+                        "helpers",
+                        getIslandHelpers(islandData).let { list ->
+                            if (list.isEmpty()) "无" else list.joinToString(",") {
+                                it.asOfflineData()?.name ?: "无"
+                            }
+                        }
+                    )
+                    .tvar("kudos", "${islandData?.kudos ?: "无"}")
+                    .tvar("heats", "${islandData?.heats ?: "无"}")
+            )
         }
     }
 

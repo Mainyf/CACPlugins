@@ -1,5 +1,6 @@
 package io.github.mainyf.playersettings.storage
 
+import io.github.mainyf.newmclib.storage.BaseEntity
 import io.github.mainyf.newmclib.storage.BaseTable
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
@@ -21,11 +22,9 @@ object PlayerLivelys : BaseTable("t_PlayerLively") {
 
 }
 
-class PlayerLively(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
+class PlayerLively(uuid: EntityID<UUID>) : BaseEntity(PlayerLivelys, uuid) {
 
     companion object : UUIDEntityClass<PlayerLively>(PlayerLivelys)
-
-    var createTime by PlayerLivelys.createTime
 
     var registerDate by PlayerLivelys.registerDate
 
@@ -58,11 +57,9 @@ object PlayerDayOnlines : BaseTable("t_PlayerDayOnline") {
 }
 
 
-class PlayerDayOnline(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
+class PlayerDayOnline(uuid: EntityID<UUID>) : BaseEntity(PlayerDayOnlines, uuid) {
 
     companion object : UUIDEntityClass<PlayerDayOnline>(PlayerDayOnlines)
-
-    var createTime by PlayerDayOnlines.createTime
 
     var pUUID by PlayerDayOnlines.pUUID
 

@@ -1,0 +1,4 @@
+sendFriendRequestToSender:
+  - "minimessage: <color:#FF5555>好友请求已发送给对方</color>"
+sendFriendRequestToAudience:
+  - "minimessage: <player> 请求添加你为好友 <click:run_command:/social agree {player}><hover:show_text:'同意请求'>✔</hover></click> | <click:run_command:/social refuse {player}><hover:show_text:'拒绝请求'>✘</hover></click>"

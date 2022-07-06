@@ -27,16 +27,12 @@ class IslandsHelperSelectMenu(
     private val currentPlayers = mutableListOf<Player>()
 
     override fun open(player: Player) {
-        this.cooldownTime = ConfigManager.helperSelectMenuConfig.cooldown
+        setup(ConfigManager.helperSelectMenuConfig.settings)
 
         maxPageIndex =
             ceil(players.size.toDouble() / ConfigManager.helperSelectMenuConfig.playerListSlot.slot.size.toDouble()).toInt()
 
-        val inv = Bukkit.createInventory(
-            createHolder(player),
-            ConfigManager.helperSelectMenuConfig.row * 9,
-            Component.text(updateTitle(player).colored())
-        )
+        val inv = createInv(player)
 
         updateInv(player, inv)
 
@@ -50,10 +46,7 @@ class IslandsHelperSelectMenu(
         icons.addAll(menuConfig.nextSlot.itemDisplay!!.iaIcons.icons())
         icons.addAll(menuConfig.backSlot.itemDisplay!!.iaIcons.icons())
 
-        val title = "${menuConfig.background} ${icons.sortedBy { it.priority }.joinToString(" ") { it.value }}"
-//        val title = menuConfig.background
-        player.setOpenInventoryTitle(title)
-        return title
+        return applyTitle(player, icons)
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
@@ -93,7 +86,7 @@ class IslandsHelperSelectMenu(
         inv.unSetIcon(menuConfig.playerListSlot.slot)
         currentPlayers.forEachIndexed { index, p ->
             val slot = menuConfig.playerListSlot.slot.getOrNull(index) ?: return@forEachIndexed
-            val skullItem = Heads.getPlayerHead(p.name)
+            val skullItem = Heads.getPlayerHead(p.name).clone()
             skullItem.setDisplayName(p.name)
             val pName = p.name
             val uuid = p.uuid

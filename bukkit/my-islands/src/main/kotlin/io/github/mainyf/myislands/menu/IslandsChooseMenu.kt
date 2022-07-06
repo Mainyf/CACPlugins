@@ -3,6 +3,7 @@ package io.github.mainyf.myislands.menu
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.config.ConfigManager
+import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
@@ -30,13 +31,9 @@ class IslandsChooseMenu(
     var ok = false
 
     override fun open(player: Player) {
-        this.cooldownTime = ConfigManager.chooseMenuConfig.cooldown
+        setup(ConfigManager.chooseMenuConfig.settings)
         updateList()
-        val inv = Bukkit.createInventory(
-            createHolder(player),
-            ConfigManager.chooseMenuConfig.row * 9,
-            Component.text(updateTitle(player).colored())
-        )
+        val inv = createInv(player)
 
         updateInv(inv)
 
@@ -56,10 +53,7 @@ class IslandsChooseMenu(
         currentIslandList.map {
             icons.addAll(it.iaIcons.icons())
         }
-        val title = "${chooseMenuConfig.background} ${icons.sortedBy { it.priority }.joinToString(" ") { it.value }}"
-//        val title = menuConfig.background
-        player.setOpenInventoryTitle(title)
-        return title
+        return applyTitle(player, icons)
     }
 
     private fun updateList() {
@@ -92,6 +86,7 @@ class IslandsChooseMenu(
                     antiClose = false
                     ConfirmMenu(
                         { p ->
+                            p.sendLang("islandIniting")
                             block.invoke(this, it, islandSchematic)
                             p.closeInventory()
                         },

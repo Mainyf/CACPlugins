@@ -6,7 +6,7 @@ import org.bukkit.entity.Player
 
 object Log {
 
-    private val LOGGER = LogManager.getLogger("WorldSettings")
+    private val LOGGER = LogManager.getLogger("MyIslands")
 
     fun debug(msg: String) {
         if (ConfigManager.debug) {

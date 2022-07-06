@@ -17,8 +17,10 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import java.util.*
+import kotlin.math.max
 
 object StorageManager : AbstractStorageManager() {
 
@@ -28,7 +30,8 @@ object StorageManager : AbstractStorageManager() {
             arrayOf(
                 PlayerIslands,
                 PlayerIslandHelpers,
-                PlayerKudoLogs
+                PlayerKudoLogs,
+                PlayerResetIslandCooldowns
             ).forEach {
                 SchemaUtils.createMissingTablesAndColumns(it)
             }
@@ -52,19 +55,28 @@ object StorageManager : AbstractStorageManager() {
 
     fun createPlayerIsland(uuid: UUID, coreLoc: Vector) {
         transaction {
-            PlayerIsland.newByID(uuid) {
-
-                coreX = coreLoc.blockX
-                coreY = coreLoc.blockY
-                coreZ = coreLoc.blockZ
-                visibility = IslandVisibility.ALL
-                kudos = 0
-
+            val islands = PlayerIsland.findById(uuid)
+            if (islands == null) {
+                PlayerIsland.newByID(uuid) {
+                    coreX = coreLoc.blockX
+                    coreY = coreLoc.blockY
+                    coreZ = coreLoc.blockZ
+                    visibility = IslandVisibility.ALL
+                    kudos = 0
+                    heats = 0
+                }
+            } else {
+                islands.coreX = coreLoc.blockX
+                islands.coreY = coreLoc.blockY
+                islands.coreZ = coreLoc.blockZ
+                islands.visibility = IslandVisibility.ALL
+                islands.kudos = 0
+                islands.heats = 0
             }
         }
     }
 
-    fun removePlayerIsland(island: PlayerIsland) {
+    fun removePlayerIsland(island: PlayerIsland, hasReset: Boolean) {
         transaction {
             island.helpers.forEach {
                 it.delete()
@@ -72,10 +84,18 @@ object StorageManager : AbstractStorageManager() {
             PlayerKudoLogs.deleteWhere {
                 PlayerKudoLogs.island eq island.id
             }
-//                PlayerIslandHelperData.find { PlayerIslandHelpers.island eq data.id }.forEach {
-//                    it.delete()
-//                }
-            island.delete()
+//            island.delete()
+            if (hasReset) {
+                val ri = PlayerResetIslandCooldown.findById(island.id)
+                if(ri == null) {
+                    PlayerResetIslandCooldown.newByID {
+                        this.island = island.id
+                        this.prevTime = DateTime.now()
+                    }
+                } else {
+                    ri.prevTime = DateTime.now()
+                }
+            }
         }
     }
 
@@ -91,6 +111,28 @@ object StorageManager : AbstractStorageManager() {
         }
     }
 
+    fun updateHeat() {
+        transaction {
+            val nowTime = DateTime.now()
+            val nowTimeMillis = nowTime.withTimeAtStartOfDay().millis
+            PlayerIsland.all().forEach { island ->
+                val prevAttenuation = island.heatAttenuationDateTime.withTimeAtStartOfDay().millis
+                val day = (nowTimeMillis - prevAttenuation) / 1000 / 3600 / 24
+                if (day >= 1) {
+                    island.heats = max(0, island.heats - 1)
+                    island.heatAttenuationDateTime = nowTime
+                }
+            }
+        }
+    }
+
+    fun initHeat() {
+        PlayerIsland.all().forEach { island ->
+            island.heats = island.kudos
+            island.heatAttenuationDateTime = DateTime.now()
+        }
+    }
+
     fun addKudos(source: UUID, island: PlayerIsland): Boolean {
         return transaction {
             val curTime = LocalDate.now().toDateTimeAtStartOfDay()
@@ -102,6 +144,7 @@ object StorageManager : AbstractStorageManager() {
             }
 
             island.kudos += 1
+            island.heats += 1
 
             PlayerKudoLog.newByID {
                 this.island = island.id
@@ -126,6 +169,14 @@ object StorageManager : AbstractStorageManager() {
             val ownerData = getPlayerIsland(owner) ?: return@transaction false
 
             ownerData.helpers.any { it.helperUUID == player.uuid }
+        }
+    }
+
+    fun removeHelpers(island: PlayerIsland, helper: UUID) {
+        transaction {
+            PlayerIslandHelpers.deleteWhere {
+                (PlayerIslandHelpers.island eq island.id) and (PlayerIslandHelpers.helperUUID eq helper)
+            }
         }
     }
 
@@ -168,12 +219,12 @@ object StorageManager : AbstractStorageManager() {
                 when (type) {
                     ALL -> PlayerIsland
                         .find { PlayerIslands.visibility eq IslandVisibility.ALL }
-                        .orderBy(PlayerIslands.kudos to SortOrder.DESC)
+                        .orderBy(PlayerIslands.heats to SortOrder.DESC)
                         .pagination(pageIndex, pageSize)
                         .toList()
                     FRIEND -> PlayerIsland
                         .find { PlayerIslands.visibility neq IslandVisibility.NONE }
-                        .orderBy(PlayerIslands.kudos to SortOrder.DESC)
+                        .orderBy(PlayerIslands.heats to SortOrder.DESC)
                         .pagination(pageIndex, pageSize)
                         .toList()
                     PERMISSION -> {

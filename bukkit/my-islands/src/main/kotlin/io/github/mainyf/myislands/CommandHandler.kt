@@ -5,6 +5,7 @@ import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.features.MoveIslandCore
 import io.github.mainyf.myislands.menu.IslandsChooseMenu
 import io.github.mainyf.myislands.menu.IslandsMainMenu
+import io.github.mainyf.myislands.storage.StorageManager
 import io.github.mainyf.newmclib.command.APICommand
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.exts.errorMsg
@@ -47,6 +48,12 @@ object CommandHandler : APICommand("myislands") {
                             it.remove()
                         }
                     }
+                }
+            }
+            "initHeat" {
+                executeOP {
+                    StorageManager.initHeat()
+                    sender.successMsg("[MyIsLands] 成功初始化热力值")
                 }
             }
             "moveCore" {
@@ -123,21 +130,21 @@ object CommandHandler : APICommand("myislands") {
                     }
                 }
             }
-            "deleteIsland" {
-                withArguments(playerArguments("玩家名"))
-                executeOP {
-                    val target = args[0] as Player
-                    val pp = target.asPlotPlayer()!!
-                    val plot = pp.location.plotAbs
-                    if (plot == null) {
-                        target.msg("你的脚下没有岛屿")
-                        return@executeOP
-                    }
-                    IslandsManager.removeIsland(pp, plot).whenComplete {
-                        target.msg("删除成功")
-                    }
-                }
-            }
+//            "deleteIsland" {
+//                withArguments(playerArguments("玩家名"))
+//                executeOP {
+//                    val target = args[0] as Player
+//                    val pp = target.asPlotPlayer()!!
+//                    val plot = pp.location.plotAbs
+//                    if (plot == null) {
+//                        target.msg("你的脚下没有岛屿")
+//                        return@executeOP
+//                    }
+//                    IslandsManager.removeIsland(pp, plot).whenComplete {
+//                        target.msg("删除成功")
+//                    }
+//                }
+//            }
         }
     }
 

@@ -41,7 +41,7 @@ class MyIslands : JavaPlugin() {
         pluginManager().registerEvents(PlayerListeners, this)
         CommandHandler.init()
         CommandHandler.register()
-        if (isPluginEnabled("AuthMe")) {
+        if (isPlugin("AuthMe")) {
             LOGGER.info("检测到安装了登录插件，操作变更")
             server.pluginManager.registerEvents(AuthListeners, this)
         } else {
@@ -51,6 +51,9 @@ class MyIslands : JavaPlugin() {
             onlinePlayers().forEach { player ->
                 IslandsManager.checkPlayerPlotTrust(player)
             }
+        }
+        submitTask(async = true, period = 20L) {
+            IslandsManager.checkIslandHeatsAttenuation()
         }
     }
 

@@ -22,6 +22,7 @@ import com.shopify.promises.Promise
 import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
+import io.github.mainyf.newmclib.exts.uuid
 import org.bukkit.entity.Player
 import java.util.UUID
 
@@ -32,7 +33,7 @@ class PlotUtils @Inject constructor(
     val plotAreaManager: PlotAreaManager
 ) {
 
-    fun removeIsland(pp: PlotPlayer<*>, plot: Plot): Promise<Unit, Throwable> {
+    fun removePlot(pp: PlotPlayer<*>, plot: Plot): Promise<Unit, Throwable> {
         return Promise {
             kotlin.runCatching {
                 plot.plotModificationManager.deletePlot(pp) {
@@ -167,6 +168,19 @@ class PlotUtils @Inject constructor(
         }) {
             this.claimSingle(plotPlayer, plot, plotArea, schematic, block)
         }
+    }
+
+    fun teleportHomePlot(player: Player) {
+        findPlot(player.uuid)
+            .let { pPlot ->
+                if (pPlot == null) {
+                    player.sendLang("playerNoPlot")
+                    return@let
+                }
+                pPlot.getHome { loc ->
+                    player.teleport(BukkitUtil.adapt(loc))
+                }
+            }
     }
 
     fun findPlot(uuid: UUID): Plot? {

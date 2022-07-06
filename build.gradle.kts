@@ -73,34 +73,37 @@ subprojects {
             compileOnly(rootProject.files("libs/BungeeCord.jar"))
         }
         if (hasBukkit(project)) {
-            implementation("io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT")
+            implementation("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
             implementation("org.jetbrains.kotlin:kotlin-stdlib")
             implementation("io.netty:netty-all:4.1.68.Final")
-            compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
+//            compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
             compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
-            implementation("io.github.mainyf:newmclib-craftbukkit:1.7.2:")
+            implementation("io.github.mainyf:newmclib-craftbukkit:1.7.3:")
             compileOnly(rootProject.files("./server/bukkit/plugins/ProtocolLib.jar"))
-            compileOnly(rootProject.files("./server/bukkit/plugins/CommandAPI-8.4.0.jar"))
+            compileOnly(rootProject.files("./server/bukkit/plugins/CommandAPI-8.4.1.jar"))
 
             when (project.name) {
                 "item-skills-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
-                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0b-beta4.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0c-beta6.jar"))
                     compileOnly(rootProject.files("./server/bukkit/plugins/PlaceholderAPI-2.11.1.jar"))
                 }
                 "my-islands" -> {
 //                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
 
-                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0b-beta4.jar"))
-                    compileOnly(rootProject.files("./server/bukkit/plugins/PlotSquared-Bukkit-6.9.0-Premium.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0c-beta6.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/PlotSquared-Bukkit-6.9.1-Premium.jar"))
 //                    compileOnly(rootProject.files("./libs/PlotSquared-Bukkit-6.6.2-Premium.jar"))
-                    compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.1.3.0.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.2.1.0.jar"))
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
                     compileOnly(rootProject.files("./libs/datafixerupper-4.1.27.jar"))
                     compileOnly(rootProject.files("./libs/SkinsRestorer.jar"))
                 }
+                "login-settings" -> {
+                    compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
+                }
                 "bungee-settings-bukkit" -> {
-                    compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.1.3.0.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.2.1.0.jar"))
                     compileOnly(rootProject.files("./server/bukkit/plugins/PlaceholderAPI-2.11.1.jar"))
                 }
                 "player-account" -> {
@@ -111,10 +114,11 @@ subprojects {
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
                 }
                 "command-settings" -> {
-                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0b-beta4.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0c-beta6.jar"))
                 }
                 "mcrmb-migration" -> {
-                    compileOnly(rootProject.files("./server/bukkit/plugins/MCRMB-2.0b19-12fe19a.jar"))
+//                    compileOnly(rootProject.files("./server/bukkit/plugins/MCRMB-2.0b19-12fe19a.jar"))
+                    compileOnly(rootProject.files("./server/bukkit/plugins/PlayerPoints-3.2.4.jar"))
                 }
             }
         }
@@ -173,7 +177,10 @@ subprojects {
                     dd.addAll(listOf("ItemsAdder"))
                 }
                 "mcrmb-migration" -> {
-                    dd.addAll(listOf("Mcrmb"))
+                    dd.addAll(listOf("PlayerPoints"))
+                }
+                "login-settings" -> {
+                    dd.addAll(listOf("AuthMe"))
                 }
             }
             dd.add("NewMCLib")
@@ -199,7 +206,16 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class $pluginName : JavaPlugin() {
 
+    companion object {
+
+        val LOGGER = LogManager.getLogger("$pluginName")
+
+        lateinit var INSTANCE: $pluginName
+
+    }
+
     override fun onEnable() {
+        INSTANCE = this
         
     }
 }
@@ -220,7 +236,7 @@ class $pluginName : JavaPlugin() {
 
         tasks.register<JavaExec>("runServer") {
             dependsOn(tasks.findByName("copyPlugin"))
-            classpath = rootProject.files("./server/bukkit/paper-1.18.2-239.jar")
+            classpath = rootProject.files("./server/bukkit/paper-1.19-41.jar")
             mainClass.set("io.papermc.paperclip.Paperclip")
             val jvmArgsText = "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
 //            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")

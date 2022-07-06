@@ -12,12 +12,14 @@ import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
+import io.github.mainyf.newmclib.menu.ConfirmMenu
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.Heads
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
+import java.time.LocalDateTime
 import java.util.*
 
 class IslandsSettingsMenu(
@@ -28,18 +30,18 @@ class IslandsSettingsMenu(
     private val helpers = mutableListOf<UUID>()
 
     override fun open(player: Player) {
-        this.helpers.clear()
-        this.helpers.addAll(IslandsManager.getIslandHelpers(island.id.value))
-        this.cooldownTime = ConfigManager.settingsMenuConfig.cooldown
-        val inv = Bukkit.createInventory(
-            createHolder(player),
-            ConfigManager.settingsMenuConfig.row * 9,
-            Component.text(updateTitle(player).colored())
-        )
+        setup(ConfigManager.settingsMenuConfig.settings)
+        updateHelpers()
+        val inv = createInv(player)
 
         updateInv(player, inv)
 
         player.openInventory(inv)
+    }
+
+    private fun updateHelpers() {
+        this.helpers.clear()
+        this.helpers.addAll(IslandsManager.getIslandHelpers(island.id.value))
     }
 
     override fun updateTitle(player: Player): String {
@@ -54,13 +56,10 @@ class IslandsSettingsMenu(
         icons.addAll(menuConfig.resetIslandSlot.itemDisplay!!.iaIcons.icons())
 
         repeat(7) {
-            icons.add(menuConfig.helpersSlot.itemDisplay!!.iaIcons["v${it + 1}"]!!)
+            icons.add(menuConfig.helpersSlot.emptyItemDisplay!!.iaIcons["v${it + 1}"]!!)
         }
 
-        val title = "${menuConfig.background} ${icons.sortedBy { it.priority }.joinToString(" ") { it.value }}"
-//        val title = menuConfig.background
-        player.setOpenInventoryTitle(title)
-        return title
+        return applyTitle(player, icons)
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
@@ -89,10 +88,38 @@ class IslandsSettingsMenu(
                 return@setIcon
             }
             resetIslandSlot.action?.execute(p)
+            val prevResetMilli = IslandsManager.getIslandLastResetDate(island)?.toMilli()
+            if (!p.isOp && prevResetMilli != null) {
+                val cur = LocalDateTime.now().toMilli()
+                val eMillis = cur - prevResetMilli
+                val cooldownMilli = ConfigManager.resetCooldown * 24 * 60 * 60 * 1000L
+                if (eMillis < cooldownMilli) {
+                    p.sendLang(
+                        "resetCooldown",
+                        mapOf(
+                            "{player}" to p.name,
+                            "{surplusTime}" to (cooldownMilli - eMillis).timestampConvertTime()
+                        )
+                    )
+                    return@setIcon
+                }
+            }
             IslandsChooseMenu(false, { chooseMenu, player, schematicConfig ->
-                IslandsManager.resetIsland(p.asPlotPlayer()!!, plot).whenComplete {
-                    MyIslands.INSTANCE.runTaskLaterBR(2 * 20L) {
-                        IslandsManager.chooseIslandSchematic(chooseMenu, player, schematicConfig)
+
+                onlinePlayers().forEach {
+                    if (it.uuid == p.uuid) return@forEach
+                    val pPlot = MyIslands.plotUtils.getPlotByPLoc(it) ?: return@forEach
+                    if (pPlot == plot) {
+                        MyIslands.plotUtils.teleportHomePlot(it)
+                        it.sendLang("resetIslandBackTourist", mapOf("{player}" to player.name))
+                    }
+                }
+
+                MyIslands.INSTANCE.submitTask(delay = 20L) {
+                    IslandsManager.resetIsland(p.asPlotPlayer()!!, plot).whenComplete {
+                        MyIslands.INSTANCE.runTaskLaterBR(3 * 20L) {
+                            IslandsManager.chooseIslandSchematic(chooseMenu, player, schematicConfig)
+                        }
                     }
                 }
             }, {
@@ -106,7 +133,7 @@ class IslandsSettingsMenu(
         val settingsMenuConfig = ConfigManager.settingsMenuConfig
 
         val helpersSlot = settingsMenuConfig.helpersSlot.slot
-        inv.setIcon(helpersSlot, settingsMenuConfig.helpersSlot.itemDisplay!!.toItemStack()) {
+        inv.setIcon(helpersSlot, settingsMenuConfig.helpersSlot.emptyItemDisplay!!.toItemStack()) {
             settingsMenuConfig.helpersSlot.emptyAction?.execute(it)
             if (plot.owner != it.uuid) {
                 it.sendLang("noOwnerOpenHelperSelectMenu")
@@ -127,22 +154,70 @@ class IslandsSettingsMenu(
             if (i >= helpersSlot.size) {
                 break
             }
-            val offlinePlayer = helper.asOfflineData()!!
-            val skullItem = Heads.getPlayerHead(offlinePlayer.name)
-            skullItem.setDisplayName(offlinePlayer.name)
-//            val skullItem = ItemStack(Material.PLAYER_HEAD)
-//            val itemMeta = skullItem.itemMeta as SkullMeta
-//            val offlinePlayer = helper.asOfflineData()!!
-//            itemMeta.playerProfile = CraftPlayerProfile(offlinePlayer.id, offlinePlayer.name)
-//            skullItem.itemMeta = itemMeta
-            inv.setIcon(helpersSlot[i], skullItem) {
-                settingsMenuConfig.helpersSlot.action?.execute(it)
+            kotlin.runCatching {
+                val offlinePlayer = helper.asOfflineData()!!
+                val islandsData = IslandsManager.getIslandData(helper)
+                val skullItem = Heads.getPlayerHead(offlinePlayer.name).clone()
+                skullItem.setDisplayName(offlinePlayer.name)
+
+                inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.itemDisplay!!.toItemStack(skullItem) {
+                    val meta = itemMeta
+                    meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer.name)))
+                    meta.lore(IslandsManager.replaceVarByLoreList(meta.lore()!!, plot, islandsData))
+                    this.itemMeta = meta
+                }, leftClickBlock = {
+                    settingsMenuConfig.helpersSlot.action?.execute(it)
+                }, rightClickBlock = { p ->
+                    settingsMenuConfig.helpersSlot.action?.execute(p)
+                    if (plot.owner != p.uuid) {
+                        p.sendLang("noOwnerRemoveHelpers")
+                        return@setIcon
+                    }
+                    ConfirmMenu(
+                        { _ ->
+                            kotlin.runCatching {
+                                IslandsManager.removeHelpers(plot, p, island, helper)
+                                player.sendLang(
+                                    "removeIslandHelperSuccess",
+                                    mapOf("{player}" to (helper.asOfflineData()?.name ?: "无"))
+                                )
+                                helper.asPlayer()?.sendLang(
+                                    "beRemoveIslandHelperSuccess",
+                                    mapOf("{player}" to player.name)
+                                )
+                                IslandsSettingsMenu(island, plot).open(p)
+                            }.onFailure {
+                                it.printStackTrace()
+                            }
+                        },
+                        { p ->
+                            IslandsSettingsMenu(island, plot).open(p)
+                        }
+                    ).open(p)
+                })
+            }.onFailure {
+                it.printStackTrace()
             }
         }
     }
 
-//    override fun onClick(slot: Int, player: Player, inv: Inventory, event: InventoryClickEvent) {
-//        println("slot: $slot")
-//    }
+    fun Long.timestampConvertTime(): String {
+        val second = (this / 1000).toDouble()
+//        val hour = this / 1000 / 60 / 60
+        if (second <= 60) return "${second}秒"
+        val surplusSecond = (second % 60).toInt()
+        val minute = (second / 60).toInt()
+        if (minute <= 60) {
+            return "${minute}分钟${surplusSecond}秒"
+        }
+        val surplusMinute = minute % 60
+        val hour = minute / 60
+        if (hour <= 24) {
+            return "${hour}小时${surplusMinute}分钟${surplusSecond}秒"
+        }
+        val surplusHour = hour % 24
+        val day = hour / 24
+        return "${day}天${surplusHour}小时${surplusMinute}分钟${surplusSecond}秒"
+    }
 
 }

@@ -1,0 +1,75 @@
+socialCardMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  background: ':offset_-8::view_plot:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  # 好友申请
+  requestSlot:
+    slot: [ 1 ]
+    type: itemsadder:air
+    name: " &c&l> &3好友申请"
+  # 修复装备
+  repairSlot:
+    slot: [ 1 ]
+    type: itemsadder:air
+    name: " &c&l> &3修复装备"
+  # 头颅格子
+  headSlot:
+    slot: [ 1 ]
+    type: itemsadder:air
+    name: " &c&l> &3头颅"
+  # 第一个
+  cardX1Slot:
+    slot: [ 1 ]
+    type: itemsadder:air
+    name: " &c&l> &3第一个"
+  # 第二个
+  cardX2Slot:
+    slot: [ 1 ]
+    type: itemsadder:air
+    name: " &c&l> &3第二个"
+  # 第三个
+  cardX3Slot:
+    slot: [ 1 ]
+    type: itemsadder:air
+    name: " &c&l> &3第三个"
+  # 第四个
+  cardX4Slot:
+    slot: [ 1 ]
+    type: itemsadder:air
+    name: " &c&l> &3第四个"
+  # 是否在线
+  onlineSlot:
+    slot: [ 1 ]
+    online:
+      iaIcons: ''
+      type: itemsadder:air
+      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      name: " &c&l> &3在线"
+    offline:
+      iaIcons: ''
+      type: itemsadder:air
+      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      name: " &c&l> &3离线"
+  # 头盔
+  helmetSlot:
+    slot: [ 1 ]
+    iaIcons: ''
+    type: NULL
+  # 盔甲
+  chestplateSlot:
+    slot: [ 2 ]
+    iaIcons: ''
+    type: NULL
+  # 护腿
+  leggingsSlot:
+    slot: [ 3 ]
+    iaIcons: ''
+    type: NULL
+  # 靴子
+  bootsSlot:
+    slot: [ 4 ]
+    iaIcons: ''
+    type: NULL

@@ -4,9 +4,9 @@ import io.github.mainyf.newmclib.storage.BaseEntity
 import io.github.mainyf.newmclib.storage.BaseTable
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.jodatime.datetime
 import org.joda.time.DateTime
 import java.util.*
-import kotlin.math.max
 
 object PlayerIslands : BaseTable("t_PlayerIslandData", true) {
 
@@ -20,6 +20,10 @@ object PlayerIslands : BaseTable("t_PlayerIslandData", true) {
 
     val kudos = integer("kudos")
 
+    val heats = integer("heats").default(0)
+
+    val heatAttenuationDateTime = datetime("heatAttenuation").default(DateTime.now())
+
 }
 
 class PlayerIsland(uuid: EntityID<UUID>) : BaseEntity(PlayerIslands, uuid) {
@@ -32,21 +36,13 @@ class PlayerIsland(uuid: EntityID<UUID>) : BaseEntity(PlayerIslands, uuid) {
     var visibility by PlayerIslands.visibility
     var kudos by PlayerIslands.kudos
 
-    val elapsedDay: Long
-        get() {
-            val nowTime = DateTime.now().withTimeAtStartOfDay().millis
-            val createTimeMillis = createTime.withTimeAtStartOfDay().millis
-            return (nowTime - createTimeMillis) / 1000 / 3600 / 24
-        }
+    var heats by PlayerIslands.heats
 
-    val heatValue: Int
-        get() {
-            return max(0, kudos - elapsedDay.toInt())
-        }
+    var heatAttenuationDateTime by PlayerIslands.heatAttenuationDateTime
 
     val helpers by PlayerIslandHelper referrersOn PlayerIslandHelpers.island
 
-//    val kudosLog by PlayerKudoLog referrersOn PlayerKudoLogs.island
+    val resetCooldown by PlayerResetIslandCooldown referrersOn PlayerResetIslandCooldowns.island
 
 }
 

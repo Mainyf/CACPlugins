@@ -36,17 +36,13 @@ class IslandsMainMenu : AbstractMenuHandler() {
     private var hasOwner = false
 
     override fun open(player: Player) {
-        this.cooldownTime = ConfigManager.mainMenuConfig.cooldown
+        setup(ConfigManager.mainMenuConfig.settings)
         updateMaxPageIndex(player)
         islandAbs = IslandsManager.getIslandAbs(player)
         plotAbs = MyIslands.plotUtils.getPlotByPLoc(player)
         hasPermission = IslandsManager.hasPermissionByFeet(player)
         hasOwner = plotAbs?.owner == player.uuid
-        val inv = Bukkit.createInventory(
-            createHolder(player),
-            ConfigManager.mainMenuConfig.row * 9,
-            Component.text(updateTitle(player).colored())
-        )
+        val inv = createInv(player)
 
         updateInv(player, inv)
         player.openInventory(inv)
@@ -78,19 +74,19 @@ class IslandsMainMenu : AbstractMenuHandler() {
             PERMISSION -> icons.add(switchViewIslandIcons["permission"]!!)
         }
 
-        if (hasPermission) {
+        if (hasOwner) {
             icons.addAll(menuConfig.infoAndKudosSlot.info.iaIcons.icons())
             icons.addAll(menuConfig.upgradeAndBackIslandSlot.upgrade.iaIcons.icons())
-            icons.add(menuConfig.islandSettingsSlot.itemDisplay!!.iaIcons["permission"]!!)
         } else {
             icons.addAll(menuConfig.infoAndKudosSlot.kudos.iaIcons.icons())
             icons.addAll(menuConfig.upgradeAndBackIslandSlot.back.iaIcons.icons())
+        }
+        if(hasPermission) {
+            icons.add(menuConfig.islandSettingsSlot.itemDisplay!!.iaIcons["permission"]!!)
+        } else {
             icons.add(menuConfig.islandSettingsSlot.itemDisplay!!.iaIcons["unfamiliar"]!!)
         }
-        val title = "${menuConfig.background} ${icons.sortedBy { it.priority }.joinToString(" ") { it.value }}"
-//        val title = menuConfig.background
-        player.setOpenInventoryTitle(title)
-        return title
+        return applyTitle(player, icons)
     }
 
     private fun updateInvSlot(player: Player, inv: Inventory) {
@@ -126,17 +122,17 @@ class IslandsMainMenu : AbstractMenuHandler() {
         val iakSlot = menuConfig.infoAndKudosSlot
         if (hasOwner) {
             inv.setIcon(iakSlot.slot, iakSlot.info.toItemStack {
-                lore(lore()?.let { replaceVarByLoreList(it) })
+                lore(lore()?.let { IslandsManager.replaceVarByLoreList(it, plotAbs!!, islandAbs) })
             }) {
                 iakSlot.infoAction?.execute(it)
             }
         } else {
             inv.setIcon(iakSlot.slot, iakSlot.kudos.toItemStack {
-                lore(lore()?.let { replaceVarByLoreList(it) })
+                lore(lore()?.let { IslandsManager.replaceVarByLoreList(it, plotAbs!!, islandAbs) })
             }) {
                 iakSlot.kudosAction?.execute(it)
-                if (islandAbs != null) {
-                    IslandsManager.addKudoToIsland(islandAbs!!, it)
+                if (islandAbs != null && IslandsManager.addKudoToIsland(islandAbs!!, it)) {
+                    updateInv(player, inv)
                 }
             }
         }
@@ -148,16 +144,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
         } else {
             inv.setIcon(uabSlot.slot, uabSlot.back.toItemStack()) {
                 uabSlot.backAction?.execute(it)
-                MyIslands.plotUtils.findPlot(it.uuid)
-                    .let { plot ->
-                        if (plot == null) {
-                            it.sendLang("playerNoPlot")
-                            return@let
-                        }
-                        plot.getHome { loc ->
-                            it.teleport(BukkitUtil.adapt(loc))
-                        }
-                    }
+                MyIslands.plotUtils.teleportHomePlot(it)
             }
         }
         inv.setIcon(menuConfig.islandSettingsSlot) {
@@ -172,27 +159,27 @@ class IslandsMainMenu : AbstractMenuHandler() {
         }
     }
 
-    private fun replaceVarByLoreList(
-        lore: List<Component>,
-        plot: Plot = plotAbs!!,
-        islandData: PlayerIsland = islandAbs!!
-    ): List<Component> {
-        return lore.map { comp ->
-            Component.text(
-                comp.text()
-                    .tvar("owner", plot.owner?.asOfflineData()?.name ?: "空")
-                    .tvar(
-                        "helpers",
-                        IslandsManager.getIslandHelpers(islandData).let { list ->
-                            if (list.isEmpty()) "空" else list.joinToString(",") {
-                                it.asOfflineData()?.name ?: "空"
-                            }
-                        }
-                    )
-                    .tvar("kudos", "${islandData.heatValue}")
-            )
-        }
-    }
+//    private fun replaceVarByLoreList(
+//        lore: List<Component>,
+//        plot: Plot = plotAbs!!,
+//        islandData: PlayerIsland? = islandAbs
+//    ): List<Component> {
+//        return lore.map { comp ->
+//            Component.text(
+//                comp.text()
+//                    .tvar("owner", plot.owner?.asOfflineData()?.name ?: "空")
+//                    .tvar(
+//                        "helpers",
+//                        IslandsManager.getIslandHelpers(islandData).let { list ->
+//                            if (list.isEmpty()) "空" else list.joinToString(",") {
+//                                it.asOfflineData()?.name ?: "空"
+//                            }
+//                        }
+//                    )
+//                    .tvar("kudos", "${islandData?.heatValue ?: "空"}")
+//            )
+//        }
+//    }
 
     private fun updateInvIslandList(player: Player, inv: Inventory) {
         val viewListSlots = ConfigManager.mainMenuConfig.islandViewSlot
@@ -204,28 +191,32 @@ class IslandsMainMenu : AbstractMenuHandler() {
             if (i >= viewListSlots.slot.size) {
                 break
             }
-            val offlinePlayer = islandData.id.value.asOfflineData()?.name ?: ""
-            val skullItem = Heads.getPlayerHead(offlinePlayer).clone()
-            val plot = MyIslands.plotUtils.findPlot(islandData.id.value)!!
+            kotlin.runCatching {
+                val offlinePlayer = islandData.id.value.asOfflineData()?.name ?: ""
+                val skullItem = Heads.getPlayerHead(offlinePlayer).clone()
+                val plot = MyIslands.plotUtils.findPlot(islandData.id.value)!!
 
-            inv.setIcon(viewListSlots.slot[i], viewListSlots.itemDisplay!!.toItemStack(skullItem) {
-                val meta = itemMeta
-                meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer)))
-                meta.lore(replaceVarByLoreList(meta.lore()!!, plot, islandData))
-                this.itemMeta = meta
-            }) {
-                viewListSlots.action?.execute(it)
-                MyIslands.plotUtils.findPlot(islandData.id.value)
-                    .let { plot ->
-                        if (plot == null) {
-                            it.sendLang("otherPlayerNoPlot")
+                inv.setIcon(viewListSlots.slot[i], viewListSlots.itemDisplay!!.toItemStack(skullItem) {
+                    val meta = itemMeta
+                    meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer)))
+                    meta.lore(IslandsManager.replaceVarByLoreList(meta.lore()!!, plot, islandData))
+                    this.itemMeta = meta
+                }) {
+                    viewListSlots.action?.execute(it)
+                    MyIslands.plotUtils.findPlot(islandData.id.value)
+                        .let { plot ->
+                            if (plot == null) {
+                                it.sendLang("otherPlayerNoPlot")
 //                            it.errorMsg("此玩家没有岛屿")
-                            return@let
+                                return@let
+                            }
+                            plot.getHome { loc ->
+                                it.teleport(BukkitUtil.adapt(loc))
+                            }
                         }
-                        plot.getHome { loc ->
-                            it.teleport(BukkitUtil.adapt(loc))
-                        }
-                    }
+                }
+            }.onFailure {
+                it.printStackTrace()
             }
         }
     }

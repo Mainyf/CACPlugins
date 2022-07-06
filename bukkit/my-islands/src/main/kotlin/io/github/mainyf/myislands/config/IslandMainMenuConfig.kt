@@ -2,12 +2,11 @@ package io.github.mainyf.myislands.config
 
 import io.github.mainyf.newmclib.config.DefaultSlotConfig
 import io.github.mainyf.newmclib.config.ItemDisplayConfig
+import io.github.mainyf.newmclib.config.MenuSettingsConfig
 import io.github.mainyf.newmclib.config.action.MultiAction
 
 class IslandMainMenuConfig(
-    val cooldown: Long,
-    val row: Int,
-    val background: String,
+    val settings: MenuSettingsConfig,
     val prevSlot: DefaultSlotConfig,
     val nextSlot: DefaultSlotConfig,
     val islandViewSlot: DefaultSlotConfig,
@@ -18,9 +17,7 @@ class IslandMainMenuConfig(
 )
 
 class IslandSettingsMenuConfig(
-    val cooldown: Long,
-    val row: Int,
-    val background: String,
+    val settings: MenuSettingsConfig,
     val helpersSlot: IslandHelperSlotConfig,
     val moveCoreSlot: DefaultSlotConfig,
     val visibilitySlot: DefaultSlotConfig,
@@ -28,9 +25,7 @@ class IslandSettingsMenuConfig(
 )
 
 class IslandChooseMenuConfig(
-    val cooldown: Long,
-    val row: Int,
-    val background: String,
+    val settings: MenuSettingsConfig,
     val islandListSlot: IslandPresetSlotConfig,
     val prevSlot: DefaultSlotConfig,
     val nextSlot: DefaultSlotConfig,
@@ -38,9 +33,7 @@ class IslandChooseMenuConfig(
 )
 
 class IslandHelperSelectMenuConfig(
-    val cooldown: Long,
-    val row: Int,
-    val background: String,
+    val settings: MenuSettingsConfig,
     val playerListSlot: DefaultSlotConfig,
     val prevSlot: DefaultSlotConfig,
     val nextSlot: DefaultSlotConfig,
@@ -58,6 +51,7 @@ class IslandChooseBackSlotConfig(
 class IslandHelperSlotConfig(
     val slot: List<Int>,
     val itemDisplay: ItemDisplayConfig?,
+    val emptyItemDisplay: ItemDisplayConfig?,
     val action: MultiAction?,
     val emptyAction: MultiAction?,
 )

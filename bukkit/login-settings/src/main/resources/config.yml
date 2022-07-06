@@ -1,0 +1,67 @@
+register:
+  stage1:
+    period: 20
+    actions:
+      - "title: &7[&e注册&7],&3请在聊天栏发送你的密码,0,30,10"
+      - 'console: cmi effect {player} blindness 300'
+      - 'console: cmi effect {player} invisibility 300'
+      - 'console: cmi heal {player}'
+  stage2:
+    period: 20
+    actions:
+      - "title: &7[&e注册&7],&3请在聊天栏再次发送你的密码,0,30,10"
+      - 'console: cmi bossbarmsg {player} &7&l[&c注意&7&l] &7请确保密码复杂性， 以免出现盗号情况 &7&l[&c注意&7&l] -t:3 -c:WHITE -s:1 -n:join -p:1/1'
+      - 'console: cmi effect {player} blindness 300'
+      - 'console: cmi effect {player} invisibility 300'
+      - 'console: cmi heal {player}'
+    registerNoRepeat:
+      - "message: &c&l！&4输入的两次密码不相同，请重新注册。"
+      - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+    registerSuccess:
+      - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+login:
+  stage1:
+    period: 20
+    actions:
+      - "title: &7[&e登录&7],&3请在聊天栏发送你的密码,0,30,10"
+      - 'console: cmi bossbarmsg {player} &7&l[&c注意&7&l] &7请确保密码复杂性， 以免出现盗号情况 &7&l[&c注意&7&l] -t:3 -c:WHITE -s:1 -n:join -p:1/1'
+      - 'console: cmi effect {player} blindness 300'
+      - 'console: cmi effect {player} invisibility 300'
+      - 'console: cmi heal {player}'
+    loginSuccess:
+      - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+    passwordWrong:
+      - "message: &c&l！&4密码错误，错误5次将半小时不能登陆。"
+      - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+resourcePack:
+  url: "https://mokier-cnc.oss-cn-hangzhou.aliyuncs.com/%E9%95%BF%E5%AE%89%E5%9F%8E_v0.1.3.zip"
+  declined:
+    - 'console: cmi warp help {player}'
+    - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+    - 'console: cmi effect {player} blindness 1'
+  failDownload:
+    - "title: ,&e服务器材质下载失败,0,30,10"
+    - "message: &c&l！&4服务器材质包下载失败。"
+  successLoad: []
+teachingMenu:
+  cooldown: 250
+  row: 6
+  background: ':offset_-8::view_login_teaching::offset_-125::view_login_teaching_msg:'
+  # 正确选择
+  slotA:
+    slot: "37-44"
+    iaIcons: ["0:offset_-8::xxx:", "0:offset_-9::xxx:", "0:offset_-10::xxx:", "0:offset_11::xxx:"]
+    actions:
+      - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+    type: itemsadder:air
+    name: " &c&l> &3传送主城"
+  # 错误选择
+  slotB:
+    slot: "2-12"
+    iaIcons: 'xx'
+    actions:
+      - 'console: cmi warp help1 {player}'
+      - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+      - 'console: cmi effect {player} blindness 1'
+    type: itemsadder:air
+    name: " &c&l> &3传送教学房间"

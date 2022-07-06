@@ -28,7 +28,8 @@ mainMenu:
       - "  &7▪ 拥有者：&f{owner}"
       - "  &7▪ 授权者：&f{helpers}"
       - ""
-      - "  &7▪ 热度：&f{kudos}"
+      - "  &7▪ 热度：&f{heats}"
+      - "  &7▪ 点赞：&f{kudos}"
   # 切换岛屿展示列表
   switchViewIslandSlot:
     slot: [ 31 ]
@@ -52,7 +53,8 @@ mainMenu:
         - "  &7▪ 拥有者：&f{owner}"
         - "  &7▪ 授权者：&f{helpers}"
         - ""
-        - "  &7▪ 热度：&f{kudos}"
+        - "  &7▪ 热度：&f{heats}"
+        - "  &7▪ 点赞：&f{kudos}"
     kudos:
       iaIcons: '1:offset_-77::view_plot_info_1:'
       actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
@@ -63,7 +65,8 @@ mainMenu:
         - "  &7▪ 拥有者：&f{owner}"
         - "  &7▪ 授权者：&f{helpers}"
         - ""
-        - "  &7▪ 热度：&f{kudos}"
+        - "  &7▪ 热度：&f{heats}"
+        - "  &7▪ 点赞：&f{kudos}"
   # 岛屿升级与返回岛屿
   upgradeAndBackIslandSlot:
     slot: [ 48,49,50 ]
@@ -95,16 +98,24 @@ settingsMenu:
   helpersSlot:
     actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
     slot: [ 1,2,3,4,5,6,7 ]
+    name: " &c&l> &3{player}"
+    lore:
+      - ""
+      - "  &7▪ 拥有者：&f{owner}"
+      - "  &7▪ 授权者：&f{helpers}"
+      - ""
+      - "  &7▪ 热度：&f{heats}"
+      - "  &7▪ 点赞：&f{kudos}"
     # 没有授权者的位置
     empty:
       iaIcons:
         v1: '1:offset_-77::view_plot_set_add:'
-        v2: '1:offset_-2::view_plot_set_add:'
-        v3: '1:offset_-2::view_plot_set_add:'
-        v4: '1:offset_-2::view_plot_set_add:'
-        v5: '1:offset_-2::view_plot_set_add:'
-        v6: '1:offset_-2::view_plot_set_add:'
-        v7: '1:offset_-2::view_plot_set_add:'
+        v2: '1:offset_-5::view_plot_set_add:'
+        v3: '1:offset_-5::view_plot_set_add:'
+        v4: '1:offset_-5::view_plot_set_add:'
+        v5: '1:offset_-5::view_plot_set_add:'
+        v6: '1:offset_-5::view_plot_set_add:'
+        v7: '1:offset_-5::view_plot_set_add:'
       actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3添加授权"
