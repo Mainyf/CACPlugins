@@ -1,9 +1,8 @@
 package io.github.mainyf.myislands.config
 
 import io.github.mainyf.newmclib.config.DefaultSlotConfig
-import io.github.mainyf.newmclib.config.ItemDisplayConfig
+import io.github.mainyf.newmclib.config.ItemSlotConfig
 import io.github.mainyf.newmclib.config.MenuSettingsConfig
-import io.github.mainyf.newmclib.config.action.MultiAction
 
 class IslandMainMenuConfig(
     val settings: MenuSettingsConfig,
@@ -42,38 +41,29 @@ class IslandHelperSelectMenuConfig(
 
 class IslandChooseBackSlotConfig(
     val slot: List<Int>,
-    val backCity: ItemDisplayConfig,
-    val backPrev: ItemDisplayConfig,
-    val backCityAction: MultiAction?,
-    val backPrevAction: MultiAction?
+    val backCity: ItemSlotConfig,
+    val backPrev: ItemSlotConfig
 )
 
 class IslandHelperSlotConfig(
     val slot: List<Int>,
-    val itemDisplay: ItemDisplayConfig?,
-    val emptyItemDisplay: ItemDisplayConfig?,
-    val action: MultiAction?,
-    val emptyAction: MultiAction?,
+    val itemSlot: ItemSlotConfig?,
+    val emptyItemSlot: ItemSlotConfig?
 )
 
 class IslandPresetSlotConfig(
     val slot: List<List<Int>>,
-    val itemDisplay: ItemDisplayConfig?,
-    val action: MultiAction?
+    val itemSlot: ItemSlotConfig?
 )
 
 class InfoAndKudosSlotConfig(
     val slot: List<Int>,
-    val info: ItemDisplayConfig,
-    val kudos: ItemDisplayConfig,
-    val infoAction: MultiAction?,
-    val kudosAction: MultiAction?
+    val info: ItemSlotConfig,
+    val kudos: ItemSlotConfig
 )
 
 class UpgradeAndBackIslandSlotSlotConfig(
     val slot: List<Int>,
-    val upgrade: ItemDisplayConfig,
-    val back: ItemDisplayConfig,
-    val upgradeAction: MultiAction?,
-    val backAction: MultiAction?
+    val upgrade: ItemSlotConfig,
+    val back: ItemSlotConfig
 )

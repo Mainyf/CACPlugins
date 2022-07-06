@@ -16,7 +16,6 @@ import io.github.mainyf.newmclib.menu.ConfirmMenu
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.Heads
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import java.time.LocalDateTime
@@ -47,16 +46,16 @@ class IslandsSettingsMenu(
     override fun updateTitle(player: Player): String {
         val menuConfig = ConfigManager.settingsMenuConfig
         val icons = mutableListOf<IaIcon>()
-        icons.addAll(menuConfig.moveCoreSlot.itemDisplay!!.iaIcons.icons())
+        icons.addAll(menuConfig.moveCoreSlot.itemSlot.iaIcons.icons())
         when (island.visibility) {
-            ALL -> icons.add(menuConfig.visibilitySlot.itemDisplay!!.iaIcons["all"]!!)
-            PERMISSION -> icons.add(menuConfig.visibilitySlot.itemDisplay!!.iaIcons["permission"]!!)
-            NONE -> icons.add(menuConfig.visibilitySlot.itemDisplay!!.iaIcons["none"]!!)
+            ALL -> icons.add(menuConfig.visibilitySlot.itemSlot.iaIcons["all"]!!)
+            PERMISSION -> icons.add(menuConfig.visibilitySlot.itemSlot.iaIcons["permission"]!!)
+            NONE -> icons.add(menuConfig.visibilitySlot.itemSlot.iaIcons["none"]!!)
         }
-        icons.addAll(menuConfig.resetIslandSlot.itemDisplay!!.iaIcons.icons())
+        icons.addAll(menuConfig.resetIslandSlot.itemSlot.iaIcons.icons())
 
         repeat(7) {
-            icons.add(menuConfig.helpersSlot.emptyItemDisplay!!.iaIcons["v${it + 1}"]!!)
+            icons.add(menuConfig.helpersSlot.emptyItemSlot!!.iaIcons["v${it + 1}"]!!)
         }
 
         return applyTitle(player, icons)
@@ -66,28 +65,28 @@ class IslandsSettingsMenu(
         val settingsMenuConfig = ConfigManager.settingsMenuConfig
 
         val moveCoreSlot = settingsMenuConfig.moveCoreSlot
-        inv.setIcon(moveCoreSlot.slot, moveCoreSlot.itemDisplay!!.toItemStack()) {
-            moveCoreSlot.action?.execute(it)
+        inv.setIcon(moveCoreSlot.slot, moveCoreSlot.itemSlot.toItemStack()) {
+            moveCoreSlot.itemSlot.execAction(it)
             MoveIslandCore.tryStartMoveCore(it, plot)
             it.closeInventory()
         }
         val visibilitySlot = settingsMenuConfig.visibilitySlot
         val resetIslandSlot = settingsMenuConfig.resetIslandSlot
-        inv.setIcon(visibilitySlot.slot, visibilitySlot.itemDisplay!!.toItemStack {
+        inv.setIcon(visibilitySlot.slot, visibilitySlot.itemSlot.toItemStack {
             setDisplayName(getDisplayName().tvar("visibility", island.visibility.text))
         }) { p ->
-            visibilitySlot.action?.execute(p)
+            visibilitySlot.itemSlot.execAction(p)
             IslandsManager.setIslandVisibility(
                 island,
                 values().find { it.count > island.visibility.count } ?: ALL)
             updateInv(player, inv)
         }
-        inv.setIcon(resetIslandSlot.slot, resetIslandSlot.itemDisplay!!.toItemStack()) { p ->
+        inv.setIcon(resetIslandSlot.slot, resetIslandSlot.itemSlot.toItemStack()) { p ->
             if (plot.owner != p.uuid) {
                 p.sendLang("noOwnerResetIslands")
                 return@setIcon
             }
-            resetIslandSlot.action?.execute(p)
+            resetIslandSlot.itemSlot.execAction(p)
             val prevResetMilli = IslandsManager.getIslandLastResetDate(island)?.toMilli()
             if (!p.isOp && prevResetMilli != null) {
                 val cur = LocalDateTime.now().toMilli()
@@ -133,8 +132,8 @@ class IslandsSettingsMenu(
         val settingsMenuConfig = ConfigManager.settingsMenuConfig
 
         val helpersSlot = settingsMenuConfig.helpersSlot.slot
-        inv.setIcon(helpersSlot, settingsMenuConfig.helpersSlot.emptyItemDisplay!!.toItemStack()) {
-            settingsMenuConfig.helpersSlot.emptyAction?.execute(it)
+        inv.setIcon(helpersSlot, settingsMenuConfig.helpersSlot.emptyItemSlot!!.toItemStack()) {
+            settingsMenuConfig.helpersSlot.emptyItemSlot.execAction(it)
             if (plot.owner != it.uuid) {
                 it.sendLang("noOwnerOpenHelperSelectMenu")
                 return@setIcon
@@ -160,15 +159,15 @@ class IslandsSettingsMenu(
                 val skullItem = Heads.getPlayerHead(offlinePlayer.name).clone()
                 skullItem.setDisplayName(offlinePlayer.name)
 
-                inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.itemDisplay!!.toItemStack(skullItem) {
+                inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.itemSlot!!.toItemStack(skullItem) {
                     val meta = itemMeta
                     meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer.name)))
                     meta.lore(IslandsManager.replaceVarByLoreList(meta.lore()!!, plot, islandsData))
                     this.itemMeta = meta
                 }, leftClickBlock = {
-                    settingsMenuConfig.helpersSlot.action?.execute(it)
+                    settingsMenuConfig.helpersSlot.itemSlot.execAction(it)
                 }, rightClickBlock = { p ->
-                    settingsMenuConfig.helpersSlot.action?.execute(p)
+                    settingsMenuConfig.helpersSlot.itemSlot.execAction(p)
                     if (plot.owner != p.uuid) {
                         p.sendLang("noOwnerRemoveHelpers")
                         return@setIcon

@@ -75,21 +75,21 @@ object ConfigManager {
             mainMenuSect.asDefaultSlotConfig("islandSettingsSlot")
         )
         settingsMenuConfig = IslandSettingsMenuConfig(
-            mainMenuSect.asMenuSettingsConfig(),
+            settingsMenuSect.asMenuSettingsConfig(),
             settingsMenuSect.asIslandHelperSlotConfig("helpersSlot"),
             settingsMenuSect.asDefaultSlotConfig("moveCoreSlot"),
             settingsMenuSect.asDefaultSlotConfig("visibilitySlot"),
             settingsMenuSect.asDefaultSlotConfig("resetIslandSlot")
         )
         chooseMenuConfig = IslandChooseMenuConfig(
-            mainMenuSect.asMenuSettingsConfig(),
+            chooseMenuSect.asMenuSettingsConfig(),
             chooseMenuSect.asIslandPresetSlotConfig("islandListSlot"),
             chooseMenuSect.asDefaultSlotConfig("prevSlot"),
             chooseMenuSect.asDefaultSlotConfig("nextSlot"),
             chooseMenuSect.asIslandChooseBackSlotConfig("backSlot")
         )
         helperSelectMenuConfig = IslandHelperSelectMenuConfig(
-            mainMenuSect.asMenuSettingsConfig(),
+            helperSelectMenuSect.asMenuSettingsConfig(),
             helperSelectMenuSect.asDefaultSlotConfig("playerListSlot"),
             helperSelectMenuSect.asDefaultSlotConfig("prevSlot"),
             helperSelectMenuSect.asDefaultSlotConfig("nextSlot"),
@@ -101,10 +101,8 @@ object ConfigManager {
         return getConfigurationSection(key)!!.let {
             IslandHelperSlotConfig(
                 it.getIntegerList("slot"),
-                it.asItemDisplay(),
-                it.getConfigurationSection("empty")!!.asItemDisplay(),
-                ActionParser.parseAction(it, "actions", false),
-                ActionParser.parseAction(it, "empty.actions", false)
+                it.asItemSlotConfig(),
+                it.getConfigurationSection("empty")!!.asItemSlotConfig()
             )
         }
     }
@@ -113,10 +111,8 @@ object ConfigManager {
         return getConfigurationSection(key)!!.let {
             IslandChooseBackSlotConfig(
                 it.getIntegerList("slot"),
-                it.getConfigurationSection("backCity")!!.asItemDisplay(),
-                it.getConfigurationSection("backPrev")!!.asItemDisplay(),
-                ActionParser.parseAction(it, "backCity.actions", false),
-                ActionParser.parseAction(it, "backPrev.actions", false)
+                it.getConfigurationSection("backCity")!!.asItemSlotConfig(),
+                it.getConfigurationSection("backPrev")!!.asItemSlotConfig()
             )
         }
     }
@@ -125,8 +121,7 @@ object ConfigManager {
         return getConfigurationSection(key)!!.let {
             IslandPresetSlotConfig(
                 it.get("slot") as List<List<Int>>,
-                it.asItemDisplay(),
-                ActionParser.parseAction(it, "actions", false)
+                it.asItemSlotConfig()
             )
         }
     }
@@ -135,10 +130,8 @@ object ConfigManager {
         return getConfigurationSection(key)!!.let {
             InfoAndKudosSlotConfig(
                 it.getIntegerList("slot"),
-                it.getConfigurationSection("info")!!.asItemDisplay(),
-                it.getConfigurationSection("kudos")!!.asItemDisplay(),
-                ActionParser.parseAction(it, "info.actions", false),
-                ActionParser.parseAction(it, "kudos.actions", false)
+                it.getConfigurationSection("info")!!.asItemSlotConfig(),
+                it.getConfigurationSection("kudos")!!.asItemSlotConfig()
             )
         }
     }
@@ -147,10 +140,8 @@ object ConfigManager {
         return getConfigurationSection(key)!!.let {
             UpgradeAndBackIslandSlotSlotConfig(
                 it.getIntegerList("slot"),
-                it.getConfigurationSection("upgrade")!!.asItemDisplay(),
-                it.getConfigurationSection("back")!!.asItemDisplay(),
-                ActionParser.parseAction(it, "upgrade.actions", false),
-                ActionParser.parseAction(it, "back.actions", false)
+                it.getConfigurationSection("upgrade")!!.asItemSlotConfig(),
+                it.getConfigurationSection("back")!!.asItemSlotConfig()
             )
         }
     }
@@ -160,7 +151,7 @@ object ConfigManager {
         coreId = mainConfigFile.getString("coreId") ?: "itemsadder:amethyst_block"
         backLobbyAction = ActionParser.parseAction(mainConfigFile.getStringList("backLobby"))!!
         islandHelperMaxCount = mainConfigFile.getInt("islandHelperMaxCount", 6)
-        resetCooldown = mainConfigFile.getLong("resetCooldown", 1)!!
+        resetCooldown = mainConfigFile.getLong("resetCooldown", 1)
         val schematicListSection = mainConfigFile.getConfigurationSection("schematics")!!
         schematicListSection.getKeys(false).forEach { schematicKey ->
             val schematicSection = schematicListSection.getConfigurationSection(schematicKey)!!

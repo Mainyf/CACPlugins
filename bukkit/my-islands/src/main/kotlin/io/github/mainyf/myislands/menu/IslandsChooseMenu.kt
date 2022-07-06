@@ -9,7 +9,6 @@ import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.menu.ConfirmMenu
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
@@ -43,8 +42,8 @@ class IslandsChooseMenu(
     override fun updateTitle(player: Player): String {
         val chooseMenuConfig = ConfigManager.chooseMenuConfig
         val icons = mutableListOf<IaIcon>()
-        icons.addAll(chooseMenuConfig.prevSlot.itemDisplay!!.iaIcons.icons())
-        icons.addAll(chooseMenuConfig.nextSlot.itemDisplay!!.iaIcons.icons())
+        icons.addAll(chooseMenuConfig.prevSlot.itemSlot.iaIcons.icons())
+        icons.addAll(chooseMenuConfig.nextSlot.itemSlot.iaIcons.icons())
         if (hasFirst) {
             icons.addAll(chooseMenuConfig.backSlot.backCity.iaIcons.icons())
         } else {
@@ -74,14 +73,14 @@ class IslandsChooseMenu(
             slotList.forEach { slot ->
                 inv.setIcon(
                     slot,
-                    chooseMenuConfig.islandListSlot.itemDisplay!!.toItemStack {
+                    chooseMenuConfig.islandListSlot.itemSlot!!.toItemStack {
                         itemMeta = itemMeta.apply {
                             displayName(Component.text(ui.name.colored()))
                             lore(ui.lore.map { Component.text(it.colored()) })
                         }
                     }
                 ) {
-                    chooseMenuConfig.islandListSlot.action?.execute(it)
+                    chooseMenuConfig.islandListSlot.itemSlot.execAction(it)
                     val old = antiClose
                     antiClose = false
                     ConfirmMenu(
@@ -98,28 +97,28 @@ class IslandsChooseMenu(
             }
         }
 
-        inv.setIcon(chooseMenuConfig.prevSlot.slot, chooseMenuConfig.prevSlot.itemDisplay!!.toItemStack()) {
+        inv.setIcon(chooseMenuConfig.prevSlot.slot, chooseMenuConfig.prevSlot.itemSlot.toItemStack()) {
             if (pageIndex > 1) {
-                chooseMenuConfig.prevSlot.action?.execute(it)
+                chooseMenuConfig.prevSlot.itemSlot.execAction(it)
                 pageIndex--
                 updateInv(inv)
             }
         }
-        inv.setIcon(chooseMenuConfig.nextSlot.slot, chooseMenuConfig.nextSlot.itemDisplay!!.toItemStack()) {
+        inv.setIcon(chooseMenuConfig.nextSlot.slot, chooseMenuConfig.nextSlot.itemSlot.toItemStack()) {
             if (pageIndex < maxPageIndex) {
-                chooseMenuConfig.nextSlot.action?.execute(it)
+                chooseMenuConfig.nextSlot.itemSlot.execAction(it)
                 pageIndex++
                 updateInv(inv)
             }
         }
         if (hasFirst) {
             inv.setIcon(chooseMenuConfig.backSlot.slot, chooseMenuConfig.backSlot.backCity.toItemStack()) {
-                chooseMenuConfig.backSlot.backCityAction?.execute(it)
+                chooseMenuConfig.backSlot.backCity.execAction(it)
                 ConfigManager.backLobbyAction.execute(it)
             }
         } else {
             inv.setIcon(chooseMenuConfig.backSlot.slot, chooseMenuConfig.backSlot.backPrev.toItemStack()) {
-                chooseMenuConfig.backSlot.backPrevAction?.execute(it)
+                chooseMenuConfig.backSlot.backPrev.execAction(it)
                 backBlock?.invoke(it)
 //                ConfigManager.backLobbyAction.execute(it)
             }

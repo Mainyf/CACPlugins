@@ -63,11 +63,11 @@ class IslandsMainMenu : AbstractMenuHandler() {
     override fun updateTitle(player: Player): String {
         val menuConfig = ConfigManager.mainMenuConfig
         val icons = mutableListOf<IaIcon>()
-        icons.addAll(menuConfig.prevSlot.itemDisplay!!.iaIcons.icons())
-        icons.addAll(menuConfig.nextSlot.itemDisplay!!.iaIcons.icons())
-        icons.addAll(menuConfig.islandViewSlot.itemDisplay!!.iaIcons.icons())
+        icons.addAll(menuConfig.prevSlot.itemSlot.iaIcons.icons())
+        icons.addAll(menuConfig.nextSlot.itemSlot.iaIcons.icons())
+        icons.addAll(menuConfig.islandViewSlot.itemSlot.iaIcons.icons())
 
-        val switchViewIslandIcons = menuConfig.switchViewIslandSlot.itemDisplay!!.iaIcons
+        val switchViewIslandIcons = menuConfig.switchViewIslandSlot.itemSlot.iaIcons
         when (viewIslandType) {
             ALL -> icons.add(switchViewIslandIcons["all"]!!)
             FRIEND -> icons.add(switchViewIslandIcons["friend"]!!)
@@ -82,9 +82,9 @@ class IslandsMainMenu : AbstractMenuHandler() {
             icons.addAll(menuConfig.upgradeAndBackIslandSlot.back.iaIcons.icons())
         }
         if(hasPermission) {
-            icons.add(menuConfig.islandSettingsSlot.itemDisplay!!.iaIcons["permission"]!!)
+            icons.add(menuConfig.islandSettingsSlot.itemSlot.iaIcons["permission"]!!)
         } else {
-            icons.add(menuConfig.islandSettingsSlot.itemDisplay!!.iaIcons["unfamiliar"]!!)
+            icons.add(menuConfig.islandSettingsSlot.itemSlot.iaIcons["unfamiliar"]!!)
         }
         return applyTitle(player, icons)
     }
@@ -93,14 +93,14 @@ class IslandsMainMenu : AbstractMenuHandler() {
         inv.clearIcon()
         val menuConfig = ConfigManager.mainMenuConfig
         inv.setIcon(menuConfig.prevSlot) {
-            menuConfig.prevSlot.action?.execute(it)
+            menuConfig.prevSlot.itemSlot.execAction(it)
             if (pageIndex > 1) {
                 pageIndex--
                 updateInvIslandList(player, inv)
             }
         }
         inv.setIcon(menuConfig.nextSlot) {
-            menuConfig.nextSlot.action?.execute(it)
+            menuConfig.nextSlot.itemSlot.execAction(it)
             if (pageIndex < maxPageIndex) {
                 pageIndex++
                 updateInvIslandList(player, inv)
@@ -109,7 +109,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
         inv.setIcon(menuConfig.switchViewIslandSlot, {
             setDisplayName(getDisplayName().tvar("filterText", viewIslandType.text))
         }) {
-            menuConfig.switchViewIslandSlot.action?.execute(it)
+            menuConfig.switchViewIslandSlot.itemSlot.execAction(it)
             viewIslandTypeIndex++
             if (viewIslandTypeIndex > values().size - 1) {
                 viewIslandTypeIndex = 0
@@ -124,13 +124,13 @@ class IslandsMainMenu : AbstractMenuHandler() {
             inv.setIcon(iakSlot.slot, iakSlot.info.toItemStack {
                 lore(lore()?.let { IslandsManager.replaceVarByLoreList(it, plotAbs!!, islandAbs) })
             }) {
-                iakSlot.infoAction?.execute(it)
+                iakSlot.info.execAction(it)
             }
         } else {
             inv.setIcon(iakSlot.slot, iakSlot.kudos.toItemStack {
                 lore(lore()?.let { IslandsManager.replaceVarByLoreList(it, plotAbs!!, islandAbs) })
             }) {
-                iakSlot.kudosAction?.execute(it)
+                iakSlot.kudos.execAction(it)
                 if (islandAbs != null && IslandsManager.addKudoToIsland(islandAbs!!, it)) {
                     updateInv(player, inv)
                 }
@@ -139,16 +139,16 @@ class IslandsMainMenu : AbstractMenuHandler() {
         val uabSlot = menuConfig.upgradeAndBackIslandSlot
         if (hasOwner) {
             inv.setIcon(uabSlot.slot, uabSlot.upgrade.toItemStack()) {
-                uabSlot.upgradeAction?.execute(it)
+                uabSlot.upgrade.execAction(it)
             }
         } else {
             inv.setIcon(uabSlot.slot, uabSlot.back.toItemStack()) {
-                uabSlot.backAction?.execute(it)
+                uabSlot.back.execAction(it)
                 MyIslands.plotUtils.teleportHomePlot(it)
             }
         }
         inv.setIcon(menuConfig.islandSettingsSlot) {
-            menuConfig.islandSettingsSlot.action?.execute(it)
+            menuConfig.islandSettingsSlot.itemSlot.execAction(it)
             if (islandAbs != null && plotAbs != null) {
                 if (!hasPermission) {
                     it.sendLang("noIslandPermission")
@@ -196,13 +196,13 @@ class IslandsMainMenu : AbstractMenuHandler() {
                 val skullItem = Heads.getPlayerHead(offlinePlayer).clone()
                 val plot = MyIslands.plotUtils.findPlot(islandData.id.value)!!
 
-                inv.setIcon(viewListSlots.slot[i], viewListSlots.itemDisplay!!.toItemStack(skullItem) {
+                inv.setIcon(viewListSlots.slot[i], viewListSlots.itemSlot.toItemStack(skullItem) {
                     val meta = itemMeta
                     meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer)))
                     meta.lore(IslandsManager.replaceVarByLoreList(meta.lore()!!, plot, islandData))
                     this.itemMeta = meta
                 }) {
-                    viewListSlots.action?.execute(it)
+                    viewListSlots.itemSlot.execAction(it)
                     MyIslands.plotUtils.findPlot(islandData.id.value)
                         .let { plot ->
                             if (plot == null) {

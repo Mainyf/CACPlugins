@@ -6,11 +6,11 @@ import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.newmclib.config.IaIcon
-import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.exts.pagination
+import io.github.mainyf.newmclib.exts.setDisplayName
+import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.utils.Heads
-import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import kotlin.math.ceil
@@ -42,9 +42,9 @@ class IslandsHelperSelectMenu(
     override fun updateTitle(player: Player): String {
         val menuConfig = ConfigManager.helperSelectMenuConfig
         val icons = mutableListOf<IaIcon>()
-        icons.addAll(menuConfig.prevSlot.itemDisplay!!.iaIcons.icons())
-        icons.addAll(menuConfig.nextSlot.itemDisplay!!.iaIcons.icons())
-        icons.addAll(menuConfig.backSlot.itemDisplay!!.iaIcons.icons())
+        icons.addAll(menuConfig.prevSlot.itemSlot.iaIcons.icons())
+        icons.addAll(menuConfig.nextSlot.itemSlot.iaIcons.icons())
+        icons.addAll(menuConfig.backSlot.itemSlot.iaIcons.icons())
 
         return applyTitle(player, icons)
     }
@@ -53,14 +53,14 @@ class IslandsHelperSelectMenu(
         val menuConfig = ConfigManager.helperSelectMenuConfig
 
         inv.setIcon(menuConfig.prevSlot) {
-            menuConfig.prevSlot.action?.execute(it)
+            menuConfig.prevSlot.itemSlot.execAction(it)
             if (pageIndex > 1) {
                 pageIndex--
                 updatePlayerList(player, inv)
             }
         }
         inv.setIcon(menuConfig.nextSlot) {
-            menuConfig.nextSlot.action?.execute(it)
+            menuConfig.nextSlot.itemSlot.execAction(it)
             if (pageIndex < maxPageIndex) {
                 pageIndex++
                 updatePlayerList(player, inv)
@@ -68,7 +68,7 @@ class IslandsHelperSelectMenu(
         }
 
         inv.setIcon(menuConfig.backSlot) {
-            menuConfig.backSlot.action?.execute(it)
+            menuConfig.backSlot.itemSlot.execAction(it)
             IslandsSettingsMenu(island, plot).open(it)
         }
         updatePlayerList(player, inv)
@@ -91,7 +91,7 @@ class IslandsHelperSelectMenu(
             val pName = p.name
             val uuid = p.uuid
             inv.setIcon(slot, skullItem) {
-                menuConfig.playerListSlot.action?.execute(it)
+                menuConfig.playerListSlot.itemSlot.execAction(it)
                 IslandsManager.addHelpers(plot, player, island, uuid)
                 it.sendLang("addIslandHelperSuccess", mapOf("{player}" to pName))
                 p.sendLang("beAddIslandHelperSuccess", mapOf("{player}" to it.name))
