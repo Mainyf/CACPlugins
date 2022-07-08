@@ -35,6 +35,7 @@ class BungeeSettingsBukkit : JavaPlugin() {
             withAliases("glDis", "bcd")
             onlyOP()
             "stp" {
+                withHelp("/bcd stp", "/bcd bcd <玩家名>")
                 withArguments(
                     playerArguments("玩家名"),
                     stringArguments("服务器名", "请输入服务器名"),

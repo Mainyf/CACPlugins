@@ -20,17 +20,34 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.ceil
 
 class IslandsSettingsMenu(
     val island: PlayerIsland,
     val plot: Plot
 ) : AbstractMenuHandler() {
 
-    private val helpers = mutableListOf<UUID>()
+    var pageIndex = 1
+    var maxPageIndex = 0
+
+    private var curHelpers = 0
+
+    private val helpers = mutableListOf<UUID?>()
+
+    private var currentEmptySlot = 0
+
+    private val currentHelpers = mutableListOf<UUID?>()
+
+    private var maxHelpers = 0
+
+    private var pageSize = 0
 
     override fun open(player: Player) {
         setup(ConfigManager.settingsMenuConfig.settings)
+        this.maxHelpers = IslandsManager.getPlayerMaxHelperCount(player)
+        this.pageSize = ConfigManager.settingsMenuConfig.helpersSlot.slot.size
         updateHelpers()
+        updateHelperList()
         val inv = createInv(player)
 
         updateInv(player, inv)
@@ -41,6 +58,22 @@ class IslandsSettingsMenu(
     private fun updateHelpers() {
         this.helpers.clear()
         this.helpers.addAll(IslandsManager.getIslandHelpers(island.id.value))
+        this.curHelpers = this.helpers.size
+        if (this.helpers.size < maxHelpers) {
+            repeat(maxHelpers - this.helpers.size) {
+                this.helpers.add(null)
+            }
+        }
+        this.maxPageIndex = ceil(
+            maxHelpers.toDouble() / pageSize.toDouble()
+        ).toInt()
+    }
+
+    private fun updateHelperList() {
+        this.currentEmptySlot =
+            if (pageIndex != maxPageIndex) pageSize else pageSize - ((pageIndex * pageSize) % maxHelpers)
+        currentHelpers.clear()
+        currentHelpers.addAll(helpers.pagination(pageIndex, ConfigManager.settingsMenuConfig.helpersSlot.slot.size))
     }
 
     override fun updateTitle(player: Player): String {
@@ -54,7 +87,8 @@ class IslandsSettingsMenu(
         }
         icons.addAll(menuConfig.resetIslandSlot.itemSlot.iaIcons.icons())
 
-        repeat(7) {
+
+        repeat(currentEmptySlot) {
             icons.add(menuConfig.helpersSlot.emptyItemSlot!!.iaIcons["v${it + 1}"]!!)
         }
 
@@ -63,6 +97,23 @@ class IslandsSettingsMenu(
 
     private fun updateInv(player: Player, inv: Inventory) {
         val settingsMenuConfig = ConfigManager.settingsMenuConfig
+
+        inv.setIcon(settingsMenuConfig.prevSlot) {
+            settingsMenuConfig.prevSlot.itemSlot.execAction(it)
+            if (pageIndex > 1) {
+                pageIndex--
+                updateHelperList()
+                updateHelperInv(player, inv)
+            }
+        }
+        inv.setIcon(settingsMenuConfig.nextSlot) {
+            settingsMenuConfig.nextSlot.itemSlot.execAction(it)
+            if (pageIndex < maxPageIndex) {
+                pageIndex++
+                updateHelperList()
+                updateHelperInv(player, inv)
+            }
+        }
 
         val moveCoreSlot = settingsMenuConfig.moveCoreSlot
         inv.setIcon(moveCoreSlot.slot, moveCoreSlot.itemSlot.toItemStack()) {
@@ -110,7 +161,7 @@ class IslandsSettingsMenu(
                     val pPlot = MyIslands.plotUtils.getPlotByPLoc(it) ?: return@forEach
                     if (pPlot == plot) {
                         MyIslands.plotUtils.teleportHomePlot(it)
-                        it.sendLang("resetIslandBackTourist", mapOf("{player}" to player.name))
+                        it.sendLang("resetIslandBackTourist", "{player}", player.name)
                     }
                 }
 
@@ -125,31 +176,47 @@ class IslandsSettingsMenu(
                 IslandsSettingsMenu(this.island, this.plot).open(it)
             }).open(p)
         }
-        updateHelper(player, inv)
+        updateHelperInv(player, inv)
     }
 
-    private fun updateHelper(player: Player, inv: Inventory) {
+    private fun updateHelperInv(player: Player, inv: Inventory) {
         val settingsMenuConfig = ConfigManager.settingsMenuConfig
 
         val helpersSlot = settingsMenuConfig.helpersSlot.slot
-        inv.setIcon(helpersSlot, settingsMenuConfig.helpersSlot.emptyItemSlot!!.toItemStack()) {
-            settingsMenuConfig.helpersSlot.emptyItemSlot.execAction(it)
-            if (plot.owner != it.uuid) {
-                it.sendLang("noOwnerOpenHelperSelectMenu")
-                return@setIcon
+        inv.unSetIcon(helpersSlot)
+        repeat(currentEmptySlot) { i ->
+            inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.emptyItemSlot!!.toItemStack().apply {
+                val meta = itemMeta
+                meta.lore(meta.lore()?.map {
+                    it.tvar(
+                        "curHelpers", curHelpers.toString(),
+                        "maxHelpers", maxHelpers.toString()
+                    )
+                })
+//            Component.text("asdsad").replaceText()
+                this.itemMeta = meta
+            }) {
+                settingsMenuConfig.helpersSlot.emptyItemSlot.execAction(it)
+                if (plot.owner != it.uuid) {
+                    it.sendLang("noOwnerOpenHelperSelectMenu")
+                    return@setIcon
+                }
+                val players = onlinePlayers().filter { p ->
+                    p.uuid != plot.owner && !helpers.contains(p.uuid) && p.asPlotPlayer()?.location?.plotAbs?.owner == plot.owner
+                }
+                if (players.isEmpty()) {
+                    it.sendLang("islandPlayerAbsEmpty")
+                    return@setIcon
+                }
+                IslandsHelperSelectMenu(this.island, this.plot, players).open(it)
             }
-            val players = onlinePlayers().filter { p ->
-                p.uuid != plot.owner && !helpers.contains(p.uuid) && p.asPlotPlayer()?.location?.plotAbs?.owner == plot.owner
-            }
-            if (players.isEmpty()) {
-                it.sendLang("islandPlayerAbsEmpty")
-                return@setIcon
-            }
-            IslandsHelperSelectMenu(this.island, this.plot, players).open(it)
         }
 
-        for (i in helpers.indices) {
-            val helper = helpers[i]
+        for (i in currentHelpers.indices) {
+            val helper = currentHelpers[i]
+            if (helper == null) {
+                break
+            }
             if (i >= helpersSlot.size) {
                 break
             }
@@ -178,11 +245,11 @@ class IslandsSettingsMenu(
                                 IslandsManager.removeHelpers(plot, p, island, helper)
                                 player.sendLang(
                                     "removeIslandHelperSuccess",
-                                    mapOf("{player}" to (helper.asOfflineData()?.name ?: "无"))
+                                    "{player}", (helper.asOfflineData()?.name ?: "无")
                                 )
                                 helper.asPlayer()?.sendLang(
                                     "beRemoveIslandHelperSuccess",
-                                    mapOf("{player}" to player.name)
+                                    "{player}", player.name
                                 )
                                 IslandsSettingsMenu(island, plot).open(p)
                             }.onFailure {

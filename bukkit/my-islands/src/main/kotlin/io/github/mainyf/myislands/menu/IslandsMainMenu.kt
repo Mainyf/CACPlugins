@@ -81,7 +81,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
             icons.addAll(menuConfig.infoAndKudosSlot.kudos.iaIcons.icons())
             icons.addAll(menuConfig.upgradeAndBackIslandSlot.back.iaIcons.icons())
         }
-        if(hasPermission) {
+        if (hasPermission) {
             icons.add(menuConfig.islandSettingsSlot.itemSlot.iaIcons["permission"]!!)
         } else {
             icons.add(menuConfig.islandSettingsSlot.itemSlot.iaIcons["unfamiliar"]!!)
@@ -107,7 +107,9 @@ class IslandsMainMenu : AbstractMenuHandler() {
             }
         }
         inv.setIcon(menuConfig.switchViewIslandSlot, {
-            setDisplayName(getDisplayName().tvar("filterText", viewIslandType.text))
+            setDisplayName {
+                it?.tvar("filterText", viewIslandType.text)
+            }
         }) {
             menuConfig.switchViewIslandSlot.itemSlot.execAction(it)
             viewIslandTypeIndex++
@@ -211,7 +213,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
                                 return@let
                             }
                             plot.getHome { loc ->
-                                it.teleport(BukkitUtil.adapt(loc))
+                                it.teleport(BukkitUtil.adapt(loc).add(0.5, 0.0, 0.5))
                             }
                         }
                 }

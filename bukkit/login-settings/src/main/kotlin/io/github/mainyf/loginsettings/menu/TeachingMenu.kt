@@ -3,12 +3,8 @@ package io.github.mainyf.loginsettings.menu
 import io.github.mainyf.loginsettings.LoginSettings
 import io.github.mainyf.loginsettings.config.ConfigManager
 import io.github.mainyf.newmclib.config.IaIcon
-import io.github.mainyf.newmclib.exts.colored
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
-import io.github.mainyf.newmclib.exts.setOpenInventoryTitle
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
-import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
@@ -23,7 +19,7 @@ class TeachingMenu : AbstractMenuHandler() {
     private var slotB = 0
 
     override fun open(player: Player) {
-        this.cooldownTime = ConfigManager.teachingMenuConfig.cooldown
+        setup(ConfigManager.teachingMenuConfig.settings)
         val slotAList = ConfigManager.teachingMenuConfig.slotA.slot
         slotAIndex = Random.nextInt(slotAList.size)
         slotA = slotAList.elementAt(slotAIndex)
@@ -34,11 +30,7 @@ class TeachingMenu : AbstractMenuHandler() {
         }
         slotB = slotBList.random()
 
-        val inv = Bukkit.createInventory(
-            createHolder(player),
-            ConfigManager.teachingMenuConfig.row * 9,
-            Component.text(updateTitle(player).colored())
-        )
+        val inv = createInv(player)
 
         updateInv(inv)
 
@@ -49,23 +41,21 @@ class TeachingMenu : AbstractMenuHandler() {
         val teachingMenuConfig = ConfigManager.teachingMenuConfig
         val icons = mutableListOf<IaIcon>()
         icons.add(teachingMenuConfig.slotA.iaIcons[slotAIndex])
-        icons.addAll(teachingMenuConfig.slotB.itemDisplay!!.iaIcons.icons())
-        val title = "${teachingMenuConfig.background} ${icons.sortedBy { it.priority }.joinToString(" ") { it.value }}"
-        player.setOpenInventoryTitle(title)
-        return title
+        icons.addAll(teachingMenuConfig.slotB.itemSlot.iaIcons.icons())
+        return applyTitle(player, icons)
     }
 
     private fun updateInv(inv: Inventory) {
         val teachingMenuConfig = ConfigManager.teachingMenuConfig
         val slotAConfig = teachingMenuConfig.slotA
-        inv.setRightIcon(slotA, slotAConfig.itemDisplay!!.toItemStack()) {
+        inv.setRightIcon(slotA, slotAConfig.itemSlot.toItemStack()) {
             ok = true
-            slotAConfig.action?.execute(it)
+            slotAConfig.itemSlot.execAction(it)
         }
         val slotBConfig = teachingMenuConfig.slotB
-        inv.setIcon(slotB, slotBConfig.itemDisplay!!.toItemStack()) {
+        inv.setIcon(slotB, slotBConfig.itemSlot.toItemStack()) {
             ok = true
-            slotBConfig.action?.execute(it)
+            slotBConfig.itemSlot.execAction(it)
         }
     }
 

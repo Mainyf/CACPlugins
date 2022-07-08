@@ -18,6 +18,8 @@ class IslandMainMenuConfig(
 class IslandSettingsMenuConfig(
     val settings: MenuSettingsConfig,
     val helpersSlot: IslandHelperSlotConfig,
+    val prevSlot: DefaultSlotConfig,
+    val nextSlot: DefaultSlotConfig,
     val moveCoreSlot: DefaultSlotConfig,
     val visibilitySlot: DefaultSlotConfig,
     val resetIslandSlot: DefaultSlotConfig

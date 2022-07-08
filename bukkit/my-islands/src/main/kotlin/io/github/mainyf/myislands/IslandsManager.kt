@@ -34,6 +34,23 @@ object IslandsManager {
 
     private val joinPlayers = mutableMapOf<UUID, Plot>()
 
+    private val helperPermissions = listOf(
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80,
+        90,
+        100
+    )
+
+    fun getPlayerMaxHelperCount(player: Player): Int {
+        return helperPermissions.reversed().find { player.hasPermission("myislands.helpers.${it}") } ?: 10
+    }
+
     fun removeHelpers(plot: Plot, player: Player, island: PlayerIsland, helperUUID: UUID) {
         StorageManager.transaction {
             if (!island.helpers.toList().any { it.helperUUID == helperUUID }) {
@@ -46,11 +63,11 @@ object IslandsManager {
 
     fun addHelpers(plot: Plot, player: Player, island: PlayerIsland, helperUUID: UUID) {
         StorageManager.transaction {
-            if (island.helpers.toList().size >= 6) {
+            if (island.helpers.toList().size >= getPlayerMaxHelperCount(player)) {
                 throw IslandException("${player.name} 尝试添加授权者，但授权者已满")
             }
             if (island.helpers.any { it.helperUUID == helperUUID }) {
-                player.sendLang("repeatAddPermission", mapOf("{player}" to (helperUUID.asOfflineData()?.name ?: "无")))
+                player.sendLang("repeatAddPermission", "{player}", (helperUUID.asOfflineData()?.name ?: "无"))
 //                    player.msg("已经添加此授权者")
                 return@transaction
             }
@@ -306,19 +323,15 @@ object IslandsManager {
         islandData: PlayerIsland?
     ): List<Component> {
         return lore.map { comp ->
-            Component.text(
-                comp.text()
-                    .tvar("owner", plot.owner?.asOfflineData()?.name ?: "无")
-                    .tvar(
-                        "helpers",
-                        getIslandHelpers(islandData).let { list ->
-                            if (list.isEmpty()) "无" else list.joinToString(",") {
-                                it.asOfflineData()?.name ?: "无"
-                            }
-                        }
-                    )
-                    .tvar("kudos", "${islandData?.kudos ?: "无"}")
-                    .tvar("heats", "${islandData?.heats ?: "无"}")
+            comp.tvar(
+                "owner", plot.owner?.asOfflineData()?.name ?: "无",
+                "helpers", getIslandHelpers(islandData).let { list ->
+                    if (list.isEmpty()) "无" else list.joinToString(",") {
+                        it.asOfflineData()?.name ?: "无"
+                    }
+                },
+                "kudos", "${islandData?.kudos ?: "无"}",
+                "heats", "${islandData?.heats ?: "无"}"
             )
         }
     }

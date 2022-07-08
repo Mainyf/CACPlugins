@@ -93,8 +93,8 @@ class IslandsHelperSelectMenu(
             inv.setIcon(slot, skullItem) {
                 menuConfig.playerListSlot.itemSlot.execAction(it)
                 IslandsManager.addHelpers(plot, player, island, uuid)
-                it.sendLang("addIslandHelperSuccess", mapOf("{player}" to pName))
-                p.sendLang("beAddIslandHelperSuccess", mapOf("{player}" to it.name))
+                it.sendLang("addIslandHelperSuccess", "{player}", pName)
+                p.sendLang("beAddIslandHelperSuccess", "{player}", it.name)
                 IslandsSettingsMenu(island, plot).open(it)
             }
         }

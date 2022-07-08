@@ -119,6 +119,22 @@ settingsMenu:
       actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3添加授权"
+      lore:
+        - "当前: {curHelpers}/{maxHelpers}"
+  # 上一页
+  prevSlot:
+    slot: [ 0 ]
+    iaIcons: ''
+    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+    type: itemsadder:air
+    name: " &c&l> &3上一页"
+  # 下一页
+  nextSlot:
+    slot: [ 8 ]
+    iaIcons: ''
+    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+    type: itemsadder:air
+    name: " &c&l> &3下一页"
   # 移动核心
   moveCoreSlot:
     iaIcons: ''

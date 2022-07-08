@@ -5,10 +5,17 @@ package io.github.mainyf.myislands.config
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.newmclib.config.*
 import io.github.mainyf.newmclib.config.action.MultiAction
+import org.bukkit.command.CommandSender
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.util.Vector
+
+fun CommandSender.sendLang(key: String, vararg data: Any) {
+    ConfigManager.lang.apply {
+        sendLang(key, *data)
+    }
+}
 
 object ConfigManager {
 
@@ -22,7 +29,7 @@ object ConfigManager {
     lateinit var coreId: String
     lateinit var backLobbyAction: MultiAction
     val schematicMap = mutableMapOf<String, PlotSchematicConfig>()
-    var islandHelperMaxCount = 6
+//    var islandHelperMaxCount = 6
 
     var resetCooldown = 1L
 
@@ -32,6 +39,8 @@ object ConfigManager {
     lateinit var helperSelectMenuConfig: IslandHelperSelectMenuConfig
 
     var moveCoreAction: MultiAction? = null
+
+    lateinit var lang: BaseLang
 
     fun load() {
         MyIslands.INSTANCE.saveDefaultConfig()
@@ -49,10 +58,11 @@ object ConfigManager {
             mainConfigFile = MyIslands.INSTANCE.config
             menuConfigFile = YamlConfiguration.loadConfiguration(menuFile)
             langConfigFile = YamlConfiguration.loadConfiguration(langFile)
+            lang = BaseLang()
 
             loadMenuConfig()
             loadMainConfig()
-            Lang.load(langConfigFile)
+            lang.load(langConfigFile)
         }.onFailure {
             MyIslands.LOGGER.info("加载配置时出现错误")
             it.printStackTrace()
@@ -77,6 +87,8 @@ object ConfigManager {
         settingsMenuConfig = IslandSettingsMenuConfig(
             settingsMenuSect.asMenuSettingsConfig(),
             settingsMenuSect.asIslandHelperSlotConfig("helpersSlot"),
+            settingsMenuSect.asDefaultSlotConfig("prevSlot"),
+            settingsMenuSect.asDefaultSlotConfig("nextSlot"),
             settingsMenuSect.asDefaultSlotConfig("moveCoreSlot"),
             settingsMenuSect.asDefaultSlotConfig("visibilitySlot"),
             settingsMenuSect.asDefaultSlotConfig("resetIslandSlot")
@@ -150,7 +162,7 @@ object ConfigManager {
         debug = mainConfigFile.getBoolean("debug", false)
         coreId = mainConfigFile.getString("coreId") ?: "itemsadder:amethyst_block"
         backLobbyAction = ActionParser.parseAction(mainConfigFile.getStringList("backLobby"))!!
-        islandHelperMaxCount = mainConfigFile.getInt("islandHelperMaxCount", 6)
+//        islandHelperMaxCount = mainConfigFile.getInt("islandHelperMaxCount", 6)
         resetCooldown = mainConfigFile.getLong("resetCooldown", 1)
         val schematicListSection = mainConfigFile.getConfigurationSection("schematics")!!
         schematicListSection.getKeys(false).forEach { schematicKey ->

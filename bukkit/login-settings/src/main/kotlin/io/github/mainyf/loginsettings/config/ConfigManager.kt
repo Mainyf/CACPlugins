@@ -57,9 +57,7 @@ object ConfigManager {
         )
         val teachingMenuSect = mainConfigFile.getConfigurationSection("teachingMenu")!!
         teachingMenuConfig = TeachingMenuConfig(
-            teachingMenuSect.getLong("cooldown"),
-            teachingMenuSect.getInt("row"),
-            teachingMenuSect.getString("background")!!,
+            teachingMenuSect.asMenuSettingsConfig(),
             teachingMenuSect.asTeachSlotAConfig("slotA"),
             teachingMenuSect.asTeachSlotConfig("slotB"),
         )
@@ -70,8 +68,7 @@ object ConfigManager {
             TeachSlotAConfig(
                 it.getIntegerList("slot"),
                 it.getStringList("iaIcons").mapNotNull { ii -> ii.asIaIcon() },
-                it.asItemDisplay(),
-                ActionParser.parseAction(it, "actions", false)
+                it.asItemSlotConfig()
             )
         }
     }
@@ -82,8 +79,7 @@ object ConfigManager {
             TeachSlotConfig(
                 slot[0].toInt(),
                 slot[1].toInt(),
-                it.asItemDisplay(),
-                ActionParser.parseAction(it, "actions", false)
+                it.asItemSlotConfig()
             )
         }
     }
@@ -115,9 +111,7 @@ object ConfigManager {
     )
 
     class TeachingMenuConfig(
-        val cooldown: Long,
-        val row: Int,
-        val background: String,
+        val settings: MenuSettingsConfig,
         val slotA: TeachSlotAConfig,
         val slotB: TeachSlotConfig,
     )
@@ -125,15 +119,13 @@ object ConfigManager {
     class TeachSlotAConfig(
         val slot: List<Int>,
         val iaIcons: List<IaIcon>,
-        val itemDisplay: ItemDisplayConfig?,
-        val action: MultiAction?
+        val itemSlot: ItemSlotConfig
     )
 
     class TeachSlotConfig(
         val slotMin: Int,
         val slotMax: Int,
-        val itemDisplay: ItemDisplayConfig?,
-        val action: MultiAction?
+        val itemSlot: ItemSlotConfig
     )
 
 }
