@@ -29,7 +29,7 @@ object PlayerListeners : Listener {
                     val plot = MyIslands.plotUtils.getPlotByPLoc(damager)
                     if (plot != null && plot.owner == damager.uuid) {
                         MoveIslandCore.playerCoreRemove.remove(damager.uuid)
-                        return
+//                        return
                     }
                 }
 
