@@ -79,22 +79,22 @@ subprojects {
 //            compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
             compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
             implementation("io.github.mainyf:newmclib-craftbukkit:1.7.3:")
-            compileOnly(rootProject.files("./server/bukkit/plugins/ProtocolLib.jar"))
-            compileOnly(rootProject.files("./server/bukkit/plugins/CommandAPI-8.4.1.jar"))
+            compileOnly(rootProject.files("./plugins/ProtocolLib.jar"))
+            compileOnly(rootProject.files("./plugins/CommandAPI-8.4.1.jar"))
 
             when (project.name) {
                 "item-skills-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
-                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0c-beta6.jar"))
-                    compileOnly(rootProject.files("./server/bukkit/plugins/PlaceholderAPI-2.11.1.jar"))
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
+                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
                 }
                 "my-islands" -> {
 //                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
 
-                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0c-beta6.jar"))
-                    compileOnly(rootProject.files("./server/bukkit/plugins/PlotSquared-Bukkit-6.9.1-Premium.jar"))
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
+                    compileOnly(rootProject.files("./plugins/PlotSquared-Bukkit-6.9.1-Premium.jar"))
 //                    compileOnly(rootProject.files("./libs/PlotSquared-Bukkit-6.6.2-Premium.jar"))
-                    compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.2.1.0.jar"))
+                    compileOnly(rootProject.files("./plugins/CMI9.2.1.0.jar"))
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
                     compileOnly(rootProject.files("./libs/datafixerupper-4.1.27.jar"))
                     compileOnly(rootProject.files("./libs/SkinsRestorer.jar"))
@@ -103,8 +103,8 @@ subprojects {
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
                 }
                 "bungee-settings-bukkit" -> {
-                    compileOnly(rootProject.files("./server/bukkit/plugins/CMI9.2.1.0.jar"))
-                    compileOnly(rootProject.files("./server/bukkit/plugins/PlaceholderAPI-2.11.1.jar"))
+                    compileOnly(rootProject.files("./plugins/CMI9.2.1.0.jar"))
+                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
                 }
                 "player-account" -> {
                     embed("com.aliyun:alibabacloud-dysmsapi20170525:1.0.1")
@@ -114,11 +114,15 @@ subprojects {
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
                 }
                 "command-settings" -> {
-                    compileOnly(rootProject.files("./server/bukkit/plugins/ItemsAdder_3.2.0c-beta6.jar"))
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
                 }
                 "mcrmb-migration" -> {
-//                    compileOnly(rootProject.files("./server/bukkit/plugins/MCRMB-2.0b19-12fe19a.jar"))
-                    compileOnly(rootProject.files("./server/bukkit/plugins/PlayerPoints-3.2.4.jar"))
+//                    compileOnly(rootProject.files("./plugins/MCRMB-2.0b19-12fe19a.jar"))
+                    compileOnly(rootProject.files("./plugins/PlayerPoints-3.2.4.jar"))
+                }
+                "shop-manager" -> {
+                    compileOnly(rootProject.files("./libs/QuickShop.jar"))
+                    compileOnly(rootProject.files("./libs/Vault.jar"))
                 }
             }
         }
@@ -182,6 +186,9 @@ subprojects {
                 "login-settings" -> {
                     dd.addAll(listOf("AuthMe"))
                 }
+                "shop-manager" -> {
+                    dd.addAll(listOf("QuickShop", "Vault"))
+                }
             }
             dd.add("NewMCLib")
             depend = dd
@@ -202,6 +209,7 @@ subprojects {
                         """
 package ${packageName.replace("/", ".")}
 
+import org.apache.logging.log4j.LogManager
 import org.bukkit.plugin.java.JavaPlugin
 
 class $pluginName : JavaPlugin() {
@@ -240,9 +248,28 @@ class $pluginName : JavaPlugin() {
             mainClass.set("io.papermc.paperclip.Paperclip")
             val jvmArgsText = "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
 //            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
-            jvmArgs = jvmArgsText.split(" ")
+            jvmArgs = jvmArgsText.split(" ").toMutableList().apply {
+                add("-Drebel.plugins=${rootProject.file("./bukkit-rebel-plugin.jar").absolutePath}")
+                add("-Drebel.bukkit=true")
+            }
             args = listOf("nogui")
             workingDir = rootProject.file("./server/bukkit")
+            standardOutput = System.out
+            standardInput = System.`in`
+            errorOutput = System.err
+            group = "bukkit"
+            description = "runs the bukkit server"
+        }
+
+        tasks.register<JavaExec>("runTestServer") {
+            dependsOn(tasks.findByName("copyPlugin"))
+            classpath = rootProject.files("./server/test/paper-1.19-41.jar")
+            mainClass.set("io.papermc.paperclip.Paperclip")
+            val jvmArgsText = "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
+//            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
+            jvmArgs = jvmArgsText.split(" ")
+            args = listOf("nogui")
+            workingDir = rootProject.file("./server/test")
             standardOutput = System.out
             standardInput = System.`in`
             errorOutput = System.err

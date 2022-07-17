@@ -22,21 +22,20 @@ mainMenu:
   islandViewSlot:
     slot: [ 1,2,3,4,5,6,7,10,11,12,13,14,15,16,19,20,21,22,23,24,25 ]
     type: itemsadder:air
-    name: " &c&l> &3{player}"
+    name: " &c&l> &3参观岛屿"
     lore:
       - ""
-      - "  &7▪ 拥有者：&f{owner}"
-      - "  &7▪ 授权者：&f{helpers}"
+      - " &7▪ 拥有者：&f{owner}"
+      - " &7▪ 热度：&f{heats}"
       - ""
-      - "  &7▪ 热度：&f{heats}"
-      - "  &7▪ 点赞：&f{kudos}"
   # 切换岛屿展示列表
   switchViewIslandSlot:
     slot: [ 31 ]
     iaIcons:
       all: '0:offset_-102::view_plot_listype_0:'
-      friend: '0:offset_-102::view_plot_listype_1:'
-      permission: '0:offset_-102::view_plot_listype_2:'
+      online: '0:offset_-102::view_plot_listype_1:'
+      friend: '0:offset_-102::view_plot_listype_2:'
+      permission: '0:offset_-102::view_plot_listype_3:'
     actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
     type: itemsadder:air
     name: " &c&l> &3切换列表展示 &7（当前: 展示&f{filterText}&7）"
@@ -50,11 +49,10 @@ mainMenu:
       name: " &c&l> &3岛屿信息"
       lore:
         - ""
-        - "  &7▪ 拥有者：&f{owner}"
-        - "  &7▪ 授权者：&f{helpers}"
+        - " &7▪ 拥有者：&f{owner}"
+        - " &7▪ 热度：&f{heats}"
+        - " &7▪ 点赞：&f{kudos}"
         - ""
-        - "  &7▪ 热度：&f{heats}"
-        - "  &7▪ 点赞：&f{kudos}"
     kudos:
       iaIcons: '1:offset_-77::view_plot_info_1:'
       actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
@@ -62,21 +60,19 @@ mainMenu:
       name: " &c&l> &3岛屿点赞"
       lore:
         - ""
-        - "  &7▪ 拥有者：&f{owner}"
-        - "  &7▪ 授权者：&f{helpers}"
+        - " &7▪ 拥有者：&f{owner}"
+        - " &7▪ 热度：&f{heats}"
         - ""
-        - "  &7▪ 热度：&f{heats}"
-        - "  &7▪ 点赞：&f{kudos}"
   # 岛屿升级与返回岛屿
   upgradeAndBackIslandSlot:
     slot: [ 48,49,50 ]
     upgrade:
-      iaIcons: '2:offset_16::view_plot_home_0:'
+      iaIcons: '2:offset_13::view_plot_home_0:'
       actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3岛屿升级 &c未开放"
     back:
-      iaIcons: '2:offset_16::view_plot_home_1:'
+      iaIcons: '2:offset_13::view_plot_home_1:'
       actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3返回自己岛屿"
@@ -84,8 +80,8 @@ mainMenu:
   islandSettingsSlot:
     slot: [ 52 ]
     iaIcons:
-      permission: '3:offset_17::view_plot_set_0:'
-      unfamiliar: '3:offset_17::view_plot_set_1:'
+      permission: '3:offset_13:'
+      unfamiliar: '3:offset_13:'
     actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
     type: itemsadder:air
     name: " &c&l> &3岛屿设置"
@@ -98,14 +94,7 @@ settingsMenu:
   helpersSlot:
     actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
     slot: [ 1,2,3,4,5,6,7 ]
-    name: " &c&l> &3{player}"
-    lore:
-      - ""
-      - "  &7▪ 拥有者：&f{owner}"
-      - "  &7▪ 授权者：&f{helpers}"
-      - ""
-      - "  &7▪ 热度：&f{heats}"
-      - "  &7▪ 点赞：&f{kudos}"
+    name: " &c&l> &3收回 {player} 的授权"
     # 没有授权者的位置
     empty:
       iaIcons:
@@ -118,9 +107,7 @@ settingsMenu:
         v7: '1:offset_-5::view_plot_set_add:'
       actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
-      name: " &c&l> &3添加授权"
-      lore:
-        - "当前: {curHelpers}/{maxHelpers}"
+      name: " &c&l> &3添加授权 &7（已授权: &f{curHelpers}&7/&f{maxHelpers}&7位）"
   # 上一页
   prevSlot:
     slot: [ 0 ]
@@ -161,7 +148,7 @@ settingsMenu:
     name: " &c&l> &3重置岛屿"
     lore:
       - ""
-      - "  &7▪ 重置后岛屿所有东西都将不复存在"
+      - " &7▪ 重置后岛屿所有东西都将不复存在"
       - ""
 chooseMenu:
   # 点击速度限制

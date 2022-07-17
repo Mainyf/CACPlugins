@@ -2,7 +2,6 @@ debug: false
 # 重置岛屿冷却时间，单位为天
 resetCooldown: 1
 coreId: "plot:plot_main"
-islandHelperMaxCount: 7
 backLobby:
   - "console: cmi server spawn {player}"
 schematics:

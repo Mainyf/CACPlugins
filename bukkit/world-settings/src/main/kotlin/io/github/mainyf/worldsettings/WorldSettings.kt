@@ -8,6 +8,8 @@ import dev.jorel.commandapi.CommandAPI
 import io.github.mainyf.newmclib.exts.registerCommand
 import io.github.mainyf.newmclib.exts.runTaskTimerBR
 import io.github.mainyf.newmclib.exts.submitTask
+import io.github.mainyf.newmclib.hooks.registerPacketListener
+import io.github.mainyf.newmclib.protocolManager
 import io.github.mainyf.worldsettings.config.ConfigManager
 import io.github.mainyf.worldsettings.config.WorldSettingConfig
 import io.github.mainyf.worldsettings.listeners.BlockListener
@@ -29,9 +31,7 @@ class WorldSettings : JavaPlugin() {
 
     override fun onEnable() {
         INSTANCE = this
-        saveDefaultConfig()
-        reloadConfig()
-        ConfigManager.load(config)
+        ConfigManager.load()
         PlayerDropItemStorage.init(this)
 //        server.pluginManager.getPlugin("AuthMe")
         CommandHandler.init()
@@ -90,7 +90,19 @@ class WorldSettings : JavaPlugin() {
             }
 
         }
-        ProtocolLibrary.getProtocolManager().addPacketListener(packetListener)
+        protocolManager().addPacketListener(packetListener)
+        protocolManager().addPacketListener(object : PacketAdapter(this, PacketType.Play.Server.ENTITY_SOUND) {
+
+            override fun onPacketSending(event: PacketEvent) {
+                val player = event.player
+                val settings = ConfigManager.getSetting(player.world) ?: return
+                val soundName = event.packet.soundEffects.read(0).name
+                if (settings.antiGoatHornSound && soundName.startsWith("ITEM_GOAT_HORN_SOUND_")) {
+                    event.isCancelled = true
+                }
+            }
+
+        })
     }
 
     override fun onDisable() {

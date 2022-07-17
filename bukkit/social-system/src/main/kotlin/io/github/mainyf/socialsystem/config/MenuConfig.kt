@@ -4,7 +4,7 @@ import io.github.mainyf.newmclib.config.DefaultSlotConfig
 import io.github.mainyf.newmclib.config.ItemSlotConfig
 import io.github.mainyf.newmclib.config.MenuSettingsConfig
 
-class SocialCardMenu(
+class SocialCardMenuConfig(
     val settings: MenuSettingsConfig,
     val requestSlot: DefaultSlotConfig,
     val repairSlot: DefaultSlotConfig,
@@ -13,7 +13,11 @@ class SocialCardMenu(
     val cardX2Slot: DefaultSlotConfig,
     val cardX3Slot: DefaultSlotConfig,
     val cardX4Slot: DefaultSlotConfig,
-    val onlineSlot: DefaultSlotConfig
+    val onlineSlot: SocialOnlineSlot,
+    val helmetSlot: DefaultSlotConfig,
+    val chestplateSlot: DefaultSlotConfig,
+    val leggingsSlot: DefaultSlotConfig,
+    val bootsSlot: DefaultSlotConfig
 )
 
 class SocialOnlineSlot(

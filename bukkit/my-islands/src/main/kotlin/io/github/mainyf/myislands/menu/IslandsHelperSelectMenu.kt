@@ -10,6 +10,7 @@ import io.github.mainyf.newmclib.exts.pagination
 import io.github.mainyf.newmclib.exts.setDisplayName
 import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
+import io.github.mainyf.newmclib.menu.ConfirmMenu
 import io.github.mainyf.newmclib.utils.Heads
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
@@ -92,10 +93,26 @@ class IslandsHelperSelectMenu(
             val uuid = p.uuid
             inv.setIcon(slot, skullItem) {
                 menuConfig.playerListSlot.itemSlot.execAction(it)
-                IslandsManager.addHelpers(plot, player, island, uuid)
-                it.sendLang("addIslandHelperSuccess", "{player}", pName)
-                p.sendLang("beAddIslandHelperSuccess", "{player}", it.name)
-                IslandsSettingsMenu(island, plot).open(it)
+
+                ConfirmMenu(
+                    {_ ->
+                        IslandsManager.addHelpers(plot, player, island, uuid)
+                        it.sendLang("addIslandHelperSuccess", "{player}", pName)
+                        p.sendLang("beAddIslandHelperSuccess", "{player}", it.name)
+                        IslandsSettingsMenu(island, plot).open(it)
+                    },
+                    { p ->
+                        if (!IslandsManager.openHelperSelectMenu(
+                                it,
+                                plot,
+                                island,
+                                IslandsManager.getIslandHelpers(island.id.value)
+                            )
+                        ) {
+                            p.closeInventory()
+                        }
+                    }
+                ).open(it)
             }
         }
     }

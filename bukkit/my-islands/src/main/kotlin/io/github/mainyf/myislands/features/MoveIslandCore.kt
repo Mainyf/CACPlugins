@@ -1,16 +1,13 @@
 package io.github.mainyf.myislands.features
 
 import com.comphenix.protocol.events.PacketEvent
-import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.plot.Plot
-import dev.lone.itemsadder.api.CustomFurniture
 import dev.lone.itemsadder.api.CustomStack
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.asPlotPlayer
 import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.config.sendLang
-import io.github.mainyf.myislands.exceptions.IslandException
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.myislands.storage.StorageManager
 import io.github.mainyf.newmclib.exts.onlinePlayers
@@ -22,17 +19,14 @@ import io.github.mainyf.newmclib.nms.sendEntityDestroy
 import io.github.mainyf.newmclib.nms.sendEntityMeta
 import io.github.mainyf.newmclib.nms.sendSpawnArmorStand
 import io.github.mainyf.newmclib.utils.Cooldown
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.EquipmentSlot
-import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
 
@@ -184,31 +178,16 @@ object MoveIslandCore : Listener {
         event.isCancelled = true
 
         val (newLoc, entityID) = playerTempCoreLoc[player.uniqueId]!!
-        val world = Bukkit.getWorld("plotworld")!!
-        val oldLoc = Location(
-            world,
-            islandData.coreX.toDouble(),
-            islandData.coreY.toDouble(),
-            islandData.coreZ.toDouble()
-        )
-        world.entities.filter {
-            val eLoc = it.location
-            eLoc.blockX == oldLoc.blockX && eLoc.blockY == oldLoc.blockY && eLoc.blockZ == oldLoc.blockZ
-        }.forEach {
-            if (it is ArmorStand) {
-                playerCoreRemove.add(player.uuid)
-                it.equipment.helmet = ItemStack(Material.AIR)
-                CustomFurniture.remove(it, true)
-                it.remove()
-                MyIslands.INSTANCE.submitTask(delay = 20L) {
-                    playerCoreRemove.remove(player.uuid)
-                }
-            }
+        val entities = IslandsManager.getIslandCoreEntity(islandData)
+        IslandsManager.markMoveingIslandCore(islandData.id.value)
+        entities.forEach {
+            IslandsManager.deleteIslandCore(player, it)
         }
         deleteEntity(player, entityID)
 //            oldLoc.block.type = Material.AIR
         StorageManager.updateCoreLoc(islandData.id.value, newLoc.toVector())
         IslandsManager.setupPlotCore(newLoc)
+        IslandsManager.cleanMoveingIslandCore(islandData.id.value)
 //            CustomBlock.place(ConfigManager.coreId, newLoc)
         val homeLoc = IslandsManager.getHomeLoc(newLoc)
         IslandsManager.setPlotHome(playerToPlot[player.uniqueId]!!, homeLoc)
@@ -223,22 +202,15 @@ object MoveIslandCore : Listener {
         return true
     }
 
-//    @EventHandler(ignoreCancelled = false)
-//    fun onInteract(event: PlayerInteractEvent) {
-//        val player = event.player
-//    }
+    fun markCoreRemove(player: Player) {
+        playerCoreRemove.add(player.uuid)
+    }
+
+    fun unMarkCoreRemove(player: Player) {
+        playerCoreRemove.remove(player.uuid)
+    }
 
     private fun placeFakeBlock(player: Player, loc: Location) {
-//        arrayOf(
-//            loc.clone().add(-1.0, 0.0, 0.0),
-//            loc.clone().add(0.0, 0.0, 0.0)
-//        )
-
-//        val plot = playerToPlot[player.uniqueId]!!
-//        if (!plot.area!!.contains(BukkitUtil.adaptComplete(loc))) {
-//            throw IslandException("${player.name} 把水晶设置在岛屿外部")
-//        }
-
         if (playerTempCoreLoc.containsKey(player.uuid)) {
             val (prevLoc, _) = playerTempCoreLoc[player.uuid]!!
             if (loc.blockX == prevLoc.blockX && loc.blockY == prevLoc.blockY && loc.blockZ == prevLoc.blockZ) {

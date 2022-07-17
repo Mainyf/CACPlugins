@@ -5,8 +5,10 @@ import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.successMsg
 import io.github.mainyf.newmclib.exts.uuid
+import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.socialsystem.config.ConfigManager
 import io.github.mainyf.socialsystem.config.sendLang
+import io.github.mainyf.socialsystem.menu.SocialCardMenu
 import org.bukkit.entity.Player
 import java.util.UUID
 
@@ -29,6 +31,12 @@ object CommandHandler : APICommand("social") {
                 friendRequest.getOrPut(target.uuid) { mutableListOf() }.add(sender.name)
                 sender.sendLang("sendFriendRequestToSender")
                 target.sendLang("sendFriendRequestToAudience", mapOf("{player}" to sender.name))
+            }
+        }
+        "card" {
+            executePlayer {
+                val target = sender
+                SocialCardMenu(target.uuid.asOfflineData()!!).open(target)
             }
         }
         "agree" {

@@ -108,7 +108,7 @@ class IslandsSettingsMenu(
         }
         inv.setIcon(settingsMenuConfig.nextSlot) {
             settingsMenuConfig.nextSlot.itemSlot.execAction(it)
-            if (pageIndex < maxPageIndex) {
+            if (pageIndex < maxPageIndex && curHelpers >= pageIndex * pageSize) {
                 pageIndex++
                 updateHelperList()
                 updateHelperInv(player, inv)
@@ -187,28 +187,34 @@ class IslandsSettingsMenu(
         repeat(currentEmptySlot) { i ->
             inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.emptyItemSlot!!.toItemStack().apply {
                 val meta = itemMeta
-                meta.lore(meta.lore()?.map {
-                    it.tvar(
+                meta.displayName(
+                    meta.displayName()?.text()?.tvar(
                         "curHelpers", curHelpers.toString(),
                         "maxHelpers", maxHelpers.toString()
-                    )
+                    )?.toComp()
+                )
+                meta.lore(meta.lore()?.map {
+                    it.text().tvar(
+                        "curHelpers", curHelpers.toString(),
+                        "maxHelpers", maxHelpers.toString()
+                    ).toComp()
                 })
-//            Component.text("asdsad").replaceText()
                 this.itemMeta = meta
             }) {
                 settingsMenuConfig.helpersSlot.emptyItemSlot.execAction(it)
-                if (plot.owner != it.uuid) {
-                    it.sendLang("noOwnerOpenHelperSelectMenu")
-                    return@setIcon
-                }
-                val players = onlinePlayers().filter { p ->
-                    p.uuid != plot.owner && !helpers.contains(p.uuid) && p.asPlotPlayer()?.location?.plotAbs?.owner == plot.owner
-                }
-                if (players.isEmpty()) {
-                    it.sendLang("islandPlayerAbsEmpty")
-                    return@setIcon
-                }
-                IslandsHelperSelectMenu(this.island, this.plot, players).open(it)
+                IslandsManager.openHelperSelectMenu(it, plot, island, helpers)
+//                if (plot.owner != it.uuid) {
+//                    it.sendLang("noOwnerOpenHelperSelectMenu")
+//                    return@setIcon
+//                }
+//                val players = onlinePlayers().filter { p ->
+//                    p.uuid != plot.owner && !helpers.contains(p.uuid) && p.asPlotPlayer()?.location?.plotAbs?.owner == plot.owner
+//                }
+//                if (players.isEmpty()) {
+//                    it.sendLang("islandPlayerAbsEmpty")
+//                    return@setIcon
+//                }
+//                IslandsHelperSelectMenu(this.island, this.plot, players).open(it)
             }
         }
 
@@ -229,11 +235,9 @@ class IslandsSettingsMenu(
                 inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.itemSlot!!.toItemStack(skullItem) {
                     val meta = itemMeta
                     meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer.name)))
-                    meta.lore(IslandsManager.replaceVarByLoreList(meta.lore()!!, plot, islandsData))
+                    meta.lore(IslandsManager.replaceVarByLoreList(meta.lore(), plot, islandsData))
                     this.itemMeta = meta
-                }, leftClickBlock = {
-                    settingsMenuConfig.helpersSlot.itemSlot.execAction(it)
-                }, rightClickBlock = { p ->
+                }) { p ->
                     settingsMenuConfig.helpersSlot.itemSlot.execAction(p)
                     if (plot.owner != p.uuid) {
                         p.sendLang("noOwnerRemoveHelpers")
@@ -260,7 +264,7 @@ class IslandsSettingsMenu(
                             IslandsSettingsMenu(island, plot).open(p)
                         }
                     ).open(p)
-                })
+                }
             }.onFailure {
                 it.printStackTrace()
             }

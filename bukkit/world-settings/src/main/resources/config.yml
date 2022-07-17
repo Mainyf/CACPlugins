@@ -63,6 +63,16 @@ gloablServer:
     # 进入服务器时的动作
     joinServerAction:
       - "message: 你进入了此服务器"
+    # 自动删除附魔
+    deleteEnchants:
+      - "minecraft:knockback"
+    # 删除附魔消息
+    deleteEnchantsAction:
+      - "mini: <red>物品 <itemname> 的附魔 <enchant> 是被禁止的</red>"
+    # 阻止踩踏海龟蛋
+    antiTrampleTurtleEgg: true
+    # 阻止山羊角声音传播
+    antiGoatHornSound: true
   worlds:
     world:
       difficulty: NORMAL

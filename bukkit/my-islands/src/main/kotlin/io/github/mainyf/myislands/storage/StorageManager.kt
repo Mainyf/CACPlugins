@@ -3,6 +3,7 @@ package io.github.mainyf.myislands.storage
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.menu.IslandViewListType
 import io.github.mainyf.myislands.menu.IslandViewListType.*
+import io.github.mainyf.newmclib.exts.onlinePlayers
 import io.github.mainyf.newmclib.exts.pagination
 import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
@@ -87,7 +88,7 @@ object StorageManager : AbstractStorageManager() {
 //            island.delete()
             if (hasReset) {
                 val ri = PlayerResetIslandCooldown.findById(island.id)
-                if(ri == null) {
+                if (ri == null) {
                     PlayerResetIslandCooldown.newByID {
                         this.island = island.id
                         this.prevTime = DateTime.now()
@@ -137,7 +138,7 @@ object StorageManager : AbstractStorageManager() {
         return transaction {
             val curTime = LocalDate.now().toDateTimeAtStartOfDay()
             val kudoData = PlayerKudoLog.find {
-                (PlayerKudoLogs.island eq island.id) and (PlayerKudoLogs.kudoDate eq curTime)
+                (PlayerKudoLogs.island eq island.id) and (PlayerKudoLogs.kudoDate eq curTime) and (PlayerKudoLogs.kudoUUID eq source)
             }
             if (!kudoData.empty()) {
                 return@transaction false
@@ -193,16 +194,18 @@ object StorageManager : AbstractStorageManager() {
         return transaction {
             when (type) {
                 ALL -> PlayerIsland.count(PlayerIslands.visibility eq IslandVisibility.ALL).toInt()
+                ONLINE -> PlayerIsland.find(PlayerIslands.visibility neq IslandVisibility.NONE).let { islands ->
+                    val onlinePlayers = onlinePlayers()
+                    islands.filter { island -> onlinePlayers.any { it.uuid == island.id.value } }.size
+                }
                 FRIEND -> PlayerIsland.count(PlayerIslands.visibility neq IslandVisibility.NONE).toInt()
                 PERMISSION -> {
-                    val islandDatas =
-                        PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
-
-                    islandDatas.filter { iData ->
-                        iData.helpers.any {
-                            it.helperUUID == player.uuid
-                        }
-                    }.size
+                    PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
+                        .filter { island ->
+                            island.helpers.any {
+                                it.helperUUID == player.uuid
+                            }
+                        }.size
                 }
             }
         }
@@ -215,38 +218,59 @@ object StorageManager : AbstractStorageManager() {
         type: IslandViewListType
     ): List<PlayerIsland> {
         return synchronized(this) {
-            transaction {
+            sortIsland(transaction {
                 when (type) {
                     ALL -> PlayerIsland
                         .find { PlayerIslands.visibility eq IslandVisibility.ALL }
                         .orderBy(PlayerIslands.heats to SortOrder.DESC)
-                        .pagination(pageIndex, pageSize)
+//                        .pagination(pageIndex, pageSize)
+                        .toList()
+                    ONLINE -> PlayerIsland
+                        .find { PlayerIslands.visibility eq IslandVisibility.ALL }
+                        .orderBy(PlayerIslands.heats to SortOrder.DESC)
+                        .let { islands ->
+                            val onlinePlayers = onlinePlayers()
+                            islands.filter { island -> onlinePlayers.any { it.uuid == island.id.value } }
+                        }
+//                        .pagination(pageIndex, pageSize)
                         .toList()
                     FRIEND -> PlayerIsland
                         .find { PlayerIslands.visibility neq IslandVisibility.NONE }
                         .orderBy(PlayerIslands.heats to SortOrder.DESC)
-                        .pagination(pageIndex, pageSize)
+//                        .pagination(pageIndex, pageSize)
                         .toList()
                     PERMISSION -> {
-                        val list = mutableListOf<PlayerIsland>()
-                        val islandData = getPlayerIsland(player.uuid)
-                        if (islandData != null) {
-                            val helpers = islandData.helpers.map { it.helperUUID }
-                            list.addAll(PlayerIsland.find { (PlayerIslands.visibility neq IslandVisibility.NONE) and (PlayerIslands.id inList helpers) })
-                        }
-//                        val islandDatas = PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
-//
-//                        islandDatas.filter { iData ->
-//                            /*iData.id.value == player.uuid || */iData.helpers.any {
-//                            it.helperUUID == player.uuid
+                        PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
+                            .filter { island ->
+                                island.helpers.any {
+                                    it.helperUUID == player.uuid
+                                }
+                            }
+//                            .pagination(pageIndex, pageSize)
+//                        val list = mutableListOf<PlayerIsland>()
+//                        val islandData = getPlayerIsland(player.uuid)
+//                        if (islandData != null) {
+//                            val helpers = islandData.helpers.map { it.helperUUID }
+//                            list.addAll(PlayerIsland.find { (PlayerIslands.visibility neq IslandVisibility.NONE) and (PlayerIslands.id inList helpers) })
 //                        }
-//                        }
-
-                        list.pagination(pageIndex, pageSize)
+//                        list.pagination(pageIndex, pageSize)
                     }
                 }
-            }
+            }, pageIndex, pageSize)
         }
+    }
+
+    private fun sortIsland(list: List<PlayerIsland>, pageIndex: Int, pageSize: Int): List<PlayerIsland> {
+        return list.sortedWith { a, b ->
+            when {
+                a.heats > b.heats -> -1
+                a.heats < b.heats -> 1
+                a.heats == b.heats -> {
+                    (a.id.value.asOfflineData()?.name ?: "").compareTo(b.id.value.asOfflineData()?.name ?: "")
+                }
+                else -> -1
+            }
+        }.pagination(pageIndex, pageSize)
     }
 
 }

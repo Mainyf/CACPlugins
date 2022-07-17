@@ -50,6 +50,7 @@ class MyIslands : JavaPlugin() {
         submitTask(period = 20L) {
             onlinePlayers().forEach { player ->
                 IslandsManager.checkPlayerPlotTrust(player)
+                IslandsManager.fixIslandCore(player)
             }
         }
         submitTask(async = true, period = 20L) {

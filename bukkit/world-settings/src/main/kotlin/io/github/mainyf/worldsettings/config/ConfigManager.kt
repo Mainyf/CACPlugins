@@ -6,13 +6,11 @@ import io.github.mainyf.newmclib.config.ActionParser
 import io.github.mainyf.newmclib.config.action.MultiAction
 import io.github.mainyf.newmclib.exts.colored
 import io.github.mainyf.newmclib.serverId
+import io.github.mainyf.worldsettings.WorldSettings
 import org.apache.commons.lang3.EnumUtils
-import org.bukkit.Difficulty
-import org.bukkit.GameMode
-import org.bukkit.GameRule
-import org.bukkit.Material
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.enchantments.Enchantment
 import org.joor.Reflect
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
@@ -26,7 +24,10 @@ object ConfigManager {
 
     val serverConfigMap = mutableMapOf<String, ServerConfig>()
 
-    fun load(config: ConfigurationSection) {
+    fun load() {
+        WorldSettings.INSTANCE.saveDefaultConfig()
+        WorldSettings.INSTANCE.reloadConfig()
+        val config = WorldSettings.INSTANCE.config
         debug = config.getBoolean("debug", false)
         ignorePermission = config.getString("ignore-permission") ?: "worldsettings.admin"
         val gloablServerSect = config.getConfigurationSection("gloablServer")!!
@@ -145,6 +146,15 @@ object ConfigManager {
                         wsc.setDefault(configKey, parent)
                     }
                 }
+                configKey == "deleteEnchants" -> {
+                    if (config.contains(configKey, true)) {
+                        wsc.setValue(configKey, config.getStringList("deleteEnchants").mapNotNull {
+                            kotlin.runCatching { Enchantment.getByKey(NamespacedKey.fromString(it.lowercase())) }.getOrNull()
+                        })
+                    } else {
+                        wsc.setDefault(configKey, parent)
+                    }
+                }
             }
         }
         return wsc
@@ -214,7 +224,11 @@ data class WorldSettingConfig(
     val tabComplete: Boolean = true,
     val antiVoidDamage: Boolean = true,
     val respawnAction: MultiAction? = null,
-    val joinServerAction: MultiAction? = null
+    val joinServerAction: MultiAction? = null,
+    val deleteEnchants: List<Enchantment> = listOf(),
+    val deleteEnchantsAction: MultiAction? = null,
+    val antiTrampleTurtleEgg: Boolean = false,
+    val antiGoatHornSound: Boolean = true
 )
 
 enum class CommandMatchType {

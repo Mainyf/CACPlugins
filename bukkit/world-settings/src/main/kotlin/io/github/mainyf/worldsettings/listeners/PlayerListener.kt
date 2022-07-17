@@ -1,7 +1,6 @@
 package io.github.mainyf.worldsettings.listeners
 
-import io.github.mainyf.newmclib.exts.errorMsg
-import io.github.mainyf.newmclib.exts.getShooterPlayer
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.worldsettings.PlayerDropItemStorage
 import io.github.mainyf.worldsettings.config.CommandMatchType.LIKE
@@ -9,6 +8,7 @@ import io.github.mainyf.worldsettings.config.CommandMatchType.START
 import io.github.mainyf.worldsettings.config.ConfigManager
 import io.github.mainyf.worldsettings.getWorldSettings
 import io.github.mainyf.worldsettings.ignorePermAndGetWorldSettings
+import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.*
 import org.bukkit.event.Event
@@ -20,6 +20,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.*
 import org.bukkit.event.server.TabCompleteEvent
 
@@ -174,6 +175,7 @@ object PlayerListener : Listener {
             if (settings.antiItemUse.contains(event.item?.type)) {
                 settings.itemBlockAction?.execute(event.player)
                 event.isCancelled = true
+                event.setUseItemInHand(Event.Result.DENY)
                 return@ignorePermAndGetWorldSettings
             }
             if (event.action == Action.RIGHT_CLICK_BLOCK && event.hasBlock() && settings.blockInteractWhite.isNotEmpty() && !settings.blockInteractWhite.contains(
@@ -182,6 +184,11 @@ object PlayerListener : Listener {
             ) {
                 event.setUseInteractedBlock(Event.Result.DENY)
 //            event.isCancelled = true
+                return@ignorePermAndGetWorldSettings
+            }
+            if (settings.antiTrampleTurtleEgg && event.action == Action.PHYSICAL && event.clickedBlock?.type == Material.TURTLE_EGG) {
+                event.setUseInteractedBlock(Event.Result.DENY)
+                event.isCancelled = true
                 return@ignorePermAndGetWorldSettings
             }
         }
@@ -272,6 +279,26 @@ object PlayerListener : Listener {
         if (e is ItemFrame && settings.antiInteractDisplayFrameAndPaint) {
             e.isFixed = true
             event.isCancelled = true
+        }
+    }
+
+    @EventHandler
+    fun onClick(event: InventoryClickEvent) {
+        val player = event.viewers.firstOrNull() as? Player ?: return
+        val itemStack = event.currentItem ?: return
+        if (itemStack.isEmpty()) return
+        ignorePermAndGetWorldSettings(player) { settings ->
+            settings.deleteEnchants.forEach {
+                if (itemStack.enchantments.containsKey(it)) {
+                    itemStack.removeEnchantment(it)
+                    settings.deleteEnchantsAction?.execute(
+                        player,
+                        "itemname", (itemStack.itemMeta?.displayName() ?: Component.translatable(itemStack)),
+                        "enchant", Component.translatable(it)
+                    )
+                    event.isCancelled = true
+                }
+            }
         }
     }
 

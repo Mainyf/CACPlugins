@@ -11,7 +11,7 @@ antiPlayerBreakCore: [ ]
 
 alreadyMoveingCore: "&c&l！&4水晶正在被其他人移动。"
 playerLocNotPlot: "你的脚下没有岛屿"
-noOwnerMoveCore: "&c&l！&4你不是岛屿主人，无法移动水晶"
+noOwnerMoveCore: "&c&l！&4你不是岛屿主人，无法移动水晶。"
 tryMoveCoreButPlayerNotHaveIsland: "意外的错误: 0xMI1"
 startMoveCore: [ ]
 moveCoreToOutIsland: [ ]
@@ -23,7 +23,7 @@ moveCoreSuccess:
   - "sound: ENTITY_PUFFER_FISH_BLOW_UP,1,2"
   - "title: ,&3成功把&b核心水晶&3设置在当前位置,10,30,10"
   - "actionbar: &r,&r"
-islandPlayerAbsEmpty: "&c&l！&4你的岛屿上没有可授权的玩家"
+islandPlayerAbsEmpty: "&c&l！&4你的岛屿上没有可授权的玩家。"
 addIslandHelperSuccess: "&c&l！&4成功添加 &c{player} &4为授权者。"
 beAddIslandHelperSuccess:
   - "message: &c&l！&4你被 &c{player} &4添加为授权者。"
@@ -59,4 +59,4 @@ islandClaimSuccess:
 resetIslandBackTourist:
   - "sound: ENTITY_PUFFER_FISH_BLOW_UP,1,2"
   - "message: &c&l！&4玩家 &c{player} &4重置了岛屿，你已返回自己岛屿。"
-resetCooldown: "重置岛屿还在冷却中，剩余: {surplusTime}"
+resetCooldown: "&c&l！&4需要等待 &c{surplusTime} &4才能重置岛屿。"

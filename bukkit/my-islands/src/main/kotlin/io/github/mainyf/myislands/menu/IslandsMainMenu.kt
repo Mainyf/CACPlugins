@@ -70,6 +70,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
         val switchViewIslandIcons = menuConfig.switchViewIslandSlot.itemSlot.iaIcons
         when (viewIslandType) {
             ALL -> icons.add(switchViewIslandIcons["all"]!!)
+            ONLINE -> icons.add(switchViewIslandIcons["online"]!!)
             FRIEND -> icons.add(switchViewIslandIcons["friend"]!!)
             PERMISSION -> icons.add(switchViewIslandIcons["permission"]!!)
         }
@@ -108,7 +109,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
         }
         inv.setIcon(menuConfig.switchViewIslandSlot, {
             setDisplayName {
-                it?.tvar("filterText", viewIslandType.text)
+                it?.text()?.tvar("filterText", viewIslandType.text)?.toComp()
             }
         }) {
             menuConfig.switchViewIslandSlot.itemSlot.execAction(it)
@@ -124,13 +125,13 @@ class IslandsMainMenu : AbstractMenuHandler() {
         val iakSlot = menuConfig.infoAndKudosSlot
         if (hasOwner) {
             inv.setIcon(iakSlot.slot, iakSlot.info.toItemStack {
-                lore(lore()?.let { IslandsManager.replaceVarByLoreList(it, plotAbs!!, islandAbs) })
+                lore(IslandsManager.replaceVarByLoreList(lore(), plotAbs!!, islandAbs))
             }) {
                 iakSlot.info.execAction(it)
             }
         } else {
             inv.setIcon(iakSlot.slot, iakSlot.kudos.toItemStack {
-                lore(lore()?.let { IslandsManager.replaceVarByLoreList(it, plotAbs!!, islandAbs) })
+                lore(IslandsManager.replaceVarByLoreList(lore(), plotAbs!!, islandAbs))
             }) {
                 iakSlot.kudos.execAction(it)
                 if (islandAbs != null && IslandsManager.addKudoToIsland(islandAbs!!, it)) {
@@ -196,12 +197,12 @@ class IslandsMainMenu : AbstractMenuHandler() {
             kotlin.runCatching {
                 val offlinePlayer = islandData.id.value.asOfflineData()?.name ?: ""
                 val skullItem = Heads.getPlayerHead(offlinePlayer).clone()
-                val plot = MyIslands.plotUtils.findPlot(islandData.id.value)!!
+                val plot = MyIslands.plotUtils.findPlot(islandData.id.value)
 
                 inv.setIcon(viewListSlots.slot[i], viewListSlots.itemSlot.toItemStack(skullItem) {
                     val meta = itemMeta
                     meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer)))
-                    meta.lore(IslandsManager.replaceVarByLoreList(meta.lore()!!, plot, islandData))
+                    meta.lore(IslandsManager.replaceVarByLoreList(meta.lore(), plot, islandData))
                     this.itemMeta = meta
                 }) {
                     viewListSlots.itemSlot.execAction(it)
@@ -232,6 +233,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
 enum class IslandViewListType(val text: String) {
 
     ALL("全部"),
+    ONLINE("在线"),
     FRIEND("好友"),
     PERMISSION("授权者");
 

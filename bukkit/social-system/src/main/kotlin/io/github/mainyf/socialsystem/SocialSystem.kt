@@ -1,6 +1,7 @@
 package io.github.mainyf.socialsystem
 
 import io.github.mainyf.socialsystem.config.ConfigManager
+import io.github.mainyf.socialsystem.module.FriendHandler
 import io.github.mainyf.socialsystem.storage.StorageManager
 import org.apache.logging.log4j.LogManager
 import org.bukkit.plugin.java.JavaPlugin
@@ -18,6 +19,8 @@ class SocialSystem : JavaPlugin() {
     override fun onEnable() {
         INSTANCE = this
         ConfigManager.load()
+        StorageManager.init()
+        FriendHandler.init()
         CommandHandler.register()
     }
 

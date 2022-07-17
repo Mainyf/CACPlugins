@@ -9,7 +9,9 @@ import dev.lone.itemsadder.api.CustomFurniture
 import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.myislands.exceptions.IslandException
+import io.github.mainyf.myislands.features.MoveIslandCore
 import io.github.mainyf.myislands.menu.IslandsChooseMenu
+import io.github.mainyf.myislands.menu.IslandsHelperSelectMenu
 import io.github.mainyf.myislands.storage.IslandVisibility
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.myislands.storage.StorageManager
@@ -20,10 +22,11 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import org.joda.time.DateTime
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -33,22 +36,34 @@ import kotlin.collections.any
 object IslandsManager {
 
     private val joinPlayers = mutableMapOf<UUID, Plot>()
+    private val resetingIslands = mutableSetOf<UUID>()
+    private val moveingIslandCores = mutableSetOf<UUID>()
 
     private val helperPermissions = listOf(
-        10,
-        20,
-        30,
-        40,
         50,
-        60,
-        70,
-        80,
-        90,
-        100
+        45,
+        40,
+        35,
+        30,
+        25,
+        20,
+        15,
+        10,
+        5
     )
 
+    fun markMoveingIslandCore(uuid: UUID) {
+        moveingIslandCores.add(uuid)
+    }
+
+    fun cleanMoveingIslandCore(uuid: UUID) {
+        moveingIslandCores.remove(uuid)
+    }
+
     fun getPlayerMaxHelperCount(player: Player): Int {
-        return helperPermissions.reversed().find { player.hasPermission("myislands.helpers.${it}") } ?: 10
+        var baseCount = helperPermissions.find { player.hasPermission("myislands.helpers.${it}") } ?: 5
+        baseCount += helperPermissions.find { player.hasPermission("myislands.helpers.add.${it}") } ?: 0
+        return baseCount
     }
 
     fun removeHelpers(plot: Plot, player: Player, island: PlayerIsland, helperUUID: UUID) {
@@ -231,6 +246,12 @@ object IslandsManager {
 //            player.errorMsg("你的已经拥有了自己的私人岛屿")
             return
         }
+        resetingIslands.add(player.uuid)
+
+        // ensure remove
+        MyIslands.INSTANCE.submitTask(delay = 8 * 20L) {
+            resetingIslands.remove(player.uuid)
+        }
         chooseMenu.ok = true
         MyIslands.plotUtils.autoClaimPlot(player, plotPlayer) {
             val plots = MyIslands.plotAPI.getPlayerPlots(plotPlayer)
@@ -263,6 +284,7 @@ object IslandsManager {
                 loc.add(0.5, 0.0, 0.5)
                 MyIslands.INSTANCE.submitTask(delay = 3 * 20L) {
                     setupPlotCore(loc)
+                    resetingIslands.remove(plot.owner!!)
                     player.sendLang("initIslandCore")
 //                    player.successMsg("岛屿水晶已放置")
                 }
@@ -304,6 +326,34 @@ object IslandsManager {
         )
     }
 
+    fun getIslandCoreEntity(island: PlayerIsland): List<ArmorStand> {
+        val oldLoc = getIslandCoreLoc(island)
+        val world = oldLoc.world
+//        val world = Bukkit.getWorld("plotworld")!!
+//        val oldLoc = Location(
+//            world,
+//            island.coreX.toDouble(),
+//            island.coreY.toDouble(),
+//            island.coreZ.toDouble()
+//        )
+        return world.entities.filter {
+            val eLoc = it.location
+            eLoc.blockX == oldLoc.blockX && eLoc.blockY == oldLoc.blockY && eLoc.blockZ == oldLoc.blockZ
+        }.filterIsInstance<ArmorStand>().filter {
+            CustomFurniture.byAlreadySpawned(it) != null
+        }
+    }
+
+    fun deleteIslandCore(player: Player, armorStand: ArmorStand) {
+        MoveIslandCore.markCoreRemove(player)
+        armorStand.equipment.helmet = ItemStack(Material.AIR)
+        CustomFurniture.remove(armorStand, true)
+        armorStand.remove()
+        MyIslands.INSTANCE.submitTask(delay = 20L) {
+            MoveIslandCore.unMarkCoreRemove(player)
+        }
+    }
+
     fun checkPlayerPlotTrust(player: Player) {
         val plot = MyIslands.plotUtils.findPlot(player.uuid) ?: return
         val helpers = getIslandHelpers(player.uuid)
@@ -317,14 +367,29 @@ object IslandsManager {
         StorageManager.updateHeat()
     }
 
+    fun fixIslandCore(player: Player) {
+        val plot = MyIslands.plotUtils.getPlotByPLoc(player) ?: return
+        if (plot.owner == null) return
+        if (resetingIslands.contains(plot.owner!!)) return
+        if (moveingIslandCores.contains(plot.owner!!)) return
+        val islandData = getIslandData(plot.owner!!) ?: return
+        if (getIslandCoreEntity(islandData).isNotEmpty()) return
+        val coreLoc = getIslandCoreLoc(islandData)
+        val pLoc = player.location
+        if (pLoc.world == coreLoc.world && pLoc.distanceSquared(coreLoc) <= 20) {
+            setupPlotCore(coreLoc)
+        }
+    }
+
     fun replaceVarByLoreList(
-        lore: List<Component>,
-        plot: Plot,
+        lore: List<Component>?,
+        plot: Plot?,
         islandData: PlayerIsland?
-    ): List<Component> {
+    ): List<Component>? {
+        if (lore == null) return null
         return lore.map { comp ->
-            comp.tvar(
-                "owner", plot.owner?.asOfflineData()?.name ?: "无",
+            comp.text().tvar(
+                "owner", plot?.owner?.asOfflineData()?.name ?: "无",
                 "helpers", getIslandHelpers(islandData).let { list ->
                     if (list.isEmpty()) "无" else list.joinToString(",") {
                         it.asOfflineData()?.name ?: "无"
@@ -332,8 +397,33 @@ object IslandsManager {
                 },
                 "kudos", "${islandData?.kudos ?: "无"}",
                 "heats", "${islandData?.heats ?: "无"}"
-            )
+            ).toComp()
         }
+    }
+
+    fun getIslandCoreLoc(islandData: PlayerIsland): Location {
+        return Location(
+            Bukkit.getWorld("plotworld")!!,
+            islandData.coreX.toDouble(),
+            islandData.coreY.toDouble(),
+            islandData.coreZ.toDouble()
+        )
+    }
+
+    fun openHelperSelectMenu(player: Player, plot: Plot, island: PlayerIsland, helpers: List<UUID?>): Boolean {
+        if (plot.owner != player.uuid) {
+            player.sendLang("noOwnerOpenHelperSelectMenu")
+            return false
+        }
+        val players = onlinePlayers().filter { p ->
+            p.uuid != plot.owner && !helpers.contains(p.uuid) && p.asPlotPlayer()?.location?.plotAbs?.owner == plot.owner
+        }
+        if (players.isEmpty()) {
+            player.sendLang("islandPlayerAbsEmpty")
+            return false
+        }
+        IslandsHelperSelectMenu(island, plot, players).open(player)
+        return true
     }
 
 }

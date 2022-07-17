@@ -1,0 +1,10 @@
+maxHarvest:
+  - "message: &c&l！&4这个商店已达今日上限，你今天还能出售 &c{eCount}个 &4这物品。"
+  - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  - "actionbar: &6&l这个商店是每日 &e&l{maxHarvest} &6&l上限, &c◆"
+sellSuccess:
+  - "mini: <green>成功出售 <count> 个 <itemName>，获得 $<totalPrice></green>"
+fullItemSuccess:
+  - "mini: <green>出售完毕 总计: $<totalPrice></green>"
+fullItemSell:
+  - "closeInv"
