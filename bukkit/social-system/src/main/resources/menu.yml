@@ -8,42 +8,57 @@ socialCardMenu:
   # 头颅格子
   headSlot:
     slot: [ 10,11,19,20 ]
-    type: BLACK_STAINED_GLASS_PANE
-    name: " &c&l> &3头颅"
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3头颅"
   # 第一个
   cardX1Slot:
     slot: [ 31 ]
-    type: BLACK_STAINED_GLASS_PANE
-    name: " &c&l> &3第一个"
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3玩家名: %player_name%"
+      lore:
+        - " &c&l> &3是否是op: %player_is_op%"
   # 第二个
   cardX2Slot:
     slot: [ 32 ]
-    type: BLACK_STAINED_GLASS_PANE
-    name: " &c&l> &3第二个"
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3玩家名: %player_name%"
+      lore:
+        - " &c&l> &3是否是op: %player_is_op%"
   # 第三个
   cardX3Slot:
     slot: [ 33 ]
-    type: BLACK_STAINED_GLASS_PANE
-    name: " &c&l> &3第三个"
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3玩家名: %player_name%"
+      lore:
+        - " &c&l> &3是否是op: %player_is_op%"
   # 第四个
   cardX4Slot:
     slot: [ 34 ]
-    type: BLACK_STAINED_GLASS_PANE
-    name: " &c&l> &3第四个"
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3玩家名: %player_name%"
+      lore:
+        - " &c&l> &3是否是op: %player_is_op%"
 
   # 好友申请
   requestSlot:
     slot: [ 37 ]
-    type: BLACK_STAINED_GLASS_PANE
-    name: " &c&l> &3好友申请"
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3好友申请"
   # 修复装备
   repairSlot:
     slot: [ 38 ]
-    type: BLACK_STAINED_GLASS_PANE
-    name: " &c&l> &3修复装备"
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3修复装备"
   # 是否在线
   onlineSlot:
-    slot: [ 8 ]
+    slot: [ 16 ]
     online:
       iaIcons: ''
       type: BLACK_STAINED_GLASS_PANE
@@ -57,20 +72,115 @@ socialCardMenu:
   # 头盔
   helmetSlot:
     slot: [ 17 ]
-    iaIcons: ''
-    type: BLACK_STAINED_GLASS_PANE
+    default:
+      iaIcons: ''
+      type: BLACK_STAINED_GLASS_PANE
   # 盔甲
   chestplateSlot:
     slot: [ 26 ]
-    iaIcons: ''
-    type: BLACK_STAINED_GLASS_PANE
+    default:
+      iaIcons: ''
+      type: BLACK_STAINED_GLASS_PANE
   # 护腿
   leggingsSlot:
     slot: [ 35 ]
-    iaIcons: ''
-    type: BLACK_STAINED_GLASS_PANE
+    default:
+      iaIcons: ''
+      type: BLACK_STAINED_GLASS_PANE
   # 靴子
   bootsSlot:
     slot: [ 44 ]
-    iaIcons: ''
-    type: BLACK_STAINED_GLASS_PANE
+    default:
+      iaIcons: ''
+      type: BLACK_STAINED_GLASS_PANE
+socialMainMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  background: ''
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  # 上一页
+  prevSlot:
+    slot: [ 0 ]
+    default:
+      iaIcons: ''
+      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      type: itemsadder:air
+      name: " &c&l> &3上一页"
+  # 下一页
+  nextSlot:
+    slot: [ 8 ]
+    default:
+      iaIcons: ''
+      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      type: itemsadder:air
+      name: " &c&l> &3下一页"
+  friendsSlot:
+    slot: [ 1,2,3,4,5,6,7 ]
+    default:
+      name: " &c&l> &3{player}"
+  # 头颅格子
+  headSlot:
+    slot: [ 10,11,19,20 ]
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3头颅"
+  # 第一个
+  cardX1Slot:
+    slot: [ 31 ]
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3玩家名: %player_name%"
+      lore:
+        - " &c&l> &3是否是op: %player_is_op%"
+  # 第二个
+  cardX2Slot:
+    slot: [ 32 ]
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3玩家名: %player_name%"
+      lore:
+        - " &c&l> &3是否是op: %player_is_op%"
+  # 第三个
+  cardX3Slot:
+    slot: [ 33 ]
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3玩家名: %player_name%"
+      lore:
+        - " &c&l> &3是否是op: %player_is_op%"
+  # 第四个
+  cardX4Slot:
+    slot: [ 34 ]
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3玩家名: %player_name%"
+      lore:
+        - " &c&l> &3是否是op: %player_is_op%"
+  # 是否在线
+  onlineSlot:
+    slot: [ 16 ]
+    online:
+      iaIcons: ''
+      type: BLACK_STAINED_GLASS_PANE
+      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      name: " &c&l> &3在线"
+    offline:
+      iaIcons: ''
+      type: BLACK_STAINED_GLASS_PANE
+      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      name: " &c&l> &3离线"
+  deleteFriendOrAllowRepairSlot:
+    slot: [ 37 ]
+    delete:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3删除玩家好友"
+    allowRepair:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3允许其他玩家帮我修理装备: {status}"
+  tpSlot:
+    slot: [ 37 ]
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: " &c&l> &3左键发起传送，右键邀请传送"

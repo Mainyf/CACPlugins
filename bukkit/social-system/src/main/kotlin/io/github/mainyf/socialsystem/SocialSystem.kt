@@ -1,6 +1,8 @@
 package io.github.mainyf.socialsystem
 
+import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.socialsystem.config.ConfigManager
+import io.github.mainyf.socialsystem.listeners.PlayerListeners
 import io.github.mainyf.socialsystem.module.FriendHandler
 import io.github.mainyf.socialsystem.storage.StorageManager
 import org.apache.logging.log4j.LogManager
@@ -20,8 +22,8 @@ class SocialSystem : JavaPlugin() {
         INSTANCE = this
         ConfigManager.load()
         StorageManager.init()
-        FriendHandler.init()
         CommandHandler.register()
+        pluginManager().registerEvents(PlayerListeners, this)
     }
 
     override fun onDisable() {

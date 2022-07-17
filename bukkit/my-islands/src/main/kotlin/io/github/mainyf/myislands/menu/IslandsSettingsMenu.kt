@@ -79,17 +79,17 @@ class IslandsSettingsMenu(
     override fun updateTitle(player: Player): String {
         val menuConfig = ConfigManager.settingsMenuConfig
         val icons = mutableListOf<IaIcon>()
-        icons.addAll(menuConfig.moveCoreSlot.itemSlot.iaIcons.icons())
+        icons.addAll(menuConfig.moveCoreSlot.iaIcon())
         when (island.visibility) {
-            ALL -> icons.add(menuConfig.visibilitySlot.itemSlot.iaIcons["all"]!!)
-            PERMISSION -> icons.add(menuConfig.visibilitySlot.itemSlot.iaIcons["permission"]!!)
-            NONE -> icons.add(menuConfig.visibilitySlot.itemSlot.iaIcons["none"]!!)
+            ALL -> icons.add(menuConfig.visibilitySlot.default()!!.iaIcons["all"]!!)
+            PERMISSION -> icons.add(menuConfig.visibilitySlot.default()!!.iaIcons["permission"]!!)
+            NONE -> icons.add(menuConfig.visibilitySlot.default()!!.iaIcons["none"]!!)
         }
-        icons.addAll(menuConfig.resetIslandSlot.itemSlot.iaIcons.icons())
+        icons.addAll(menuConfig.resetIslandSlot.iaIcon())
 
 
         repeat(currentEmptySlot) {
-            icons.add(menuConfig.helpersSlot.emptyItemSlot!!.iaIcons["v${it + 1}"]!!)
+            icons.add(menuConfig.helpersSlot["empty"]!!.iaIcons["v${it + 1}"]!!)
         }
 
         return applyTitle(player, icons)
@@ -99,7 +99,6 @@ class IslandsSettingsMenu(
         val settingsMenuConfig = ConfigManager.settingsMenuConfig
 
         inv.setIcon(settingsMenuConfig.prevSlot) {
-            settingsMenuConfig.prevSlot.itemSlot.execAction(it)
             if (pageIndex > 1) {
                 pageIndex--
                 updateHelperList()
@@ -107,7 +106,6 @@ class IslandsSettingsMenu(
             }
         }
         inv.setIcon(settingsMenuConfig.nextSlot) {
-            settingsMenuConfig.nextSlot.itemSlot.execAction(it)
             if (pageIndex < maxPageIndex && curHelpers >= pageIndex * pageSize) {
                 pageIndex++
                 updateHelperList()
@@ -116,28 +114,27 @@ class IslandsSettingsMenu(
         }
 
         val moveCoreSlot = settingsMenuConfig.moveCoreSlot
-        inv.setIcon(moveCoreSlot.slot, moveCoreSlot.itemSlot.toItemStack()) {
-            moveCoreSlot.itemSlot.execAction(it)
+        inv.setIcon(moveCoreSlot) {
             MoveIslandCore.tryStartMoveCore(it, plot)
             it.closeInventory()
         }
         val visibilitySlot = settingsMenuConfig.visibilitySlot
         val resetIslandSlot = settingsMenuConfig.resetIslandSlot
-        inv.setIcon(visibilitySlot.slot, visibilitySlot.itemSlot.toItemStack {
-            setDisplayName(getDisplayName().tvar("visibility", island.visibility.text))
+        inv.setIcon(visibilitySlot, itemBlock = {
+            withMetaText(displayNameBlock = {
+                it?.tvar("visibility", island.visibility.text)
+            })
         }) { p ->
-            visibilitySlot.itemSlot.execAction(p)
             IslandsManager.setIslandVisibility(
                 island,
                 values().find { it.count > island.visibility.count } ?: ALL)
             updateInv(player, inv)
         }
-        inv.setIcon(resetIslandSlot.slot, resetIslandSlot.itemSlot.toItemStack()) { p ->
+        inv.setIcon(resetIslandSlot) { p ->
             if (plot.owner != p.uuid) {
                 p.sendLang("noOwnerResetIslands")
                 return@setIcon
             }
-            resetIslandSlot.itemSlot.execAction(p)
             val prevResetMilli = IslandsManager.getIslandLastResetDate(island)?.toMilli()
             if (!p.isOp && prevResetMilli != null) {
                 val cur = LocalDateTime.now().toMilli()
@@ -185,7 +182,7 @@ class IslandsSettingsMenu(
         val helpersSlot = settingsMenuConfig.helpersSlot.slot
         inv.unSetIcon(helpersSlot)
         repeat(currentEmptySlot) { i ->
-            inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.emptyItemSlot!!.toItemStack().apply {
+            inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot["empty"]!!.toItemStack().apply {
                 val meta = itemMeta
                 meta.displayName(
                     meta.displayName()?.text()?.tvar(
@@ -201,7 +198,7 @@ class IslandsSettingsMenu(
                 })
                 this.itemMeta = meta
             }) {
-                settingsMenuConfig.helpersSlot.emptyItemSlot.execAction(it)
+                settingsMenuConfig.helpersSlot["empty"]!!.execAction(it)
                 IslandsManager.openHelperSelectMenu(it, plot, island, helpers)
 //                if (plot.owner != it.uuid) {
 //                    it.sendLang("noOwnerOpenHelperSelectMenu")
@@ -232,13 +229,13 @@ class IslandsSettingsMenu(
                 val skullItem = Heads.getPlayerHead(offlinePlayer.name).clone()
                 skullItem.setDisplayName(offlinePlayer.name)
 
-                inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.itemSlot!!.toItemStack(skullItem) {
+                inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.default()!!.toItemStack(skullItem) {
                     val meta = itemMeta
                     meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer.name)))
                     meta.lore(IslandsManager.replaceVarByLoreList(meta.lore(), plot, islandsData))
                     this.itemMeta = meta
                 }) { p ->
-                    settingsMenuConfig.helpersSlot.itemSlot.execAction(p)
+                    settingsMenuConfig.helpersSlot.default()!!.execAction(p)
                     if (plot.owner != p.uuid) {
                         p.sendLang("noOwnerRemoveHelpers")
                         return@setIcon
@@ -269,25 +266,6 @@ class IslandsSettingsMenu(
                 it.printStackTrace()
             }
         }
-    }
-
-    fun Long.timestampConvertTime(): String {
-        val second = (this / 1000).toDouble()
-//        val hour = this / 1000 / 60 / 60
-        if (second <= 60) return "${second}秒"
-        val surplusSecond = (second % 60).toInt()
-        val minute = (second / 60).toInt()
-        if (minute <= 60) {
-            return "${minute}分钟${surplusSecond}秒"
-        }
-        val surplusMinute = minute % 60
-        val hour = minute / 60
-        if (hour <= 24) {
-            return "${hour}小时${surplusMinute}分钟${surplusSecond}秒"
-        }
-        val surplusHour = hour % 24
-        val day = hour / 24
-        return "${day}天${surplusHour}小时${surplusMinute}分钟${surplusSecond}秒"
     }
 
 }

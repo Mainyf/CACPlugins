@@ -304,6 +304,9 @@ object IslandsManager {
     }
 
     fun setupPlotCore(loc: Location): CustomFurniture {
+//        Thread.currentThread().stackTrace.forEach {
+//            println(it)
+//        }
         return CustomFurniture.spawnPreciseNonSolid(ConfigManager.coreId, loc)!!.apply {
             armorstand?.isInvulnerable = true
         }

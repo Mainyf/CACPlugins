@@ -1,4 +1,30 @@
+alreadyFriend:
+  - "minimessage: <red>对方已经是你的好友了，你无法在向他发送好友请求</red>"
+
+sendFriendRequestCooldown:
+  - "minimessage: <color:#FF5555>发送好友请求冷却: <eTime></color>"
 sendFriendRequestToSender:
   - "minimessage: <color:#FF5555>好友请求已发送给对方</color>"
-sendFriendRequestToAudience:
+sendFriendRequestToReceiver:
   - "minimessage: <player> 请求添加你为好友 <click:run_command:/social agree {player}><hover:show_text:'同意请求'>✔</hover></click> | <click:run_command:/social refuse {player}><hover:show_text:'拒绝请求'>✘</hover></click>"
+
+agressFriendRequestToSender:
+  - "minimessage: <color:#FF5555>发送给 <receiver> 的好友申请已被接受，你们已经是好友了</color>"
+agressFriendRequestToReceiver:
+  - "minimessage: <color:#FF5555>你已接受 <sender> 发送给你的好友申请，你们已经是好友了</color>"
+
+refuseFriendRequestToSender:
+  - "minimessage: <color:#FF5555>发送给 <receiver> 的好友申请已被拒绝</color>"
+refuseFriendRequestToReceiver:
+  - "minimessage: <color:#FF5555>你已拒绝 <sender> 发送给你的好友申请</color>"
+
+sendRepairHandEquipmentToSender:
+  - "minimessage: <color:#FF5555>已经帮对方修复手中物品</color>"
+sendRepairHandEquipmentToReceiver:
+  - "minimessage: <color:#FF5555><player> 帮你修复了手中物品</color>"
+friendRequestsNoExists:
+  - "minimessage: <color:#FF5555>好友申请列表中没有此玩家</color>"
+deleteFriendToSender:
+  - "minimessage: <color:#FF5555>删除好友 <friend> 成功</color>"
+deleteFriendToRecevier:
+  - "minimessage: <color:#FF5555>你被 <friend> 删除了好友</color>"

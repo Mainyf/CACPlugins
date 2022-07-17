@@ -187,7 +187,9 @@ object MoveIslandCore : Listener {
 //            oldLoc.block.type = Material.AIR
         StorageManager.updateCoreLoc(islandData.id.value, newLoc.toVector())
         IslandsManager.setupPlotCore(newLoc)
-        IslandsManager.cleanMoveingIslandCore(islandData.id.value)
+        MyIslands.INSTANCE.submitTask(delay = 40L) {
+            IslandsManager.cleanMoveingIslandCore(islandData.id.value)
+        }
 //            CustomBlock.place(ConfigManager.coreId, newLoc)
         val homeLoc = IslandsManager.getHomeLoc(newLoc)
         IslandsManager.setPlotHome(playerToPlot[player.uniqueId]!!, homeLoc)

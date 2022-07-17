@@ -43,9 +43,9 @@ class IslandsHelperSelectMenu(
     override fun updateTitle(player: Player): String {
         val menuConfig = ConfigManager.helperSelectMenuConfig
         val icons = mutableListOf<IaIcon>()
-        icons.addAll(menuConfig.prevSlot.itemSlot.iaIcons.icons())
-        icons.addAll(menuConfig.nextSlot.itemSlot.iaIcons.icons())
-        icons.addAll(menuConfig.backSlot.itemSlot.iaIcons.icons())
+        icons.addAll(menuConfig.prevSlot.iaIcon())
+        icons.addAll(menuConfig.nextSlot.iaIcon())
+        icons.addAll(menuConfig.backSlot.iaIcon())
 
         return applyTitle(player, icons)
     }
@@ -54,14 +54,14 @@ class IslandsHelperSelectMenu(
         val menuConfig = ConfigManager.helperSelectMenuConfig
 
         inv.setIcon(menuConfig.prevSlot) {
-            menuConfig.prevSlot.itemSlot.execAction(it)
+            menuConfig.prevSlot
             if (pageIndex > 1) {
                 pageIndex--
                 updatePlayerList(player, inv)
             }
         }
         inv.setIcon(menuConfig.nextSlot) {
-            menuConfig.nextSlot.itemSlot.execAction(it)
+            menuConfig.nextSlot
             if (pageIndex < maxPageIndex) {
                 pageIndex++
                 updatePlayerList(player, inv)
@@ -69,7 +69,7 @@ class IslandsHelperSelectMenu(
         }
 
         inv.setIcon(menuConfig.backSlot) {
-            menuConfig.backSlot.itemSlot.execAction(it)
+            menuConfig.backSlot
             IslandsSettingsMenu(island, plot).open(it)
         }
         updatePlayerList(player, inv)
@@ -92,10 +92,10 @@ class IslandsHelperSelectMenu(
             val pName = p.name
             val uuid = p.uuid
             inv.setIcon(slot, skullItem) {
-                menuConfig.playerListSlot.itemSlot.execAction(it)
+                menuConfig.playerListSlot.default()?.actions?.execAction(it)
 
                 ConfirmMenu(
-                    {_ ->
+                    { _ ->
                         IslandsManager.addHelpers(plot, player, island, uuid)
                         it.sendLang("addIslandHelperSuccess", "{player}", pName)
                         p.sendLang("beAddIslandHelperSuccess", "{player}", it.name)

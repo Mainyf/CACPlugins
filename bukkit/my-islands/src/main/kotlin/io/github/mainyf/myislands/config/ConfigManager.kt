@@ -80,13 +80,13 @@ object ConfigManager {
             mainMenuSect.asDefaultSlotConfig("nextSlot"),
             mainMenuSect.asDefaultSlotConfig("islandViewSlot"),
             mainMenuSect.asDefaultSlotConfig("switchViewIslandSlot"),
-            mainMenuSect.asInfoAndKudosSlotConfig("infoAndKudosSlot"),
-            mainMenuSect.asUpgradeAndBackIslandSlotSlotConfig("upgradeAndBackIslandSlot"),
+            mainMenuSect.asDefaultSlotConfig("infoAndKudosSlot"),
+            mainMenuSect.asDefaultSlotConfig("upgradeAndBackIslandSlot"),
             mainMenuSect.asDefaultSlotConfig("islandSettingsSlot")
         )
         settingsMenuConfig = IslandSettingsMenuConfig(
             settingsMenuSect.asMenuSettingsConfig(),
-            settingsMenuSect.asIslandHelperSlotConfig("helpersSlot"),
+            settingsMenuSect.asDefaultSlotConfig("helpersSlot"),
             settingsMenuSect.asDefaultSlotConfig("prevSlot"),
             settingsMenuSect.asDefaultSlotConfig("nextSlot"),
             settingsMenuSect.asDefaultSlotConfig("moveCoreSlot"),
@@ -98,7 +98,7 @@ object ConfigManager {
             chooseMenuSect.asIslandPresetSlotConfig("islandListSlot"),
             chooseMenuSect.asDefaultSlotConfig("prevSlot"),
             chooseMenuSect.asDefaultSlotConfig("nextSlot"),
-            chooseMenuSect.asIslandChooseBackSlotConfig("backSlot")
+            chooseMenuSect.asDefaultSlotConfig("backSlot")
         )
         helperSelectMenuConfig = IslandHelperSelectMenuConfig(
             helperSelectMenuSect.asMenuSettingsConfig(),
@@ -109,26 +109,26 @@ object ConfigManager {
         )
     }
 
-    private fun ConfigurationSection.asIslandHelperSlotConfig(key: String): IslandHelperSlotConfig {
-        return getConfigurationSection(key)!!.let {
-            IslandHelperSlotConfig(
-                it.getIntegerList("slot"),
-                it.asItemSlotConfig(),
-                it.getConfigurationSection("empty")!!.asItemSlotConfig()
-            )
-        }
-    }
-
-    private fun ConfigurationSection.asIslandChooseBackSlotConfig(key: String): IslandChooseBackSlotConfig {
-        return getConfigurationSection(key)!!.let {
-            IslandChooseBackSlotConfig(
-                it.getIntegerList("slot"),
-                it.getConfigurationSection("backCity")!!.asItemSlotConfig(),
-                it.getConfigurationSection("backPrev")!!.asItemSlotConfig()
-            )
-        }
-    }
-
+//    private fun ConfigurationSection.asIslandHelperSlotConfig(key: String): IslandHelperSlotConfig {
+//        return getConfigurationSection(key)!!.let {
+//            IslandHelperSlotConfig(
+//                it.getIntegerList("slot"),
+//                it.asItemSlotConfig(),
+//                it.getConfigurationSection("empty")!!.asItemSlotConfig()
+//            )
+//        }
+//    }
+//
+//    private fun ConfigurationSection.asIslandChooseBackSlotConfig(key: String): IslandChooseBackSlotConfig {
+//        return getConfigurationSection(key)!!.let {
+//            IslandChooseBackSlotConfig(
+//                it.getIntegerList("slot"),
+//                it.getConfigurationSection("backCity")!!.asItemSlotConfig(),
+//                it.getConfigurationSection("backPrev")!!.asItemSlotConfig()
+//            )
+//        }
+//    }
+//
     private fun ConfigurationSection.asIslandPresetSlotConfig(key: String): IslandPresetSlotConfig {
         return getConfigurationSection(key)!!.let {
             IslandPresetSlotConfig(
@@ -137,26 +137,26 @@ object ConfigManager {
             )
         }
     }
-
-    private fun ConfigurationSection.asInfoAndKudosSlotConfig(key: String): InfoAndKudosSlotConfig {
-        return getConfigurationSection(key)!!.let {
-            InfoAndKudosSlotConfig(
-                it.getIntegerList("slot"),
-                it.getConfigurationSection("info")!!.asItemSlotConfig(),
-                it.getConfigurationSection("kudos")!!.asItemSlotConfig()
-            )
-        }
-    }
-
-    private fun ConfigurationSection.asUpgradeAndBackIslandSlotSlotConfig(key: String): UpgradeAndBackIslandSlotSlotConfig {
-        return getConfigurationSection(key)!!.let {
-            UpgradeAndBackIslandSlotSlotConfig(
-                it.getIntegerList("slot"),
-                it.getConfigurationSection("upgrade")!!.asItemSlotConfig(),
-                it.getConfigurationSection("back")!!.asItemSlotConfig()
-            )
-        }
-    }
+//
+//    private fun ConfigurationSection.asInfoAndKudosSlotConfig(key: String): InfoAndKudosSlotConfig {
+//        return getConfigurationSection(key)!!.let {
+//            InfoAndKudosSlotConfig(
+//                it.getIntegerList("slot"),
+//                it.getConfigurationSection("info")!!.asItemSlotConfig(),
+//                it.getConfigurationSection("kudos")!!.asItemSlotConfig()
+//            )
+//        }
+//    }
+//
+//    private fun ConfigurationSection.asUpgradeAndBackIslandSlotSlotConfig(key: String): UpgradeAndBackIslandSlotSlotConfig {
+//        return getConfigurationSection(key)!!.let {
+//            UpgradeAndBackIslandSlotSlotConfig(
+//                it.getIntegerList("slot"),
+//                it.getConfigurationSection("upgrade")!!.asItemSlotConfig(),
+//                it.getConfigurationSection("back")!!.asItemSlotConfig()
+//            )
+//        }
+//    }
 
     private fun loadMainConfig() {
         debug = mainConfigFile.getBoolean("debug", false)

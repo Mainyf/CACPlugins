@@ -76,6 +76,7 @@ subprojects {
             implementation("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
             implementation("org.jetbrains.kotlin:kotlin-stdlib")
             implementation("io.netty:netty-all:4.1.68.Final")
+            implementation(rootProject.files("./bukkit-rebel-plugin.jar"))
 //            compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
             compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
             implementation("io.github.mainyf:newmclib-craftbukkit:1.7.3:")
@@ -123,6 +124,9 @@ subprojects {
                 "shop-manager" -> {
                     compileOnly(rootProject.files("./libs/QuickShop.jar"))
                     compileOnly(rootProject.files("./libs/Vault.jar"))
+                }
+                "social-system" -> {
+                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
                 }
             }
         }
@@ -188,6 +192,9 @@ subprojects {
                 }
                 "shop-manager" -> {
                     dd.addAll(listOf("QuickShop", "Vault"))
+                }
+                "social-system" -> {
+                    dd.addAll(listOf("PlaceholderAPI"))
                 }
             }
             dd.add("NewMCLib")

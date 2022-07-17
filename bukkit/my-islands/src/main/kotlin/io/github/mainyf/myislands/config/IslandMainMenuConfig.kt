@@ -10,14 +10,14 @@ class IslandMainMenuConfig(
     val nextSlot: DefaultSlotConfig,
     val islandViewSlot: DefaultSlotConfig,
     val switchViewIslandSlot: DefaultSlotConfig,
-    val infoAndKudosSlot: InfoAndKudosSlotConfig,
-    val upgradeAndBackIslandSlot: UpgradeAndBackIslandSlotSlotConfig,
+    val infoAndKudosSlot: DefaultSlotConfig,
+    val upgradeAndBackIslandSlot: DefaultSlotConfig,
     val islandSettingsSlot: DefaultSlotConfig
 )
 
 class IslandSettingsMenuConfig(
     val settings: MenuSettingsConfig,
-    val helpersSlot: IslandHelperSlotConfig,
+    val helpersSlot: DefaultSlotConfig,
     val prevSlot: DefaultSlotConfig,
     val nextSlot: DefaultSlotConfig,
     val moveCoreSlot: DefaultSlotConfig,
@@ -30,7 +30,7 @@ class IslandChooseMenuConfig(
     val islandListSlot: IslandPresetSlotConfig,
     val prevSlot: DefaultSlotConfig,
     val nextSlot: DefaultSlotConfig,
-    val backSlot: IslandChooseBackSlotConfig
+    val backSlot: DefaultSlotConfig
 )
 
 class IslandHelperSelectMenuConfig(
@@ -40,32 +40,32 @@ class IslandHelperSelectMenuConfig(
     val nextSlot: DefaultSlotConfig,
     val backSlot: DefaultSlotConfig
 )
-
-class IslandChooseBackSlotConfig(
-    val slot: List<Int>,
-    val backCity: ItemSlotConfig,
-    val backPrev: ItemSlotConfig
-)
-
-class IslandHelperSlotConfig(
-    val slot: List<Int>,
-    val itemSlot: ItemSlotConfig?,
-    val emptyItemSlot: ItemSlotConfig?
-)
-
+//
+//class IslandChooseBackSlotConfig(
+//    val slot: List<Int>,
+//    val backCity: ItemSlotConfig,
+//    val backPrev: ItemSlotConfig
+//)
+//
+//class IslandHelperSlotConfig(
+//    val slot: List<Int>,
+//    val itemSlot: ItemSlotConfig?,
+//    val emptyItemSlot: ItemSlotConfig?
+//)
+//
 class IslandPresetSlotConfig(
     val slot: List<List<Int>>,
     val itemSlot: ItemSlotConfig?
 )
-
-class InfoAndKudosSlotConfig(
-    val slot: List<Int>,
-    val info: ItemSlotConfig,
-    val kudos: ItemSlotConfig
-)
-
-class UpgradeAndBackIslandSlotSlotConfig(
-    val slot: List<Int>,
-    val upgrade: ItemSlotConfig,
-    val back: ItemSlotConfig
-)
+//
+//class InfoAndKudosSlotConfig(
+//    val slot: List<Int>,
+//    val info: ItemSlotConfig,
+//    val kudos: ItemSlotConfig
+//)
+//
+//class UpgradeAndBackIslandSlotSlotConfig(
+//    val slot: List<Int>,
+//    val upgrade: ItemSlotConfig,
+//    val back: ItemSlotConfig
+//)

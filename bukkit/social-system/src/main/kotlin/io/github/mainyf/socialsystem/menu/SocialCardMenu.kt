@@ -1,20 +1,40 @@
 package io.github.mainyf.socialsystem.menu
 
-import io.github.mainyf.newmclib.exts.AIR_ITEM
-import io.github.mainyf.newmclib.exts.asPlayer
+import io.github.mainyf.newmclib.config.IaIcon
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.offline_player_ext.OfflinePlayerData
+import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
+import io.github.mainyf.newmclib.utils.Cooldown
+import io.github.mainyf.newmclib.utils.Heads
 import io.github.mainyf.socialsystem.config.ConfigManager
+import io.github.mainyf.socialsystem.config.sendLang
+import io.github.mainyf.socialsystem.module.FriendHandler
+import me.clip.placeholderapi.PlaceholderAPI
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 
-class SocialCardMenu(offlineData: OfflinePlayerData) : AbstractMenuHandler() {
+class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler() {
 
-    private val player = offlineData.uuid.asPlayer()
+    constructor(target: Player) : this(target.uuid.asOfflineData()!!)
 
-    private val hasOnline get() = player != null
+    companion object {
+
+        val friendRequestCooldown = Cooldown()
+
+    }
+
+    private val target = offlineData.uuid.asPlayer()
+
+    private val isTargetOnline get() = target != null
+
+    private lateinit var player: Player
+
+    private val offlinePlayer = Bukkit.getOfflinePlayer(offlineData.name)
 
     override fun open(player: Player) {
+        this.player = player
         setup(ConfigManager.socialCardMenuConfig.settings)
         val inv = createInv(player)
 
@@ -22,26 +42,78 @@ class SocialCardMenu(offlineData: OfflinePlayerData) : AbstractMenuHandler() {
         player.openInventory(inv)
     }
 
+    override fun updateTitle(player: Player): String {
+        val scmConfig = ConfigManager.socialCardMenuConfig
+        val icons = mutableListOf<IaIcon>()
+        icons.addAll(scmConfig.requestSlot.iaIcon())
+        icons.addAll(scmConfig.repairSlot.iaIcon())
+        icons.addAll(scmConfig.headSlot.iaIcon())
+        icons.addAll(scmConfig.cardX1Slot.iaIcon())
+        icons.addAll(scmConfig.cardX2Slot.iaIcon())
+        icons.addAll(scmConfig.cardX3Slot.iaIcon())
+        icons.addAll(scmConfig.cardX4Slot.iaIcon())
+
+        if (isTargetOnline) {
+            icons.addAll(scmConfig.onlineSlot.iaIcon("online"))
+        } else {
+            icons.addAll(scmConfig.onlineSlot.iaIcon("offline"))
+        }
+
+        icons.addAll(scmConfig.helmetSlot.iaIcon())
+        icons.addAll(scmConfig.chestplateSlot.iaIcon())
+        icons.addAll(scmConfig.leggingsSlot.iaIcon())
+        icons.addAll(scmConfig.bootsSlot.iaIcon())
+        return applyTitle(player, icons)
+    }
+
     private fun updateInv(player: Player, inv: Inventory) {
         val scmConfig = ConfigManager.socialCardMenuConfig
-        inv.setIcon(scmConfig.requestSlot)
-        inv.setIcon(scmConfig.repairSlot)
-        inv.setIcon(scmConfig.headSlot)
-        inv.setIcon(scmConfig.cardX1Slot)
-        inv.setIcon(scmConfig.cardX2Slot)
-        inv.setIcon(scmConfig.cardX3Slot)
-        inv.setIcon(scmConfig.cardX4Slot)
-
-        if (hasOnline) {
-            inv.setIcon(scmConfig.onlineSlot.slot, scmConfig.onlineSlot.onlineItem.toItemStack())
-        } else {
-            inv.setIcon(scmConfig.onlineSlot.slot, scmConfig.onlineSlot.offlineItem.toItemStack())
+        if (offlineData.uuid != player.uuid) {
+            inv.setIcon(scmConfig.requestSlot) {
+                if (FriendHandler.isFriend(it, offlineData.uuid)) {
+                    it.sendLang("alreadyFriend")
+                    return@setIcon
+                }
+                friendRequestCooldown.invoke(it.uuid, ConfigManager.friendRequestCooldown * 1000L, {
+                    FriendHandler.sendFriendRequest(it, offlineData.uuid)
+                    player.sendLang("sendFriendRequestToSender")
+                    target?.sendLang("sendFriendRequestToReceiver", "{player}", player.name)
+                }, { eTime ->
+                    it.sendLang("sendFriendRequestCooldown", "{eTime}", eTime.timestampConvertTime())
+                })
+            }
+            if (FriendHandler.allowRepair(player, offlineData.uuid) && isTargetOnline) {
+                inv.setIcon(scmConfig.repairSlot) {
+                    execmd("cmi repair hand ${target!!.name}")
+                    player.sendLang("sendRepairHandEquipmentToSender")
+                    target.sendLang("sendRepairHandEquipmentToReceiver", "{player}", player.name)
+                }
+            }
         }
-        if (hasOnline) {
-            inv.setIcon(scmConfig.helmetSlot.slot, player.equipment.helmet ?: AIR_ITEM)
-            inv.setIcon(scmConfig.chestplateSlot.slot, player.equipment.chestplate ?: AIR_ITEM)
-            inv.setIcon(scmConfig.leggingsSlot.slot, player.equipment.leggings ?: AIR_ITEM)
-            inv.setIcon(scmConfig.bootsSlot.slot, player.equipment.boots ?: AIR_ITEM)
+
+        inv.setIcon(scmConfig.headSlot.slot, Heads.getPlayerHead(offlineData.name))
+
+        arrayOf(
+            scmConfig.cardX1Slot,
+            scmConfig.cardX2Slot,
+            scmConfig.cardX3Slot,
+            scmConfig.cardX4Slot
+        ).forEach {
+            inv.setIcon(it, itemBlock = {
+                setPlaceholder(offlinePlayer)
+            })
+        }
+
+        if (isTargetOnline) {
+            inv.setIcon(scmConfig.onlineSlot, "online")
+        } else {
+            inv.setIcon(scmConfig.onlineSlot, "offline")
+        }
+        if (isTargetOnline) {
+            inv.setIcon(scmConfig.helmetSlot, itemStack = target!!.equipment.helmet ?: AIR_ITEM)
+            inv.setIcon(scmConfig.chestplateSlot, itemStack = target.equipment.chestplate ?: AIR_ITEM)
+            inv.setIcon(scmConfig.leggingsSlot, itemStack = target.equipment.leggings ?: AIR_ITEM)
+            inv.setIcon(scmConfig.bootsSlot, itemStack = target.equipment.boots ?: AIR_ITEM)
         }
     }
 

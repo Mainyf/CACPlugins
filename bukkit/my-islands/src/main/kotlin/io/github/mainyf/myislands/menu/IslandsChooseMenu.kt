@@ -42,12 +42,12 @@ class IslandsChooseMenu(
     override fun updateTitle(player: Player): String {
         val chooseMenuConfig = ConfigManager.chooseMenuConfig
         val icons = mutableListOf<IaIcon>()
-        icons.addAll(chooseMenuConfig.prevSlot.itemSlot.iaIcons.icons())
-        icons.addAll(chooseMenuConfig.nextSlot.itemSlot.iaIcons.icons())
+        icons.addAll(chooseMenuConfig.prevSlot.iaIcon())
+        icons.addAll(chooseMenuConfig.nextSlot.iaIcon())
         if (hasFirst) {
-            icons.addAll(chooseMenuConfig.backSlot.backCity.iaIcons.icons())
+            icons.addAll(chooseMenuConfig.backSlot.iaIcon("backCity"))
         } else {
-            icons.addAll(chooseMenuConfig.backSlot.backPrev.iaIcons.icons())
+            icons.addAll(chooseMenuConfig.backSlot.iaIcon("backPrev"))
         }
         currentIslandList.map {
             icons.addAll(it.iaIcons.icons())
@@ -97,28 +97,24 @@ class IslandsChooseMenu(
             }
         }
 
-        inv.setIcon(chooseMenuConfig.prevSlot.slot, chooseMenuConfig.prevSlot.itemSlot.toItemStack()) {
+        inv.setIcon(chooseMenuConfig.prevSlot) {
             if (pageIndex > 1) {
-                chooseMenuConfig.prevSlot.itemSlot.execAction(it)
                 pageIndex--
                 updateInv(inv)
             }
         }
-        inv.setIcon(chooseMenuConfig.nextSlot.slot, chooseMenuConfig.nextSlot.itemSlot.toItemStack()) {
+        inv.setIcon(chooseMenuConfig.nextSlot) {
             if (pageIndex < maxPageIndex) {
-                chooseMenuConfig.nextSlot.itemSlot.execAction(it)
                 pageIndex++
                 updateInv(inv)
             }
         }
         if (hasFirst) {
-            inv.setIcon(chooseMenuConfig.backSlot.slot, chooseMenuConfig.backSlot.backCity.toItemStack()) {
-                chooseMenuConfig.backSlot.backCity.execAction(it)
+            inv.setIcon(chooseMenuConfig.backSlot, key = "backCity") {
                 ConfigManager.backLobbyAction.execute(it)
             }
         } else {
-            inv.setIcon(chooseMenuConfig.backSlot.slot, chooseMenuConfig.backSlot.backPrev.toItemStack()) {
-                chooseMenuConfig.backSlot.backPrev.execAction(it)
+            inv.setIcon(chooseMenuConfig.backSlot, key = "backPrev") {
                 backBlock?.invoke(it)
 //                ConfigManager.backLobbyAction.execute(it)
             }

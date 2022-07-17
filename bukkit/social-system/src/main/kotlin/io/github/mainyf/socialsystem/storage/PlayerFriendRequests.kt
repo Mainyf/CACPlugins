@@ -1,12 +1,13 @@
 package io.github.mainyf.socialsystem.storage
 
+import io.github.mainyf.newmclib.env
 import io.github.mainyf.newmclib.storage.BaseEntity
 import io.github.mainyf.newmclib.storage.BaseTable
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import java.util.*
 
-object PlayerFriendRequests : BaseTable("t_PlayerFriendRequests", true) {
+object PlayerFriendRequests : BaseTable("t_PlayerFriendRequests_${env()}") {
 
     val sender = reference("sender", PlayerSocials)
 

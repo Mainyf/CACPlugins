@@ -4,47 +4,48 @@ mainMenu:
   # ia背景图片
   row: 6
   background: ':offset_-8::view_plot:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   # 上一页
   prevSlot:
     slot: [ 28 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3上一页"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3上一页"
   # 下一页
   nextSlot:
     slot: [ 34 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3下一页"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3下一页"
   # 岛屿展示格子
   islandViewSlot:
     slot: [ 1,2,3,4,5,6,7,10,11,12,13,14,15,16,19,20,21,22,23,24,25 ]
-    type: itemsadder:air
-    name: " &c&l> &3参观岛屿"
-    lore:
-      - ""
-      - " &7▪ 拥有者：&f{owner}"
-      - " &7▪ 热度：&f{heats}"
-      - ""
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3参观岛屿"
+      lore:
+        - ""
+        - " &7▪ 拥有者：&f{owner}"
+        - " &7▪ 热度：&f{heats}"
+        - ""
   # 切换岛屿展示列表
   switchViewIslandSlot:
     slot: [ 31 ]
-    iaIcons:
-      all: '0:offset_-102::view_plot_listype_0:'
-      online: '0:offset_-102::view_plot_listype_1:'
-      friend: '0:offset_-102::view_plot_listype_2:'
-      permission: '0:offset_-102::view_plot_listype_3:'
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3切换列表展示 &7（当前: 展示&f{filterText}&7）"
+    default:
+      iaIcons:
+        all: '0:offset_-102::view_plot_listype_0:'
+        online: '0:offset_-102::view_plot_listype_1:'
+        friend: '0:offset_-102::view_plot_listype_2:'
+        permission: '0:offset_-102::view_plot_listype_3:'
+      type: itemsadder:air
+      name: " &c&l> &3切换列表展示 &7（当前: 展示&f{filterText}&7）"
   # 岛屿信息
   infoAndKudosSlot:
     slot: [ 46 ]
     info:
       iaIcons: '1:offset_-77::view_plot_info_0:'
-      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3岛屿信息"
       lore:
@@ -55,7 +56,6 @@ mainMenu:
         - ""
     kudos:
       iaIcons: '1:offset_-77::view_plot_info_1:'
-      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3岛屿点赞"
       lore:
@@ -68,33 +68,32 @@ mainMenu:
     slot: [ 48,49,50 ]
     upgrade:
       iaIcons: '2:offset_13::view_plot_home_0:'
-      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3岛屿升级 &c未开放"
     back:
       iaIcons: '2:offset_13::view_plot_home_1:'
-      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3返回自己岛屿"
   # 岛屿设置
   islandSettingsSlot:
     slot: [ 52 ]
-    iaIcons:
-      permission: '3:offset_13:'
-      unfamiliar: '3:offset_13:'
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3岛屿设置"
+    default:
+      iaIcons:
+        permission: '3:offset_13:'
+        unfamiliar: '3:offset_13:'
+      type: itemsadder:air
+      name: " &c&l> &3岛屿设置"
 settingsMenu:
   # 点击速度限制
   cooldown: 250
   row: 3
   background: ':offset_-8::view_plot_set::offset_-150:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   # 授权者
   helpersSlot:
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
     slot: [ 1,2,3,4,5,6,7 ]
-    name: " &c&l> &3收回 {player} 的授权"
+    default:
+      name: " &c&l> &3收回 {player} 的授权"
     # 没有授权者的位置
     empty:
       iaIcons:
@@ -105,85 +104,83 @@ settingsMenu:
         v5: '1:offset_-5::view_plot_set_add:'
         v6: '1:offset_-5::view_plot_set_add:'
         v7: '1:offset_-5::view_plot_set_add:'
-      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3添加授权 &7（已授权: &f{curHelpers}&7/&f{maxHelpers}&7位）"
   # 上一页
   prevSlot:
     slot: [ 0 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3上一页"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3上一页"
   # 下一页
   nextSlot:
     slot: [ 8 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3下一页"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3下一页"
   # 移动核心
   moveCoreSlot:
-    iaIcons: ''
     slot: [ 20 ]
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3移动核心水晶"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3移动核心水晶"
   # 切换岛屿状态
   visibilitySlot:
-    iaIcons:
-      all: '0:offset_150::offset_-102::view_plot_set_listype_0:'
-      permission: '0:offset_150::offset_-102::view_plot_set_listype_1:'
-      none: '0:offset_150::offset_-102::view_plot_set_listype_2:'
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
     slot: [ 22 ]
-    type: itemsadder:air
-    name: " &c&l> &3切换展示状态 &7（当前: &f{visibility}&7可见）"
+    default:
+      iaIcons:
+        all: '0:offset_150::offset_-102::view_plot_set_listype_0:'
+        permission: '0:offset_150::offset_-102::view_plot_set_listype_1:'
+        none: '0:offset_150::offset_-102::view_plot_set_listype_2:'
+      type: itemsadder:air
+      name: " &c&l> &3切换展示状态 &7（当前: &f{visibility}&7可见）"
   # 重置岛屿
   resetIslandSlot:
-    iaIcons: ''
     slot: [ 24 ]
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3重置岛屿"
-    lore:
-      - ""
-      - " &7▪ 重置后岛屿所有东西都将不复存在"
-      - ""
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3重置岛屿"
+      lore:
+        - ""
+        - " &7▪ 重置后岛屿所有东西都将不复存在"
+        - ""
 chooseMenu:
   # 点击速度限制
   cooldown: 250
   row: 4
   background: ':offset_-8::view_plot_types:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   # 岛屿预设列表
   islandListSlot:
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
     slot: [ [ 0, 1, 2, 9, 10, 11 ], [ 3, 4, 5, 12, 13, 14 ], [ 6, 7, 8, 15, 16, 17 ] ]
-    type: itemsadder:air
+    default:
+      type: itemsadder:air
   # 上一页
   prevSlot:
     slot: [ 29 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3上一页"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3上一页"
   # 下一页
   nextSlot:
     slot: [ 33 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3下一页"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3下一页"
   backSlot:
     slot: [ 31 ]
     backCity:
       iaIcons: ''
-      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3返回大厅"
     backPrev:
       iaIcons: ''
-      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       type: itemsadder:air
       name: " &c&l> &3返回界面"
 # 选择授权玩家菜单
@@ -191,27 +188,27 @@ helperSelectMenu:
   cooldown: 250
   row: 4
   background: ''
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   # 玩家列表
   playerListSlot:
     slot: [ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26 ]
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   # 上一页
   prevSlot:
     slot: [ 28 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3上一页"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3上一页"
   # 下一页
   nextSlot:
     slot: [ 34 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3下一页"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3下一页"
   backSlot:
     slot: [ 31 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3返回界面"
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3返回界面"

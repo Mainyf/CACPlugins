@@ -2,7 +2,6 @@
 
 package io.github.mainyf.socialsystem.config
 
-import io.github.mainyf.newmclib.config.DefaultSlotConfig
 import io.github.mainyf.newmclib.config.asDefaultSlotConfig
 import io.github.mainyf.newmclib.config.asItemSlotConfig
 import io.github.mainyf.newmclib.config.asMenuSettingsConfig
@@ -17,7 +16,11 @@ object ConfigManager {
     private lateinit var menuConfigFile: FileConfiguration
     private lateinit var langConfigFile: FileConfiguration
 
+    lateinit var repairPermission: String
+    var friendRequestCooldown: Long = 60L
+
     lateinit var socialCardMenuConfig: SocialCardMenuConfig
+    lateinit var socialMainMenuConfig: SocialMainMenuConfig
 
     fun load() {
         SocialSystem.INSTANCE.saveDefaultConfig()
@@ -56,26 +59,52 @@ object ConfigManager {
             socialCardSect.asDefaultSlotConfig("cardX2Slot"),
             socialCardSect.asDefaultSlotConfig("cardX3Slot"),
             socialCardSect.asDefaultSlotConfig("cardX4Slot"),
-            socialCardSect.asSocialOnlineSlot("onlineSlot"),
+            socialCardSect.asDefaultSlotConfig("onlineSlot"),
             socialCardSect.asDefaultSlotConfig("helmetSlot"),
             socialCardSect.asDefaultSlotConfig("chestplateSlot"),
             socialCardSect.asDefaultSlotConfig("leggingsSlot"),
             socialCardSect.asDefaultSlotConfig("bootsSlot")
         )
+        val socialMainSect = menuConfigFile.getConfigurationSection("socialMainMenu")!!
+        socialMainMenuConfig = SocialMainMenuConfig(
+            socialMainSect.asMenuSettingsConfig(),
+            socialMainSect.asDefaultSlotConfig("prevSlot"),
+            socialMainSect.asDefaultSlotConfig("nextSlot"),
+            socialMainSect.asDefaultSlotConfig("friendsSlot"),
+            socialMainSect.asDefaultSlotConfig("headSlot"),
+            socialMainSect.asDefaultSlotConfig("cardX1Slot"),
+            socialMainSect.asDefaultSlotConfig("cardX2Slot"),
+            socialMainSect.asDefaultSlotConfig("cardX3Slot"),
+            socialMainSect.asDefaultSlotConfig("cardX4Slot"),
+            socialMainSect.asDefaultSlotConfig("onlineSlot"),
+            socialMainSect.asDefaultSlotConfig("deleteFriendOrAllowRepairSlot"),
+            socialMainSect.asDefaultSlotConfig("tpSlot")
+        )
     }
 
     private fun loadMainConfig() {
-
+        repairPermission = mainConfigFile.getString("repairPermission")!!
+        friendRequestCooldown = mainConfigFile.getLong("friendRequestCooldown", 60L)
     }
 
-    private fun ConfigurationSection.asSocialOnlineSlot(key: String): SocialOnlineSlot {
-        return getConfigurationSection(key)!!.let {
-            SocialOnlineSlot(
-                it.getIntegerList("slot"),
-                it.getConfigurationSection("online")!!.asItemSlotConfig(),
-                it.getConfigurationSection("offline")!!.asItemSlotConfig()
-            )
-        }
+//    private fun ConfigurationSection.asSocialOnlineSlot(key: String): SocialOnlineSlot {
+//        return getConfigurationSection(key)!!.let {
+//            SocialOnlineSlot(
+//                it.getIntegerList("slot"),
+//                it.getConfigurationSection("online")!!.asItemSlotConfig(),
+//                it.getConfigurationSection("offline")!!.asItemSlotConfig()
+//            )
+//        }
+//    }
+//
+//    private fun ConfigurationSection.asDeleteFriendOrAllowRepairSlot(key: String): DeleteFriendOrAllowRepairSlot {
+//        return getConfigurationSection(key)!!.let {
+//            DeleteFriendOrAllowRepairSlot(
+//                it.getIntegerList("slot"),
+//                it.getConfigurationSection("delete")!!.asItemSlotConfig(),
+//                it.getConfigurationSection("allowRepair")!!.asItemSlotConfig()
+//            )
+//        }
+//    }
 
-    }
 }
