@@ -10,6 +10,7 @@ import io.github.mainyf.worldsettings.getWorldSettings
 import io.github.mainyf.worldsettings.ignorePermAndGetWorldSettings
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
+import org.bukkit.block.Campfire
 import org.bukkit.entity.*
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
@@ -172,6 +173,12 @@ object PlayerListener : Listener {
             }
         }
         ignorePermAndGetWorldSettings(event.player) { settings ->
+            if(settings.antiCampfireInteract && event.clickedBlock?.state is Campfire) {
+                event.setUseItemInHand(Event.Result.DENY)
+                event.setUseInteractedBlock(Event.Result.DENY)
+                event.isCancelled = true
+                return@ignorePermAndGetWorldSettings
+            }
             if (settings.antiItemUse.contains(event.item?.type)) {
                 settings.itemBlockAction?.execute(event.player)
                 event.isCancelled = true

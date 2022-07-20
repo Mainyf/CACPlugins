@@ -1,21 +1,64 @@
 package io.github.mainyf.bungeesettingsbungee
 
+import io.github.mainyf.bungeesettingsbungee.socket.ServerSocketManager
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
+import net.md_5.bungee.api.ChatColor
+import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.event.PluginMessageEvent
+import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.Listener
 import net.md_5.bungee.api.plugin.Plugin
+import net.md_5.bungee.config.ConfigurationProvider
+import net.md_5.bungee.config.YamlConfiguration
 import net.md_5.bungee.event.EventHandler
 import java.util.UUID
 
 class BungeeSettingsBungee : Plugin(), Listener {
 
     private val CHANNEL_NAME = "cacserver:dispatcher"
+    var socketPort = 24440
+
+    companion object {
+
+        lateinit var INSTANCE: BungeeSettingsBungee
+
+    }
 
     override fun onEnable() {
+        INSTANCE = this
         proxy.registerChannel(CHANNEL_NAME)
         ProxyServer.getInstance().pluginManager.registerListener(this, this)
+        ProxyServer.getInstance().pluginManager.registerCommand(this, object : Command("bsb") {
+
+            override fun execute(sender: CommandSender, args: Array<String>) {
+                if (!sender.hasPermission("bsb.command.use")) return
+                if (args.getOrNull(0) == "reload") {
+                    loadConfig()
+                    sender.sendMessage(*ComponentBuilder("[BungeeSettingsBungee] 重载成功").color(ChatColor.GREEN).create())
+                }
+            }
+
+        })
+        loadConfig()
+    }
+
+    override fun onDisable() {
+        ServerSocketManager.close()
+    }
+
+    private fun loadConfig() {
+        val configProvider = ConfigurationProvider.getProvider(YamlConfiguration::class.java)
+        val configFile = dataFolder.resolve("config.yml")
+        if (!configFile.exists()) {
+            dataFolder.mkdirs()
+            getResourceAsStream("config.yml").transferTo(configFile.outputStream())
+        }
+        val config = configProvider.load(configFile)
+        socketPort = config.getInt("socketPort")
+        ServerSocketManager.initServer(socketPort, this.logger)
     }
 
     @EventHandler

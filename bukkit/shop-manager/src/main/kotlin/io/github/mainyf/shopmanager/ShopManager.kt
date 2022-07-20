@@ -69,10 +69,11 @@ class ShopManager : JavaPlugin() {
         sellShop: ConfigManager.SellShopLimit
     ): Int {
         val currentHarvest = StorageManager.getCurrentHarvest(player.uuid, material)
-        if (currentHarvest >= sellShop.maxHarvest) {
+        val maxHarvest = ConfigManager.getMaxHarvest(player, sellShop)
+        if (currentHarvest >= maxHarvest) {
             return 0
         }
-        return floor((sellShop.maxHarvest - currentHarvest) / sellShop.price).toInt()
+        return floor((maxHarvest - currentHarvest) / sellShop.price).toInt()
     }
 
 }

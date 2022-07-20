@@ -133,7 +133,7 @@ object ConfigManager {
         return getConfigurationSection(key)!!.let {
             IslandPresetSlotConfig(
                 it.get("slot") as List<List<Int>>,
-                it.asItemSlotConfig()
+                it.getConfigurationSection("default")!!.asItemSlotConfig()
             )
         }
     }

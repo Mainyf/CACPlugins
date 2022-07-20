@@ -228,7 +228,8 @@ data class WorldSettingConfig(
     val deleteEnchants: List<Enchantment> = listOf(),
     val deleteEnchantsAction: MultiAction? = null,
     val antiTrampleTurtleEgg: Boolean = false,
-    val antiGoatHornSound: Boolean = true
+    val antiGoatHornSound: Boolean = true,
+    val antiCampfireInteract: Boolean = true
 )
 
 enum class CommandMatchType {

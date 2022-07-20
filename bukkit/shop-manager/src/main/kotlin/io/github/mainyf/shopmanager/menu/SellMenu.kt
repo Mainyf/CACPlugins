@@ -33,17 +33,17 @@ class SellMenu : AbstractMenuHandler() {
     override fun updateTitle(player: Player): String {
         val sellMenuConfig = ConfigManager.sellMenuConfig
         val icons = mutableListOf<IaIcon>()
-        icons.addAll(sellMenuConfig.placeholderSlot.itemSlot.iaIcons.icons())
-        icons.addAll(sellMenuConfig.sellSlot.itemSlot.iaIcons.icons())
+        icons.addAll(sellMenuConfig.placeholderSlot.iaIcon())
+        icons.addAll(sellMenuConfig.sellSlot.iaIcon())
 
         return applyTitle(player, icons)
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
         val pSlot = ConfigManager.sellMenuConfig.placeholderSlot
-        inv.setIcon(pSlot.slot, pSlot.itemSlot.toItemStack())
+        inv.setIcon(pSlot)
         val sellSlot = ConfigManager.sellMenuConfig.sellSlot
-        inv.setIcon(sellSlot.slot, sellSlot.itemSlot.toItemStack()) {
+        inv.setIcon(sellSlot) {
             sell(player, inv)
         }
     }
@@ -72,7 +72,7 @@ class SellMenu : AbstractMenuHandler() {
             var totalPrice = sellShop.price * amount
 
             val sellCount = ShopManager.INSTANCE.getSellItemCount(player, type, sellShop)
-            val langArr = sellShop.getLangArr(type, sellCount)
+            val langArr = sellShop.getLangArr(player, type, sellCount)
             if (amount > sellCount) {
                 if (sellCount <= 0) {
                     player.sendLang(

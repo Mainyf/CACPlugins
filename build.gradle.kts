@@ -300,7 +300,7 @@ class $pluginName : JavaPlugin() {
             dependsOn(tasks.findByName("copyPlugin"))
             classpath = rootProject.files("./server/bungeecord/BungeeCord.jar")
             mainClass.set("net.md_5.bungee.Bootstrap")
-            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
+            jvmArgs = listOf("-Xmx4g"/*, "-Dfile.encoding=UTF-8"*/)
             args = listOf("nogui")
             workingDir = rootProject.file("./server/bungeecord")
             standardOutput = System.out

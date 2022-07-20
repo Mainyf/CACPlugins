@@ -21,6 +21,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import kotlin.math.ceil
+import kotlin.system.measureTimeMillis
 
 class IslandsMainMenu : AbstractMenuHandler() {
 
@@ -40,6 +41,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
         updateMaxPageIndex(player)
         islandAbs = IslandsManager.getIslandAbs(player)
         plotAbs = MyIslands.plotUtils.getPlotByPLoc(player)
+
         hasPermission = IslandsManager.hasPermissionByFeet(player)
         hasOwner = plotAbs?.owner == player.uuid
         val inv = createInv(player)
@@ -178,7 +180,12 @@ class IslandsMainMenu : AbstractMenuHandler() {
         val viewListSlots = ConfigManager.mainMenuConfig.islandViewSlot
         inv.unSetIcon(viewListSlots.slot)
         val type = values()[viewIslandTypeIndex]
-        val islands = StorageManager.getIsLandsOrderByKudos(pageIndex, viewListSlots.slot.size, player, type)
+        val islands = StorageManager.getIsLandsOrderByKudos(
+            pageIndex,
+            viewListSlots.slot.size,
+            player,
+            type
+        )
         for (i in islands.indices) {
             val islandData = islands[i]
             if (i >= viewListSlots.slot.size) {
@@ -187,6 +194,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
             kotlin.runCatching {
                 val offlinePlayer = islandData.id.value.asOfflineData()?.name ?: ""
                 val skullItem = Heads.getPlayerHead(offlinePlayer).clone()
+//                val skullItem = Heads.getPlayerHead(offlinePlayer).clone()
                 val plot = MyIslands.plotUtils.findPlot(islandData.id.value)
 
                 inv.setIcon(viewListSlots.slot[i], viewListSlots.default()!!.toItemStack(skullItem) {
@@ -225,6 +233,6 @@ enum class IslandViewListType(val text: String) {
     ALL("全部"),
     ONLINE("在线"),
     FRIEND("好友"),
-    PERMISSION("授权者");
+    PERMISSION("授权岛");
 
 }

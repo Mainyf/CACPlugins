@@ -73,6 +73,8 @@ gloablServer:
     antiTrampleTurtleEgg: true
     # 阻止山羊角声音传播
     antiGoatHornSound: true
+    # 阻止拿下营火上的物品
+    antiCampfireInteract: true
   worlds:
     world:
       difficulty: NORMAL

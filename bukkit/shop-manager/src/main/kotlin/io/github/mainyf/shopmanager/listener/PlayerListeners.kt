@@ -41,7 +41,7 @@ object PlayerListeners : Listener {
             shop.price = sellShop.price
         }
         val sellCount = ShopManager.INSTANCE.getSellItemCount(player, material, sellShop)
-        val langArr = sellShop.getLangArr(material, sellCount)
+        val langArr = sellShop.getLangArr(player, material, sellCount)
         if (event.amount > sellCount) {
             player.sendLang("maxHarvest", *langArr)
             event.isCancelled = true

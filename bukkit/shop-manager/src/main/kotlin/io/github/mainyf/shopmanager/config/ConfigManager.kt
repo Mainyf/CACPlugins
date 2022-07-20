@@ -12,6 +12,7 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Player
 
 fun CommandSender.sendLang(key: String, vararg data: Any) {
     ConfigManager.lang.apply {
@@ -29,8 +30,22 @@ object ConfigManager {
 
     lateinit var sellMenuConfig: SellMenuConfig
 
+    var addPermission = "shopmanager.add"
     private val sellShopLimitMap = mutableMapOf<Material, SellShopLimit>()
     lateinit var lang: BaseLang
+
+    private val addPermissionLevels = listOf(
+        100,
+        90,
+        80,
+        70,
+        60,
+        50,
+        40,
+        30,
+        20,
+        10
+    )
 
     fun load() {
         ShopManager.INSTANCE.saveDefaultConfig()
@@ -71,6 +86,7 @@ object ConfigManager {
 
     private fun loadMainConfig() {
         debug = mainConfigFile.getBoolean("debug", false)
+        addPermission = mainConfigFile.getString("addPermission", addPermission)!!
         sellShopLimitMap.clear()
         val sellShopSect = mainConfigFile.getConfigurationSection("buyShop")!!
         sellShopSect.getKeys(false).forEach { key ->
@@ -103,15 +119,20 @@ object ConfigManager {
         return sellShopLimitMap[material]
     }
 
+    fun getMaxHarvest(player: Player, sellShop: SellShopLimit): Double {
+        val value = addPermissionLevels.find { player.hasPermission("${addPermission}.${it}") }?.toDouble() ?: 0.0
+        return sellShop.maxHarvest + (sellShop.maxHarvest * (value / 100.0))
+    }
+
     class SellShopLimit(
         val price: Double,
         val maxHarvest: Double
     ) {
 
-        fun getLangArr(material: Material, count: Int): Array<Any> {
+        fun getLangArr(player: Player, material: Material, count: Int): Array<Any> {
             return arrayOf(
                 "{itemName}", Component.translatable(material),
-                "{maxHarvest}", maxHarvest.toString(),
+                "{maxHarvest}", getMaxHarvest(player, this),
                 "{eCount}", count.toString()
             )
         }

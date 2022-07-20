@@ -74,10 +74,10 @@ class IslandsChooseMenu(
                 inv.setIcon(
                     slot,
                     chooseMenuConfig.islandListSlot.itemSlot!!.toItemStack {
-                        itemMeta = itemMeta.apply {
-                            displayName(Component.text(ui.name.colored()))
-                            lore(ui.lore.map { Component.text(it.colored()) })
-                        }
+                        withMeta(
+                            displayName = ui.name.toComp(),
+                            lore = ui.lore.map { it.toComp() }
+                        )
                     }
                 ) {
                     chooseMenuConfig.islandListSlot.itemSlot.execAction(it)

@@ -1,4 +1,5 @@
 debug: false
+addPermission: "shopmanager.add"
 # 出售商店
 buyShop:
   DIAMOND: "82,8000"

@@ -7,12 +7,14 @@ sellMenu:
   # 上一页
   placeholderSlot:
     slot: [ 45,46,47,48,50,51,52,53 ]
-    iaIcons: ''
-    type: BLACK_STAINED_GLASS_PANE
-    name: " "
+    default:
+      iaIcons: ''
+      type: BLACK_STAINED_GLASS_PANE
+      name: " "
   sellSlot:
     slot: [ 49 ]
-    iaIcons: ''
-    actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: GREEN_STAINED_GLASS_PANE
-    name: " &c&l> &3一键出售"
+    default:
+      iaIcons: ''
+      actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      type: GREEN_STAINED_GLASS_PANE
+      name: " &c&l> &3一键出售"

@@ -22,6 +22,7 @@ import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import java.util.*
 import kotlin.math.max
+import kotlin.system.measureTimeMillis
 
 object StorageManager : AbstractStorageManager() {
 
@@ -268,6 +269,7 @@ object StorageManager : AbstractStorageManager() {
                 a.heats == b.heats -> {
                     (a.id.value.asOfflineData()?.name ?: "").compareTo(b.id.value.asOfflineData()?.name ?: "")
                 }
+                a.heats == b.heats -> 0
                 else -> -1
             }
         }.pagination(pageIndex, pageSize)
