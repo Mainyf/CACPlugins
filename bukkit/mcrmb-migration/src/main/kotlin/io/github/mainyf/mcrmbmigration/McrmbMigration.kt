@@ -1,6 +1,9 @@
 package io.github.mainyf.mcrmbmigration
 
 import com.google.gson.Gson
+import dev.jorel.commandapi.CommandAPI
+import dev.jorel.commandapi.arguments.GreedyStringArgument
+import dev.jorel.commandapi.arguments.TextArgument
 import io.github.mainyf.mcrmbmigration.storage.StorageManager
 import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.stringArguments
@@ -29,7 +32,7 @@ class McrmbMigration : JavaPlugin() {
         loadConfig()
         apiCommand("getoldpoints") {
             withHelp("领取点券补偿", "/getoldpoints <密码> 领取补偿的点券")
-            withArguments(stringArguments("密码", "输入你的密码"))
+            withArguments(GreedyStringArgument("密码"))
             executePlayer {
                 val player = sender
                 val password = args[0] as String
@@ -59,6 +62,10 @@ class McrmbMigration : JavaPlugin() {
             sender.successMsg("重载完成")
             return@cmd true
         })
+    }
+
+    override fun onDisable() {
+        CommandAPI.unregister("getoldpoints")
     }
 
     private fun loadConfig() {
