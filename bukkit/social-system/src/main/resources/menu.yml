@@ -180,7 +180,7 @@ socialMainMenu:
       type: BLACK_STAINED_GLASS_PANE
       name: " &c&l> &3允许其他玩家帮我修理装备: {status}"
   tpSlot:
-    slot: [ 37 ]
+    slot: [ 38 ]
     default:
       type: BLACK_STAINED_GLASS_PANE
       name: " &c&l> &3左键发起传送，右键邀请传送"

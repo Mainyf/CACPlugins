@@ -1,5 +1,6 @@
 package io.github.mainyf.socialsystem.menu
 
+import io.github.mainyf.bungeesettingsbukkit.CrossServerManager
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
@@ -10,7 +11,6 @@ import io.github.mainyf.newmclib.utils.Heads
 import io.github.mainyf.socialsystem.config.ConfigManager
 import io.github.mainyf.socialsystem.config.sendLang
 import io.github.mainyf.socialsystem.module.FriendHandler
-import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
@@ -27,7 +27,7 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
 
     private val target = offlineData.uuid.asPlayer()
 
-    private val isTargetOnline get() = target != null
+    private val isTargetOnline get() = CrossServerManager.isOnline(offlineData.uuid)
 
     private lateinit var player: Player
 

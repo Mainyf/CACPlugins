@@ -211,9 +211,12 @@ class IslandsMainMenu : AbstractMenuHandler() {
 //                            it.errorMsg("此玩家没有岛屿")
                                 return@let
                             }
-                            plot.getHome { loc ->
-                                it.teleport(BukkitUtil.adapt(loc).add(0.5, 0.0, 0.5))
-                            }
+                            val coreLoc = IslandsManager.getIslandCoreLoc(islandData)
+                            val homeLoc = IslandsManager.getHomeLoc(coreLoc)
+                            MyIslands.plotUtils.teleportPlayerToLoc(player, homeLoc.add(0.5, 0.0, 0.5), coreLoc)
+//                            plot.getHome { loc ->
+//                                it.teleport(BukkitUtil.adapt(loc).add(0.5, 0.0, 0.5))
+//                            }
                         }
                 }
             }.onFailure {

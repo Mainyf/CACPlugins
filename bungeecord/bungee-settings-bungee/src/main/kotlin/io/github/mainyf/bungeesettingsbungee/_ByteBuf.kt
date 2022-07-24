@@ -1,4 +1,4 @@
-package io.github.mainyf.bungeesettingsbukkit
+package io.github.mainyf.bungeesettingsbungee
 
 import io.netty.buffer.ByteBuf
 import java.util.*

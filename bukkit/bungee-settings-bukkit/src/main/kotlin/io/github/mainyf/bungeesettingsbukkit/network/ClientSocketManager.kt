@@ -2,33 +2,33 @@ package io.github.mainyf.bungeesettingsbukkit.network
 
 import io.github.mainyf.bungeesettingsbukkit.BungeeSettingsBukkit
 import io.github.mainyf.bungeesettingsbukkit.CrossServerManager
+import io.github.mainyf.bungeesettingsbukkit.ServerPacket
+import io.github.mainyf.newmclib.exts.readString
 import io.github.mainyf.newmclib.exts.toByteArray
-import io.github.mainyf.newmclib.logger
+import io.github.mainyf.newmclib.exts.writeString
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import java.io.BufferedOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.Socket
-import java.net.SocketException
-import java.util.Timer
-import java.util.TimerTask
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread
+import kotlin.concurrent.timerTask
 
 object ClientSocketManager {
 
-    private var threadPool: ExecutorService? = null
     private var clientSocket: Socket? = null
     private var dis: DataInputStream? = null
     private var dos: DataOutputStream? = null
 
-    private var clientKeepLoop: Thread? = null
-    private var clientSenderLoop: Future<*>? = null
-    private var clientReceiveLoop: Future<*>? = null
+    private var clientKeepLoop: Timer? = null
+    private var clientSenderLoop: Timer? = null
+    private var clientReceiveLoop: Timer? = null
 
     private val pendingData = LinkedBlockingQueue<ByteArray>()
 
@@ -43,7 +43,7 @@ object ClientSocketManager {
             dis = DataInputStream(clientSocket!!.getInputStream())
 
             dos = DataOutputStream(BufferedOutputStream(clientSocket!!.getOutputStream(), 5120))
-            CrossServerManager.initServerID()
+            CrossServerManager.updateServerID()
         }.onFailure {
             BungeeSettingsBukkit.LOG.info("未连接到根节点，等待重试")
             return false
@@ -53,13 +53,11 @@ object ClientSocketManager {
     }
 
     fun tryConnect(block: () -> Unit) {
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                if (loadClientSocket()) {
-                    hasClose = true
-                    block()
-                    cancel()
-                }
+        Timer().schedule(timerTask {
+            if (loadClientSocket()) {
+                hasClose = true
+                block()
+                cancel()
             }
         }, 1000L, 1000L)
     }
@@ -69,52 +67,44 @@ object ClientSocketManager {
         kotlin.runCatching {
             clientSocket?.close()
 
-            clientKeepLoop?.interrupt()
-            clientSenderLoop?.cancel(true)
-            clientReceiveLoop?.cancel(true)
+            clientKeepLoop?.cancel()
+            clientSenderLoop?.cancel()
+            clientReceiveLoop?.cancel()
+
         }.onFailure {
             it.printStackTrace()
         }
-        threadPool = Executors.newFixedThreadPool(3)
         tryConnect {
-            clientKeepLoop = thread {
-                while (true) {
-                    if (Thread.currentThread().isInterrupted) {
-                        return@thread
-                    }
-                    Thread.sleep(200L)
+            clientKeepLoop = Timer("clientKeepLoop")
+            clientKeepLoop!!.schedule(timerTask {
+                runConnect {
+                    sendData(ServerPacket.KEEP_ALIVE)
+                }
+            }, 300L, 300L)
+            clientSenderLoop = Timer("clientSenderLoop")
+            clientSenderLoop!!.schedule(timerTask {
+                if (pendingData.isEmpty()) return@timerTask
 
-                    runConnect {
-                        sendData(999)
+                runConnect {
+                    val bytes = pendingData.poll()
+                    dos!!.writeInt(bytes.size)
+                    dos!!.write(bytes)
+
+                    dos!!.flush()
+                }
+            }, 100L, 100L)
+            clientReceiveLoop = Timer("clientReceiveLoop")
+            clientReceiveLoop!!.schedule(timerTask {
+                runConnect {
+                    val len = dis!!.readInt()
+                    if (len > 0) {
+                        val bytes = ByteArray(len)
+                        dis!!.readFully(bytes, 0, bytes.size)
+                        if (bytes.isEmpty()) return@runConnect
+                        handleData(Unpooled.wrappedBuffer(bytes))
                     }
                 }
-            }
-            clientSenderLoop = threadPool!!.submit {
-                while (true) {
-                    if (pendingData.isEmpty()) continue
-
-                    runConnect {
-                        val bytes = pendingData.poll()
-                        dos!!.writeInt(bytes.size)
-                        dos!!.write(bytes)
-
-                        dos!!.flush()
-                    }
-                }
-            }
-            clientReceiveLoop = threadPool!!.submit {
-                while (true) {
-                    runConnect {
-                        val len = dis!!.readInt()
-                        if (len > 0) {
-                            val bytes = ByteArray(len)
-                            dis!!.readFully(bytes, 0, bytes.size)
-                            if (bytes.isEmpty()) return@runConnect
-                            handleData(Unpooled.wrappedBuffer(bytes))
-                        }
-                    }
-                }
-            }
+            }, 100L, 100L)
         }
     }
 
@@ -142,15 +132,16 @@ object ClientSocketManager {
         pendingData.add(buf.toByteArray())
     }
 
-    fun sendData(id: Int, bufBlock: ByteBuf.() -> Unit = {}) {
+    fun sendData(id: ServerPacket, bufBlock: ByteBuf.() -> Unit = {}) {
         pendingData.add(Unpooled.buffer().apply {
-            writeInt(id)
+            writeString(id.name)
             this.bufBlock()
         }.toByteArray())
     }
 
     fun handleData(buf: ByteBuf) {
-        CrossServerManager.handleServerPacket(buf.readInt(), buf)
+        val packetName = buf.readString()
+        CrossServerManager.handleServerPacket(packetName, ServerPacket.getPacket(packetName), buf)
     }
 
 }

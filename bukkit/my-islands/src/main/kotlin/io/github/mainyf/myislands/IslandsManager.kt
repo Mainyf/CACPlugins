@@ -6,6 +6,7 @@ import com.plotsquared.core.player.PlotPlayer
 import com.plotsquared.core.plot.Plot
 import com.shopify.promises.Promise
 import dev.lone.itemsadder.api.CustomFurniture
+import dev.lone.itemsadder.api.CustomStack
 import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.myislands.exceptions.IslandException
@@ -36,8 +37,8 @@ import kotlin.collections.any
 object IslandsManager {
 
     private val joinPlayers = mutableMapOf<UUID, Plot>()
-    private val resetingIslands = mutableSetOf<UUID>()
-    private val moveingIslandCores = mutableSetOf<UUID>()
+    val resetingIslands = mutableSetOf<UUID>()
+    val moveingIslandCores = mutableSetOf<UUID>()
 
     private val helperPermissions = listOf(
         50,
@@ -210,9 +211,10 @@ object IslandsManager {
                 }
                 Log.debugP(player, "准备传送玩家前往地皮")
                 MyIslands.INSTANCE.submitTask(delay = 10L) {
-                    plots.first().getHome {
-                        plotPlayer.teleport(it)
-                    }
+                    MyIslands.plotUtils.teleportHomePlot(player)
+//                    plots.first().getHome {
+//                        plotPlayer.teleport(it)
+//                    }
                 }
                 return@submitTask
             }
@@ -343,8 +345,15 @@ object IslandsManager {
             val eLoc = it.location
             eLoc.blockX == oldLoc.blockX && eLoc.blockY == oldLoc.blockY && eLoc.blockZ == oldLoc.blockZ
         }.filterIsInstance<ArmorStand>().filter {
-            CustomFurniture.byAlreadySpawned(it) != null
+            isIslandCore(it)
         }
+    }
+
+    fun isIslandCore(armorStand: ArmorStand): Boolean {
+        if (CustomFurniture.byAlreadySpawned(armorStand) == null) {
+            return false
+        }
+        return CustomStack.byItemStack(armorStand.equipment.helmet)?.namespacedID == ConfigManager.coreId
     }
 
     fun deleteIslandCore(player: Player, armorStand: ArmorStand) {
@@ -380,7 +389,7 @@ object IslandsManager {
         val coreLoc = getIslandCoreLoc(islandData)
         val pLoc = player.location
         if (pLoc.world == coreLoc.world && pLoc.distanceSquared(coreLoc) <= 20) {
-            setupPlotCore(coreLoc)
+            setupPlotCore(coreLoc.clone().add(0.5, 0.0, 0.5))
         }
     }
 

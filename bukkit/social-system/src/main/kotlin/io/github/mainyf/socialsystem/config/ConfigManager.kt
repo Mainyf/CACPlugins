@@ -5,10 +5,13 @@ package io.github.mainyf.socialsystem.config
 import io.github.mainyf.newmclib.config.asDefaultSlotConfig
 import io.github.mainyf.newmclib.config.asItemSlotConfig
 import io.github.mainyf.newmclib.config.asMenuSettingsConfig
+import io.github.mainyf.newmclib.exts.colored
 import io.github.mainyf.socialsystem.SocialSystem
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Player
+import org.bukkit.permissions.Permissible
 
 object ConfigManager {
 
@@ -18,9 +21,16 @@ object ConfigManager {
 
     lateinit var repairPermission: String
     var friendRequestCooldown: Long = 60L
+    var tpRequestCooldown = 60L
 
     lateinit var socialCardMenuConfig: SocialCardMenuConfig
     lateinit var socialMainMenuConfig: SocialMainMenuConfig
+
+    private var cardPermission = "social.card"
+    private var tabCardDefault = ""
+    private var tabCardMap = mutableMapOf<String, Pair<Int, String>>()
+    private var chatCardDefault = ""
+    private var chatCardMap = mutableMapOf<String, Pair<Int, String>>()
 
     fun load() {
         SocialSystem.INSTANCE.saveDefaultConfig()
@@ -85,26 +95,51 @@ object ConfigManager {
     private fun loadMainConfig() {
         repairPermission = mainConfigFile.getString("repairPermission")!!
         friendRequestCooldown = mainConfigFile.getLong("friendRequestCooldown", 60L)
+        tpRequestCooldown = mainConfigFile.getLong("tpRequestCooldown", 60L)
+
+        cardPermission = mainConfigFile.getString("card.permission", "social.card")!!
+        tabCardDefault = mainConfigFile.getString("card.tab.default", "")!!.colored()
+        chatCardDefault = mainConfigFile.getString("card.chat.default", "")!!.colored()
+
+        tabCardMap.clear()
+        val tabSect = mainConfigFile.getConfigurationSection("card.tab")!!
+        tabSect.getKeys(false).forEach {
+            if (it == "default") return@forEach
+            val priority = tabSect.getInt("${it}.priority")
+            val value = tabSect.getString("${it}.value")!!.colored()
+            tabCardMap[it] = priority to value
+        }
+        val chatSect = mainConfigFile.getConfigurationSection("card.chat")!!
+        chatSect.getKeys(false).forEach {
+            if (it == "default") return@forEach
+            val priority = chatSect.getInt("${it}.priority")
+            val value = chatSect.getString("${it}.value")!!.colored()
+            chatCardMap[it] = priority to value
+        }
     }
 
-//    private fun ConfigurationSection.asSocialOnlineSlot(key: String): SocialOnlineSlot {
-//        return getConfigurationSection(key)!!.let {
-//            SocialOnlineSlot(
-//                it.getIntegerList("slot"),
-//                it.getConfigurationSection("online")!!.asItemSlotConfig(),
-//                it.getConfigurationSection("offline")!!.asItemSlotConfig()
-//            )
-//        }
-//    }
-//
-//    private fun ConfigurationSection.asDeleteFriendOrAllowRepairSlot(key: String): DeleteFriendOrAllowRepairSlot {
-//        return getConfigurationSection(key)!!.let {
-//            DeleteFriendOrAllowRepairSlot(
-//                it.getIntegerList("slot"),
-//                it.getConfigurationSection("delete")!!.asItemSlotConfig(),
-//                it.getConfigurationSection("allowRepair")!!.asItemSlotConfig()
-//            )
-//        }
-//    }
+    fun getPlayerTabCard(player: Player): String {
+        val cards = tabCardMap.filter { hasCardPermission(player, it.key) }
+        if (cards.isEmpty()) {
+            return tabCardDefault
+        }
+        return cards.values.minByOrNull {
+            it.first
+        }!!.second
+    }
+
+    fun getPlayerChatCard(player: Player): String {
+        val cards = chatCardMap.filter { hasCardPermission(player, it.key) }
+        if (cards.isEmpty()) {
+            return chatCardDefault
+        }
+        return cards.values.minByOrNull {
+            it.first
+        }!!.second
+    }
+
+    fun hasCardPermission(permissible: Permissible, cardName: String): Boolean {
+        return permissible.hasPermission("${cardPermission}.${cardName}")
+    }
 
 }

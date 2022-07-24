@@ -1,7 +1,7 @@
 package io.github.mainyf.bungeesettingsbungee
 
+import io.github.mainyf.bungeesettingsbungee.socket.ServerPacket
 import io.github.mainyf.bungeesettingsbungee.socket.ServerSocketManager
-import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
@@ -14,7 +14,6 @@ import net.md_5.bungee.api.plugin.Plugin
 import net.md_5.bungee.config.ConfigurationProvider
 import net.md_5.bungee.config.YamlConfiguration
 import net.md_5.bungee.event.EventHandler
-import java.util.UUID
 
 class BungeeSettingsBungee : Plugin(), Listener {
 
@@ -66,7 +65,7 @@ class BungeeSettingsBungee : Plugin(), Listener {
         if (event.tag != CHANNEL_NAME) return
         val buf = Unpooled.wrappedBuffer(event.data)
         when (buf.readString()) {
-            "tp" -> {
+            ServerPacket.TP_POS.name -> {
                 val playerUUID = buf.readUUID()
                 val proxyPlayer = ProxyServer.getInstance().getPlayer(playerUUID) ?: return
                 val serverName = buf.readString()
@@ -81,7 +80,7 @@ class BungeeSettingsBungee : Plugin(), Listener {
                     proxyPlayer.connect(proxyServer)
                 }
                 proxyServer.sendData(CHANNEL_NAME, Unpooled.buffer().apply {
-                    writeString("tp")
+                    writeString(ServerPacket.TP_POS.name)
                     writeUUID(playerUUID)
                     writeString(world)
                     writeDouble(x)
@@ -91,47 +90,19 @@ class BungeeSettingsBungee : Plugin(), Listener {
                     writeFloat(pitch)
                 }.toByteArray())
             }
+            ServerPacket.TP_PLAYER.name -> {
+                val playerUUID = buf.readUUID()
+                val targetUUID = buf.readUUID()
+                val proxyPlayer = ProxyServer.getInstance().getPlayer(playerUUID) ?: return
+                val proxyTarget = ProxyServer.getInstance().getPlayer(targetUUID) ?: return
+                proxyPlayer.connect(proxyTarget.server.info)
+                proxyTarget.server.info.sendData(CHANNEL_NAME, Unpooled.buffer().apply {
+                    writeString(ServerPacket.TP_PLAYER.name)
+                    writeUUID(playerUUID)
+                    writeUUID(targetUUID)
+                }.toByteArray())
+            }
         }
-    }
-
-    fun ByteBuf.toByteArray(): ByteArray {
-        val bytes: ByteArray
-        val length = readableBytes()
-
-        if (hasArray()) {
-            bytes = array()
-        } else {
-            bytes = ByteArray(length)
-            getBytes(readerIndex(), bytes)
-        }
-        return bytes
-    }
-
-    fun ByteBuf.writeUUID(uuid: UUID) {
-        writeLong(uuid.mostSignificantBits)
-        writeLong(uuid.leastSignificantBits)
-    }
-
-    fun ByteBuf.readUUID(): UUID {
-        val most = readLong()
-        val least = readLong()
-        return UUID(most, least)
-    }
-
-    fun ByteBuf.writeString(t: String) {
-        writeInt(t.length)
-        t.forEach {
-            writeChar(it.code)
-        }
-    }
-
-    fun ByteBuf.readString(): String {
-        val l = readInt()
-        val sb = StringBuilder()
-        repeat(l) {
-            sb.append(readChar())
-        }
-        return sb.toString()
     }
 
 }

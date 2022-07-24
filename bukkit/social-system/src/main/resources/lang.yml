@@ -4,14 +4,14 @@ alreadyFriend:
 sendFriendRequestCooldown:
   - "minimessage: <color:#FF5555>发送好友请求冷却: <eTime></color>"
 sendFriendRequestToSender:
-  - "minimessage: <color:#FF5555>好友请求已发送给对方</color>"
+  - "minimessage: <color:#FFFFF>好友请求已发送给对方</color>"
 sendFriendRequestToReceiver:
   - "minimessage: <player> 请求添加你为好友 <click:run_command:/social agree {player}><hover:show_text:'同意请求'>✔</hover></click> | <click:run_command:/social refuse {player}><hover:show_text:'拒绝请求'>✘</hover></click>"
 
 agressFriendRequestToSender:
-  - "minimessage: <color:#FF5555>发送给 <receiver> 的好友申请已被接受，你们已经是好友了</color>"
+  - "minimessage: <color:#FFFFF>发送给 <receiver> 的好友申请已被接受，你们已经是好友了</color>"
 agressFriendRequestToReceiver:
-  - "minimessage: <color:#FF5555>你已接受 <sender> 发送给你的好友申请，你们已经是好友了</color>"
+  - "minimessage: <color:#FFFFF>你已接受 <sender> 发送给你的好友申请，你们已经是好友了</color>"
 
 refuseFriendRequestToSender:
   - "minimessage: <color:#FF5555>发送给 <receiver> 的好友申请已被拒绝</color>"
@@ -19,12 +19,43 @@ refuseFriendRequestToReceiver:
   - "minimessage: <color:#FF5555>你已拒绝 <sender> 发送给你的好友申请</color>"
 
 sendRepairHandEquipmentToSender:
-  - "minimessage: <color:#FF5555>已经帮对方修复手中物品</color>"
+  - "minimessage: <color:#FFFFF>已经帮对方修复手中物品</color>"
 sendRepairHandEquipmentToReceiver:
-  - "minimessage: <color:#FF5555><player> 帮你修复了手中物品</color>"
+  - "minimessage: <color:#FFFFF><player> 帮你修复了手中物品</color>"
 friendRequestsNoExists:
   - "minimessage: <color:#FF5555>好友申请列表中没有此玩家</color>"
 deleteFriendToSender:
-  - "minimessage: <color:#FF5555>删除好友 <friend> 成功</color>"
+  - "minimessage: <color:#FFFFF>删除好友 <friend> 成功</color>"
 deleteFriendToRecevier:
   - "minimessage: <color:#FF5555>你被 <friend> 删除了好友</color>"
+
+tpRequestCooldown:
+  - "minimessage: <color:#FFFFF>传送请求正在冷却: <eTime></color>"
+tpTargetOffline:
+  - "minimessage: <color:#FF5555>该玩家不在线</color>"
+sendTPRequestToSender:
+  - "minimessage: <color:#FFFFF>传送请求已发送给对方</color>"
+sendTPRequestToReceiver:
+  - "minimessage: <player> 请求传送到你身边 <click:run_command:/social agreeTPReq {player}><hover:show_text:'同意请求'>✔</hover></click> | <click:run_command:/social refuseTPReq {player}><hover:show_text:'拒绝请求'>✘</hover></click>"
+tpRequestSuccessToSender:
+  - "minimessage: <color:#FFFFF> <friend> 已答应了您的传送请求，正在传送中</color>"
+tpRequestSuccessToReceiver:
+  - "minimessage: <color:#FFFFF>您已答应了 <friend> 的传送请求，正在传送中</color>"
+tpRequestInvalid:
+  - "minimessage: <color:#FF5555>该传送请求已失效</color>"
+refuseTPRequest:
+  - "minimessage: <color:#FF5555>你的传送请求对方已经拒绝</color>"
+
+inviteTPToSender:
+  - "minimessage: <color:#FFFFF>邀请传送已发送给对方</color>"
+inviteTPToReceiver:
+  - "minimessage: <player> 邀请您传送到他身边 <click:run_command:/social agreeTPReqInv {player}><hover:show_text:'同意请求'>✔</hover></click> | <click:run_command:/social refuseTPReqInv {player}><hover:show_text:'拒绝请求'>✘</hover></click>"
+inviteTPSuccessToSender:
+  - "minimessage: <color:#FFFFF> <friend> 已答应了您的邀请，正在传送中</color>"
+inviteTPSuccessToReceiver:
+  - "minimessage: <color:#FFFFF>你已答应了 <friend> 的邀请，正在传送中</color>"
+
+inviteTPInvalid:
+  - "minimessage: <color:#FF5555>该邀请传送已失效</color>"
+refuseTPInv:
+  - "minimessage: <color:#FF5555>你的邀请传送对方已经拒绝</color>"

@@ -22,7 +22,11 @@ import com.shopify.promises.Promise
 import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
+import io.github.mainyf.newmclib.exts.submitTask
 import io.github.mainyf.newmclib.exts.uuid
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import java.util.UUID
 
@@ -171,16 +175,64 @@ class PlotUtils @Inject constructor(
     }
 
     fun teleportHomePlot(player: Player) {
-        findPlot(player.uuid)
-            .let { pPlot ->
-                if (pPlot == null) {
-                    player.sendLang("playerNoPlot")
-                    return@let
-                }
-                pPlot.getHome { loc ->
-                    player.teleport(BukkitUtil.adapt(loc))
+        val islandData = IslandsManager.getIslandData(player.uuid)
+        if (islandData == null) {
+            player.sendLang("playerNoPlot")
+            return
+        }
+        val coreLoc = IslandsManager.getIslandCoreLoc(islandData)
+        val homeLoc = IslandsManager.getHomeLoc(coreLoc)
+        teleportPlayerToLoc(player, homeLoc, coreLoc)
+    }
+
+    fun findSafeLoc(player: Player, loc: Location, coreLoc: Location, msg: Boolean = true): Location {
+        if (hasDanger(loc, -1.0)) {
+            val z = 0.0
+            repeat(2) {
+                for (i in 1..4) {
+                    val newLoc = coreLoc.clone().add(0.0, 0.0, if (it == 0) z else -z)
+                    if (hasDanger(newLoc)) {
+                        continue
+                    }
+                    if (msg) {
+                        player.sendLang("dangerHomeLoc")
+                    }
+                    return loc
                 }
             }
+            val x = 0.0
+            repeat(2) {
+                for (i in 1..4) {
+                    val newLoc = coreLoc.clone().add(if (it == 0) x else -x, 0.0, 0.0)
+                    if (hasDanger(newLoc)) {
+                        continue
+                    }
+                    if (msg) {
+                        player.sendLang("dangerHomeLoc")
+                    }
+                    return loc
+                }
+            }
+            return if (hasDanger(coreLoc)) {
+                coreLoc.clone().add(0.0, -1.0, 0.0).block.type = Material.STONE
+                coreLoc
+            } else {
+                if (msg) {
+                    player.sendLang("dangerHomeLoc")
+                }
+                coreLoc
+            }
+        } else {
+            return loc
+        }
+    }
+
+    fun teleportPlayerToLoc(player: Player, loc: Location, coreLoc: Location) {
+        player.teleport(findSafeLoc(player, loc, coreLoc))
+    }
+
+    private fun hasDanger(loc: Location, yOffset: Double = 0.0): Boolean {
+        return loc.clone().add(0.0, yOffset, 0.0).block.isEmpty
     }
 
     fun findPlot(uuid: UUID): Plot? {

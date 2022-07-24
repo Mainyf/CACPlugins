@@ -26,6 +26,13 @@ object CommandHandler : APICommand("myislands") {
                     sender.successMsg("[MyIsLands] 重载成功")
                 }
             }
+            "placeCore" {
+                executeOP {
+                    val player = sender as Player
+                    IslandsManager.setupPlotCore(player.location)
+                    sender.successMsg("[MyIsLands] 测试核心已放置")
+                }
+            }
             "range" {
                 withArguments(DoubleArgument("范围"))
                 executeOP {
@@ -48,6 +55,11 @@ object CommandHandler : APICommand("myislands") {
                             it.remove()
                         }
                     }
+                }
+            }
+            "home" {
+                executePlayer {
+                    MyIslands.plotUtils.teleportHomePlot(sender)
                 }
             }
             "initHeat" {
@@ -106,17 +118,25 @@ object CommandHandler : APICommand("myislands") {
                     IslandsChooseMenu(antiClose = true, block = IslandsManager::chooseIslandSchematic).open(target)
                 }
             }
+            "viewDebug" {
+                withArguments(playerArguments("玩家名"))
+                executeOP {
+                    val target = player()
+                    sender.msg("是否正在重置岛屿: ${IslandsManager.resetingIslands.contains(target.uuid)}")
+                    sender.msg("是否正在移动核心: ${IslandsManager.moveingIslandCores.contains(target.uuid)}")
+                }
+            }
             "menu" {
                 withArguments(playerArguments("玩家名"))
                 executeOP {
-                    val target = args[0] as Player
+                    val target = player()
                     IslandsMainMenu().open(target)
                 }
             }
             "viewLoc" {
                 withArguments(playerArguments("玩家名"))
                 executeOP {
-                    val target = args[0] as Player
+                    val target = player()
                     val wrapPlayer = MyIslands.plotAPI.wrapPlayer(target.uniqueId)!!
                     val plots = MyIslands.plotAPI.getPlayerPlots(wrapPlayer)
                     plots.forEach { plot ->

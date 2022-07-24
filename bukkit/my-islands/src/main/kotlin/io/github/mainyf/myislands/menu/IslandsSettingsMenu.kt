@@ -115,6 +115,10 @@ class IslandsSettingsMenu(
 
         val moveCoreSlot = settingsMenuConfig.moveCoreSlot
         inv.setIcon(moveCoreSlot) {
+            if (plot.owner != it.uuid) {
+                it.sendLang("noOwnerMoveCore")
+                return@setIcon
+            }
             MoveIslandCore.tryStartMoveCore(it, plot)
             it.closeInventory()
         }

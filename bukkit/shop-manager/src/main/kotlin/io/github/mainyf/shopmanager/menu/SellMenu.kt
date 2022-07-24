@@ -143,15 +143,21 @@ class SellMenu : AbstractMenuHandler() {
         if (itemMap.containsKey(slot)) {
             inv.setItem(slot, null)
             val itemStack = itemMap.remove(slot)!!
-            player.giveItem(itemStack)
+            if (player.giveItem(itemStack)) {
+                player.sendLang("unSellItemBack")
+            }
         }
     }
 
     override fun onClose(player: Player, inv: Inventory, event: InventoryCloseEvent) {
         if (itemMap.isNotEmpty()) {
+            var flag = false
             itemMap.forEach { (slot, itemStack) ->
                 inv.setItem(slot, null)
-                player.giveItem(itemStack)
+                flag = player.giveItem(itemStack)
+            }
+            if (flag) {
+                player.sendLang("unSellItemBack")
             }
         }
     }

@@ -4,6 +4,8 @@ maxHarvest:
   - "actionbar: &6&l这个商店是每日 &e&l{maxHarvest} &6&l上限, &c◆"
 sellSuccess:
   - "mini: <green>成功出售 <count> 个 <itemName>，获得 $<totalPrice></green>"
+unSellItemBack:
+  - "mini: <green>未出售的物品已返回，如您背包已满，将会丢弃在地下</green>"
 fullItemSuccess:
   - "mini: <green>出售完毕 总计: $<totalPrice></green>"
 fullItemSell:

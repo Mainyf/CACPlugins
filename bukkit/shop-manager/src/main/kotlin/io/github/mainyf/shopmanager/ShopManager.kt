@@ -3,6 +3,7 @@ package io.github.mainyf.shopmanager
 import dev.jorel.commandapi.arguments.ItemStackArgument
 import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.offlinePlayerArguments
+import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.shopmanager.config.ConfigManager
 import io.github.mainyf.shopmanager.listener.PlayerListeners
@@ -53,6 +54,14 @@ class ShopManager : JavaPlugin() {
                             .append(Component.text("已获得: "))
                             .append(Component.text(harvest))
                     )
+                }
+            }
+            "sell-player" {
+                withArguments(
+                    playerArguments("玩家名")
+                )
+                executeOP {
+                    SellMenu().open(player())
                 }
             }
             "sell" {

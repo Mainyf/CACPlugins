@@ -53,6 +53,44 @@ object CommandHandler : APICommand("social") {
                 FriendHandler.refuseFriendRequest(sender, target.uuid)
             }
         }
+        "agreeTPReq" {
+            withArguments(
+                stringArguments("玩家名")
+            )
+            executePlayer {
+                val target = text()
+                FriendHandler.handleTPReqAgree(sender, target)
+            }
+        }
+        "refuseTPReq" {
+            withArguments(
+                stringArguments("玩家名")
+            )
+            executePlayer {
+                val target = text()
+                FriendHandler.handleTPReqRefuse(sender, target)
+            }
+        }
+        "agreeTPReqInv" {
+            withArguments(
+                stringArguments("玩家名")
+            )
+            executePlayer {
+                val target = text()
+                FriendHandler.handleInviteTPAgree(sender, target)
+
+            }
+        }
+        "refuseTPReqInv" {
+            withArguments(
+                stringArguments("玩家名")
+            )
+            executePlayer {
+                val target = text()
+                FriendHandler.handleInviteTPRefuse(sender, target)
+
+            }
+        }
     }
 
 }

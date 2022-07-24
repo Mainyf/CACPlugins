@@ -1,14 +1,17 @@
 package io.github.mainyf.commandsettings
 
 import dev.jorel.commandapi.arguments.GreedyStringArgument
+import io.github.mainyf.bungeesettingsbukkit.CrossServerManager
 import io.github.mainyf.commandsettings.config.ConfigManager
 import io.github.mainyf.commandsettings.config.ItemAction
 import io.github.mainyf.newmclib.command.APICommand
 import io.github.mainyf.newmclib.command.customArguments
 import io.github.mainyf.newmclib.command.playerArguments
+import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.config.ActionParser
 import io.github.mainyf.newmclib.config.action.BaseAction
 import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.serverId
 import org.bukkit.entity.Player
 
 object CommandHandler : APICommand("cset") {
@@ -24,6 +27,32 @@ object CommandHandler : APICommand("cset") {
                     sender.successMsg("重载成功")
                 }
             }
+            "serverSend" {
+                withArguments(
+                    stringArguments("类型") { _ -> arrayOf("all", *CrossServerManager.serverIds.toTypedArray()) },
+                    stringArguments("ID") { _ -> ConfigManager.getActionNames().toTypedArray() }
+                )
+                executeOP {
+                    val type = text()
+                    val id = text()
+                    if (!ConfigManager.getActionNames().contains(id)) {
+                        return@executeOP
+                    }
+                    if (type == serverId()) {
+                        val action = ConfigManager.getAction(id) ?: return@executeOP
+                        action.actions?.execute(console())
+                    } else {
+                        if(type == "all") {
+                            val action = ConfigManager.getAction(id) ?: return@executeOP
+                            action.actions?.execute(console())
+                        }
+                        CrossServerManager.sendData(CommandSettings.ACTION_ID) {
+                            writeString(type)
+                            writeString(id)
+                        }
+                    }
+                }
+            }
             "send" {
                 withArguments(
                     customArguments(
@@ -36,7 +65,7 @@ object CommandHandler : APICommand("cset") {
                 executeOP {
                     val action = args[0] as ItemAction
                     val player = args[1] as Player
-                    trySendAction(player, action)
+                    CommandSettings.INSTANCE.trySendAction(player, action)
                 }
             }
             "sendAll" {
@@ -50,7 +79,7 @@ object CommandHandler : APICommand("cset") {
                 executeOP {
                     val action = args[0] as ItemAction
                     onlinePlayers().forEach {
-                        trySendAction(it, action)
+                        CommandSettings.INSTANCE.trySendAction(it, action)
                     }
                 }
             }
@@ -97,52 +126,5 @@ object CommandHandler : APICommand("cset") {
         }
     }
 
-//    override fun onCommand(sender: CommandSender, cmd: Command, label: String, args: Array<String>): Boolean {
-//        if (!sender.hasPermission("${CommandSettings.INSTANCE.name}.command")) return false
-//        cmdParser(sender, args) cmd@{
-//            val type = arg<String>() ?: return@cmd
-//            when (type) {
-//                "reload" -> {
-//                    ConfigManager.load()
-//                    sender.successMsg("重载成功")
-//                }
-//                "send" -> {
-//                    val id = arg<String>() ?: return@cmd
-//                    val action = ConfigManager.getAction(id) ?: return@cmd
-//                    val player = arg<Player>() ?: return@cmd
-//                    trySendAction(player, action)
-//                }
-//                "sendAll" -> {
-//                    val id = arg<String>() ?: return@cmd
-//                    val action = ConfigManager.getAction(id) ?: return@cmd
-//                    Bukkit.getOnlinePlayers().forEach {
-//                        trySendAction(it, action)
-//                    }
-//                }
-//            }
-//        }
-//        return true
-//    }
-
-    private fun trySendAction(player: Player, action: ItemAction) {
-        var flag = true
-
-        for ((type, amount) in action.demandItems) {
-            val itemCount = player.countByItem { it?.equalsByIaNamespaceID(type) ?: false }
-            if (itemCount < amount) {
-                flag = false
-                break
-            }
-        }
-        if (!flag) {
-            action.noDemandActions?.execute(player)
-            return
-        }
-        for ((type, amount) in action.demandItems) {
-            player.takeItem(amount) { it?.equalsByIaNamespaceID(type) ?: false }
-        }
-        action.actions?.execute(player)
-        action.plays?.execute(player.location)
-    }
 
 }

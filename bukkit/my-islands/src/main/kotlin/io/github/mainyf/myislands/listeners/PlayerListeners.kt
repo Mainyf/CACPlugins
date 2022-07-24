@@ -7,6 +7,7 @@ import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.myislands.features.MoveIslandCore
 import io.github.mainyf.myislands.menu.IslandsMainMenu
 import io.github.mainyf.newmclib.exts.getShooterPlayer
+import io.github.mainyf.newmclib.exts.submitTask
 import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.utils.Cooldown
 import org.bukkit.entity.ArmorStand
@@ -17,6 +18,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
+import org.bukkit.event.player.PlayerRespawnEvent
 
 object PlayerListeners : Listener {
 
@@ -45,7 +47,7 @@ object PlayerListeners : Listener {
     @EventHandler
     fun onInteractAE(event: PlayerInteractAtEntityEvent) {
         val entity = event.rightClicked
-        if (entity is ArmorStand) {
+        if (entity is ArmorStand && IslandsManager.isIslandCore(entity)) {
             val player = event.player
             val plot = MyIslands.plotUtils.getPlotByPLoc(player)
             if (plot?.owner != null) {
@@ -87,6 +89,18 @@ object PlayerListeners : Listener {
                 })
                 event.isCancelled = true
             }
+        }
+    }
+
+
+    @EventHandler
+    fun onRespawn(event: PlayerRespawnEvent) {
+        val islandData = IslandsManager.getIslandData(event.player.uuid) ?: return
+        val coreLoc = IslandsManager.getIslandCoreLoc(islandData)
+        val homeLoc = IslandsManager.getHomeLoc(coreLoc)
+        event.respawnLocation = MyIslands.plotUtils.findSafeLoc(event.player, homeLoc, coreLoc)
+        MyIslands.INSTANCE.submitTask(delay = 1L) {
+            MyIslands.plotUtils.teleportHomePlot(event.player)
         }
     }
 

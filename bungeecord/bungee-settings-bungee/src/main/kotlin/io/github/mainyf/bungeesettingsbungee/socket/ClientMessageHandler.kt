@@ -1,6 +1,7 @@
 package io.github.mainyf.bungeesettingsbungee.socket
 
-import io.github.mainyf.bungeesettingsbukkit.toByteArray
+import io.github.mainyf.bungeesettingsbungee.toByteArray
+import io.github.mainyf.bungeesettingsbungee.writeString
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import java.io.BufferedInputStream
@@ -9,9 +10,12 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.Socket
 import java.net.SocketAddress
+import java.util.Timer
+import java.util.TimerTask
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.logging.Logger
 import kotlin.concurrent.thread
+import kotlin.concurrent.timerTask
 
 class ClientMessageHandler(val socket: Socket, val logger: Logger) : Runnable {
 
@@ -22,8 +26,8 @@ class ClientMessageHandler(val socket: Socket, val logger: Logger) : Runnable {
     private var bos: BufferedOutputStream? = null
     private var dos: DataOutputStream? = null
 
-    private var senderLoop: Thread? = null
-    private var receiveLoop: Thread? = null
+    private var receiveLoop: Timer? = null
+    private var senderLoop: Timer? = null
 
     private val pendingData = LinkedBlockingQueue<ByteArray>()
 
@@ -39,65 +43,58 @@ class ClientMessageHandler(val socket: Socket, val logger: Logger) : Runnable {
         }.onFailure {
             it.printStackTrace()
         }
-        receiveLoop = thread {
-            while (true) {
-                if (!socket.isConnected || Thread.currentThread().isInterrupted) {
-                    ServerSocketManager.removeClient(this)
-                    break
-                }
-                var flag = false
-                kotlin.runCatching {
-                    val len = dis!!.readInt()
-                    if (len > 0) {
-                        val bytes = ByteArray(len)
-                        dis!!.readFully(bytes, 0, bytes.size)
-                        if (bytes.isEmpty()) return@runCatching
-                        ServerSocketManager.handleClientMessage(this, bytes)
-                    }
-                }.onFailure {
-                    flag = true
-                    logger.info("$ID 断开连接")
-                    ServerSocketManager.removeClient(this)
-                }
-                if (flag) {
-                    break
-                }
-            }
-        }
-        senderLoop = thread {
-            while (true) {
-                if (!socket.isConnected || Thread.currentThread().isInterrupted) {
-                    ServerSocketManager.removeClient(this)
-                    break
-                }
-                var flag = false
 
-                if (pendingData.isEmpty()) continue
-                kotlin.runCatching {
-                    val bytes = pendingData.poll()
-                    dos!!.writeInt(bytes.size)
-                    dos!!.write(bytes)
-
-                    dos!!.flush()
-                }.onFailure {
-                    flag = true
-                    logger.info("$ID 断开连接")
-                    ServerSocketManager.removeClient(this)
+        receiveLoop = Timer("$ID - receiveLoop")
+        receiveLoop!!.schedule(timerTask {
+            var flag = false
+            kotlin.runCatching {
+                val len = dis!!.readInt()
+                if (len > 0) {
+                    val bytes = ByteArray(len)
+                    dis!!.readFully(bytes, 0, bytes.size)
+                    if (bytes.isEmpty()) return@runCatching
+                    ServerSocketManager.handleClientMessage(this@ClientMessageHandler, bytes)
                 }
-                if (flag) {
-                    break
-                }
+            }.onFailure {
+                flag = true
+                logger.info("$ID 断开连接")
+                this.cancel()
+                ServerSocketManager.removeClient(this@ClientMessageHandler)
             }
-        }
+            if (flag) {
+                this.cancel()
+            }
+        }, 100L, 100L)
+        senderLoop = Timer("$ID - senderLoop")
+        senderLoop!!.schedule(timerTask {
+            var flag = false
+
+            if (pendingData.isEmpty()) return@timerTask
+            kotlin.runCatching {
+                val bytes = pendingData.poll()
+                dos!!.writeInt(bytes.size)
+                dos!!.write(bytes)
+
+                dos!!.flush()
+            }.onFailure {
+                flag = true
+                logger.info("$ID 断开连接")
+                this.cancel()
+                ServerSocketManager.removeClient(this@ClientMessageHandler)
+            }
+            if (flag) {
+                this.cancel()
+            }
+        }, 100L, 100L)
     }
 
-    private fun sendData(bytes: ByteArray) {
+    fun sendData(bytes: ByteArray) {
         pendingData.add(bytes)
     }
 
-    fun sendData(id: Int, block: ByteBuf.() -> Unit) {
+    fun sendData(id: ServerPacket, block: ByteBuf.() -> Unit) {
         return sendData(Unpooled.buffer().apply {
-            writeInt(id)
+            writeString(id.name)
             this.block()
         }.toByteArray())
     }
@@ -105,8 +102,8 @@ class ClientMessageHandler(val socket: Socket, val logger: Logger) : Runnable {
     fun close() {
         logger.info("子节点 $ID 已离线")
         kotlin.runCatching {
-            senderLoop?.interrupt()
-            receiveLoop?.interrupt()
+            senderLoop?.cancel()
+            receiveLoop?.cancel()
             socket.close()
             dis!!.close()
             dos!!.close()

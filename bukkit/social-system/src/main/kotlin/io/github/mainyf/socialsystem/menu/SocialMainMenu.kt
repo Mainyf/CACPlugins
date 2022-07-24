@@ -1,12 +1,15 @@
 package io.github.mainyf.socialsystem.menu
 
+import io.github.mainyf.bungeesettingsbukkit.CrossServerManager
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.menu.ConfirmMenu
 import io.github.mainyf.newmclib.offline_player_ext.OfflinePlayerData
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
+import io.github.mainyf.newmclib.utils.Cooldown
 import io.github.mainyf.newmclib.utils.Heads
+import io.github.mainyf.socialsystem.SocialSystem
 import io.github.mainyf.socialsystem.config.ConfigManager
 import io.github.mainyf.socialsystem.config.sendLang
 import io.github.mainyf.socialsystem.module.FriendHandler
@@ -30,9 +33,9 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
 
     private val currentFriends = mutableListOf<OfflinePlayerData>()
 
-    private val target = offlineData.uuid.asPlayer()
+//    private val target = offlineData.uuid.asPlayer()
 
-    private val isTargetOnline get() = target != null
+    private val isTargetOnline get() = CrossServerManager.isOnline(offlineData.uuid)
 
     private lateinit var player: Player
 
@@ -41,6 +44,12 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
     private val offlinePlayer = Bukkit.getOfflinePlayer(offlineData.name)
 
     private val hasOwner get() = offlineData.uuid == player.uuid
+
+    companion object {
+
+        val sendTPRequestCooldown = Cooldown()
+
+    }
 
     override fun open(player: Player) {
         this.player = player
@@ -133,9 +142,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                 if (FriendHandler.isFriend(player, offlineData.uuid)) {
                     ConfirmMenu(
                         {
-                            FriendHandler.removeFriend(player, offlineData.uuid)
-                            player.sendLang("deleteFriendToSender", "{friend}", offlineData.name)
-                            target?.sendLang("deleteFriendToRecevier", "{friend}", player.name)
+                            FriendHandler.deleteFriend(player, offlineData)
                             player.closeInventory()
                         },
                         {
@@ -145,9 +152,27 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     ).open(player)
                 }
             }
-            inv.setIcon(smmConfig.tpSlot) {
-
-            }
+            inv.setIcon(smmConfig.tpSlot, leftClickBlock = { p ->
+                if (!isTargetOnline) {
+                    p.sendLang("tpTargetOffline")
+                    return@setIcon
+                }
+                sendTPRequestCooldown.invoke(p.uuid, ConfigManager.tpRequestCooldown * 1000L, {
+                    FriendHandler.sendTPRequest(p, offlineData)
+                }, {
+                    p.sendLang("tpRequestCooldown", "{eTime}", it.timestampConvertTime())
+                })
+            }, rightClickBlock = { p ->
+                if (!isTargetOnline) {
+                    p.sendLang("tpTargetOffline")
+                    return@setIcon
+                }
+                sendTPRequestCooldown.invoke(p.uuid, ConfigManager.tpRequestCooldown * 1000L, {
+                    FriendHandler.sendInviteTP(p, offlineData)
+                }, {
+                    p.sendLang("tpRequestCooldown", "{eTime}", it.timestampConvertTime())
+                })
+            })
         }
         updateFriends(player, inv)
     }

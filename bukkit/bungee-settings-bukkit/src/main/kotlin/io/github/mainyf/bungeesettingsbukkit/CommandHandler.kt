@@ -7,7 +7,9 @@ import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.successMsg
+import io.github.mainyf.newmclib.exts.toComp
 import io.github.mainyf.newmclib.exts.writeString
+import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.serverId
 import org.bukkit.Location
 
@@ -17,8 +19,7 @@ object CommandHandler {
         apiCommand("bcd") {
             withAliases("bc")
             onlyOP()
-            "stp" {
-                withHelp("/bcd stp", "/bcd bcd <玩家名>")
+            "stp-pos" {
                 withArguments(
                     playerArguments("玩家名"),
                     stringArguments("服务器名") { _ -> CrossServerManager.serverIds.toTypedArray() },
@@ -41,6 +42,18 @@ object CommandHandler {
                     CrossServerManager.stp(player, serverName, world, Location(null, x, y, z, yaw, pitch))
                 }
             }
+            "stp-player" {
+                withArguments(
+                    playerArguments("玩家名"),
+                    stringArguments("目标玩家名") { info -> CrossServerManager.playerMap.map { it.value }.toTypedArray() }
+                )
+                executeOP {
+                    val player = player()
+                    val target = text().asOfflineData()!!.uuid
+
+                    CrossServerManager.stp(player, target)
+                }
+            }
             "cmd" {
                 withArguments(
                     stringArguments("服务器ID") { _ -> CrossServerManager.serverIds.toTypedArray() },
@@ -59,6 +72,17 @@ object CommandHandler {
                 executeOP {
                     val cmd = text()
                     CrossServerManager.executeCommandToAll(cmd)
+                }
+            }
+            "chat" {
+                withArguments(
+                    stringArguments("玩家"),
+                    stringArguments("消息")
+                )
+                executeOP {
+                    val offlinePlayer = text().asOfflineData()!!
+                    val msg = text()
+                    CrossServerManager.sendChat(offlinePlayer.uuid, msg.toComp())
                 }
             }
             "reload" {

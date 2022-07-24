@@ -1,2 +1,21 @@
 repairPermission: "social.repair.use"
 friendRequestCooldown: 60
+tpRequestCooldown: 60
+card:
+  permission: "social.card"
+  tab:
+    default: '&7[&f安&7] &0{player}'
+    svip:
+      priority: 1
+      value: '&7[&e安&7] &7{player}'
+    mvp:
+      priority: 0
+      value: '&7[&e安&7] &f{player}'
+  chat:
+    default: '&7[&f安&7] &0{player} :'
+    svip:
+      priority: 1
+      value: '&7[&e安&7] &7{player} : '
+    mvp:
+      priority: 0
+      value: '&7[&e安&7] &f{player} : '

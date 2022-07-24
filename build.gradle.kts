@@ -84,6 +84,13 @@ subprojects {
             compileOnly(rootProject.files("./plugins/CommandAPI-8.4.1.jar"))
 
             when (project.name) {
+                "plugin-loader" -> {
+                    implementation(rootProject.fileTree(mapOf(
+                        "dir" to "./server/bukkit/libraries",
+                        "include" to "**/*.jar"
+                    )))
+                    embed("net.bytebuddy:byte-buddy:1.11.22")
+                }
                 "item-skills-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
                     compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
@@ -116,6 +123,7 @@ subprojects {
                 }
                 "command-settings" -> {
                     compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
+                    compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
                 "mcrmb-migration" -> {
 //                    compileOnly(rootProject.files("./plugins/MCRMB-2.0b19-12fe19a.jar"))
@@ -127,6 +135,7 @@ subprojects {
                 }
                 "social-system" -> {
                     compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
+                    compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
             }
         }
@@ -182,7 +191,7 @@ subprojects {
                     sd.addAll(listOf("AuthMe"))
                 }
                 "command-settings" -> {
-                    dd.addAll(listOf("ItemsAdder"))
+                    dd.addAll(listOf("ItemsAdder", "BungeeSettingsBukkit"))
                 }
                 "mcrmb-migration" -> {
                     dd.addAll(listOf("PlayerPoints"))
@@ -194,10 +203,12 @@ subprojects {
                     dd.addAll(listOf("QuickShop", "Vault"))
                 }
                 "social-system" -> {
-                    dd.addAll(listOf("PlaceholderAPI"))
+                    dd.addAll(listOf("PlaceholderAPI", "BungeeSettingsBukkit"))
                 }
             }
-            dd.add("NewMCLib")
+            if (project.name != "plugin-loader") {
+                dd.add("NewMCLib")
+            }
             depend = dd
             softDepend = sd
         }
@@ -240,27 +251,53 @@ class $pluginName : JavaPlugin() {
             }
         }
 
+        val folder = "bukkit"
+
         tasks.register<Copy>("copyPlugin") {
             group = "bukkit"
-//            rootProject.file("./server/bukkit/plugins/").listFiles()?.find {
-//                it.name.startsWith(project.name) && it.name.endsWith(".jar")
-//            }?.delete()
             from(tasks.jar)
-            into(rootProject.file("./server/bukkit/plugins/").absolutePath)
+            into(rootProject.file("./server/${folder}/plugins/").absolutePath)
+        }
+
+        tasks.register<Copy>("copyPlugin2") {
+            group = "bukkit"
+            from(tasks.jar)
+            into(rootProject.file("./server/bukkit2/plugins/").absolutePath)
         }
 
         tasks.register<JavaExec>("runServer") {
             dependsOn(tasks.findByName("copyPlugin"))
-            classpath = rootProject.files("./server/bukkit/paper-1.19-41.jar")
+            classpath = rootProject.files("./server/${folder}/paper-1.19-41.jar")
             mainClass.set("io.papermc.paperclip.Paperclip")
-            val jvmArgsText = "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
+            val jvmArgsText =
+                "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
 //            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
             jvmArgs = jvmArgsText.split(" ").toMutableList().apply {
                 add("-Drebel.plugins=${rootProject.file("./bukkit-rebel-plugin.jar").absolutePath}")
                 add("-Drebel.bukkit=true")
             }
             args = listOf("nogui")
-            workingDir = rootProject.file("./server/bukkit")
+            workingDir = rootProject.file("./server/${folder}")
+            standardOutput = System.out
+            standardInput = System.`in`
+            errorOutput = System.err
+            group = "bukkit"
+            description = "runs the bukkit server"
+        }
+
+        tasks.register<JavaExec>("runServer2") {
+            dependsOn(tasks.findByName("copyPlugin2"))
+            classpath = rootProject.files("./server/bukkit2/paper-1.19-41.jar")
+            mainClass.set("io.papermc.paperclip.Paperclip")
+            val jvmArgsText =
+                "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
+//            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
+            jvmArgs = jvmArgsText.split(" ").toMutableList().apply {
+                add("-Drebel.plugins=${rootProject.file("./bukkit-rebel-plugin.jar").absolutePath}")
+                add("-Drebel.bukkit=true")
+            }
+            args = listOf("nogui")
+            workingDir = rootProject.file("./server/bukkit2")
             standardOutput = System.out
             standardInput = System.`in`
             errorOutput = System.err
@@ -272,7 +309,8 @@ class $pluginName : JavaPlugin() {
             dependsOn(tasks.findByName("copyPlugin"))
             classpath = rootProject.files("./server/test/paper-1.19-41.jar")
             mainClass.set("io.papermc.paperclip.Paperclip")
-            val jvmArgsText = "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
+            val jvmArgsText =
+                "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
 //            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
             jvmArgs = jvmArgsText.split(" ")
             args = listOf("nogui")
