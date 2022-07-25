@@ -57,7 +57,11 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         this.targetSocial = FriendHandler.getPlayerSocial(offlineData.uuid)
         updateFriends()
         updateCurrentFriends()
-        setup(ConfigManager.socialMainMenuConfig.settings)
+        if(hasOwner) {
+            setup(ConfigManager.socialMainMenuConfig.settings)
+        } else {
+            setup(ConfigManager.socialMainMenuConfig.settings.copy(background = ConfigManager.socialMainMenuConfig.backgroundFriend))
+        }
         val inv = createInv(player)
 
         updateInv(player, inv)
@@ -77,7 +81,11 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         icons.addAll(smmConfig.cardX3Slot.iaIcon())
         icons.addAll(smmConfig.cardX4Slot.iaIcon())
         icons.addAll(smmConfig.onlineSlot.iaIcon(if (isTargetOnline) "online" else "offline"))
-        icons.addAll(smmConfig.deleteFriendOrAllowRepairSlot.iaIcon(if (hasOwner) "allowRepair" else "delete"))
+        if (hasOwner) {
+            icons.addAll(smmConfig.allowRepairSlot.iaIcon())
+        } else {
+            icons.addAll(smmConfig.deleteSlot.iaIcon())
+        }
         if (!hasOwner) {
             icons.addAll(smmConfig.tpSlot.iaIcon())
         }
@@ -116,7 +124,13 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
             }
         }
 
-        inv.setIcon(smmConfig.headSlot, itemStack = Heads.getPlayerHead(offlineData.name))
+//        inv.setIcon(smmConfig.headSlot, itemStack = Heads.getPlayerHead(offlineData.name))
+
+        inv.setIcon(
+            smmConfig.headSlot.slot,
+            smmConfig.headSlot.default()!!
+                .toItemStack(Heads.getPlayerHead(offlineData.name)).tvar("player", offlineData.name)
+        )
 
         arrayOf(
             smmConfig.cardX1Slot,
@@ -131,14 +145,14 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
 
         inv.setIcon(smmConfig.onlineSlot, if (isTargetOnline) "online" else "offline")
         if (hasOwner) {
-            inv.setIcon(smmConfig.deleteFriendOrAllowRepairSlot, "allowRepair", itemBlock = {
+            inv.setIcon(smmConfig.allowRepairSlot, itemBlock = {
                 tvar("status", if (targetSocial.allowRepair) "开启" else "关闭")
             }) {
                 FriendHandler.setAllowRepair(targetSocial, !targetSocial.allowRepair)
                 updateInv(player, inv)
             }
         } else {
-            inv.setIcon(smmConfig.deleteFriendOrAllowRepairSlot, "delete") {
+            inv.setIcon(smmConfig.deleteSlot) {
                 if (FriendHandler.isFriend(player, offlineData.uuid)) {
                     ConfirmMenu(
                         {
@@ -181,9 +195,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         val smmConfig = ConfigManager.socialMainMenuConfig
         val friendsSlot = smmConfig.friendsSlot.slot
         val barFriends = mutableListOf<OfflinePlayerData>()
-        if (!hasOwner) {
-            barFriends.add(player.uuid.asOfflineData()!!)
-        }
+        barFriends.add(player.uuid.asOfflineData()!!)
         barFriends.addAll(currentFriends)
         barFriends.forEachIndexed { index, offlinePlayerData ->
             val skullItem = Heads.getPlayerHead(offlinePlayerData.name).clone()

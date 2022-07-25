@@ -78,6 +78,7 @@ object ConfigManager {
         val socialMainSect = menuConfigFile.getConfigurationSection("socialMainMenu")!!
         socialMainMenuConfig = SocialMainMenuConfig(
             socialMainSect.asMenuSettingsConfig(),
+            socialMainSect.getString("backgroundFriend")!!,
             socialMainSect.asDefaultSlotConfig("prevSlot"),
             socialMainSect.asDefaultSlotConfig("nextSlot"),
             socialMainSect.asDefaultSlotConfig("friendsSlot"),
@@ -87,7 +88,8 @@ object ConfigManager {
             socialMainSect.asDefaultSlotConfig("cardX3Slot"),
             socialMainSect.asDefaultSlotConfig("cardX4Slot"),
             socialMainSect.asDefaultSlotConfig("onlineSlot"),
-            socialMainSect.asDefaultSlotConfig("deleteFriendOrAllowRepairSlot"),
+            socialMainSect.asDefaultSlotConfig("deleteSlot"),
+            socialMainSect.asDefaultSlotConfig("allowRepairSlot"),
             socialMainSect.asDefaultSlotConfig("tpSlot")
         )
     }

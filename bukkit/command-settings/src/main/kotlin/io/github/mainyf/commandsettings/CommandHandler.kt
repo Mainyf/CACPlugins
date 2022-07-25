@@ -33,24 +33,22 @@ object CommandHandler : APICommand("cset") {
                     stringArguments("ID") { _ -> ConfigManager.getActionNames().toTypedArray() }
                 )
                 executeOP {
-                    val type = text()
+                    val serverId = text()
                     val id = text()
-                    if (!ConfigManager.getActionNames().contains(id)) {
-                        return@executeOP
-                    }
-                    if (type == serverId()) {
-                        val action = ConfigManager.getAction(id) ?: return@executeOP
-                        action.actions?.execute(console())
-                    } else {
-                        if(type == "all") {
-                            val action = ConfigManager.getAction(id) ?: return@executeOP
-                            action.actions?.execute(console())
-                        }
-                        CrossServerManager.sendData(CommandSettings.ACTION_ID) {
-                            writeString(type)
-                            writeString(id)
-                        }
-                    }
+                    CommandSettings.INSTANCE.sendAction(serverId, id)
+                }
+            }
+            "serverSendPlayer" {
+                withArguments(
+                    stringArguments("类型") { _ -> arrayOf("all", *CrossServerManager.serverIds.toTypedArray()) },
+                    stringArguments("ID") { _ -> ConfigManager.getActionNames().toTypedArray() },
+                    stringArguments("玩家名")
+                )
+                executeOP {
+                    val serverId = text()
+                    val id = text()
+                    val playerName = text()
+                    CommandSettings.INSTANCE.sendAction(serverId, id, playerName)
                 }
             }
             "send" {

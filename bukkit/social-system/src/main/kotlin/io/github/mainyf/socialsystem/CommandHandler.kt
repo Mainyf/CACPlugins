@@ -1,6 +1,7 @@
 package io.github.mainyf.socialsystem
 
 import io.github.mainyf.newmclib.command.APICommand
+import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.successMsg
 import io.github.mainyf.newmclib.exts.uuid
@@ -30,6 +31,13 @@ object CommandHandler : APICommand("social") {
         "menu" {
             executePlayer {
                 val target = sender
+                SocialMainMenu(target.uuid.asOfflineData()!!).open(target)
+            }
+        }
+        "menu-player" {
+            withArguments(playerArguments("玩家名"))
+            executePlayer {
+                val target = player()
                 SocialMainMenu(target.uuid.asOfflineData()!!).open(target)
             }
         }

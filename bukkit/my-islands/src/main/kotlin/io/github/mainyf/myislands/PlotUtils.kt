@@ -228,10 +228,10 @@ class PlotUtils @Inject constructor(
     }
 
     fun teleportPlayerToLoc(player: Player, loc: Location, coreLoc: Location) {
-        player.teleport(findSafeLoc(player, loc, coreLoc))
+        player.teleport(IslandsManager.fixIslandHomeLoc(findSafeLoc(player, loc, coreLoc)))
     }
 
-    private fun hasDanger(loc: Location, yOffset: Double = 0.0): Boolean {
+    fun hasDanger(loc: Location, yOffset: Double = 0.0): Boolean {
         return loc.clone().add(0.0, yOffset, 0.0).block.isEmpty
     }
 

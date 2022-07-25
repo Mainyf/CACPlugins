@@ -62,3 +62,5 @@ resetIslandBackTourist:
 resetCooldown: "&c&l！&4需要等待 &c{surplusTime} &4才能重置岛屿。"
 dangerHomeLoc:
   - "message: &c&l！&4落脚点危险，已经将您传送至安全的位置，请确认岛屿落脚点安全"
+setupIslandCoreDanger:
+  - "message: &c&l！&4岛屿核心位置危险"

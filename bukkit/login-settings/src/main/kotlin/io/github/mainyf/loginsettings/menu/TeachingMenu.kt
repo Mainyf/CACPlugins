@@ -2,6 +2,7 @@ package io.github.mainyf.loginsettings.menu
 
 import io.github.mainyf.loginsettings.LoginSettings
 import io.github.mainyf.loginsettings.config.ConfigManager
+import io.github.mainyf.loginsettings.storage.StorageManager
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
@@ -50,7 +51,11 @@ class TeachingMenu : AbstractMenuHandler() {
         val slotAConfig = teachingMenuConfig.slotA
         inv.setRightIcon(slotA, slotAConfig.itemSlot.toItemStack()) {
             ok = true
-            slotAConfig.itemSlot.execAction(it)
+            if (!StorageManager.hasAgreePlayRuleInWeek(it)) {
+                ConfigManager.teachingMenuSlotA?.execute(it)
+            } else {
+                slotAConfig.itemSlot.execAction(it)
+            }
         }
         val slotBConfig = teachingMenuConfig.slotB
         inv.setIcon(slotB, slotBConfig.itemSlot.toItemStack()) {

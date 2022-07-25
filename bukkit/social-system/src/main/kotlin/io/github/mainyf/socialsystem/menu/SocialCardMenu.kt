@@ -91,7 +91,11 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
             }
         }
 
-        inv.setIcon(scmConfig.headSlot.slot, Heads.getPlayerHead(offlineData.name))
+        inv.setIcon(
+            scmConfig.headSlot.slot,
+            scmConfig.headSlot.default()!!
+                .toItemStack(Heads.getPlayerHead(offlineData.name)).tvar("player", offlineData.name)
+        )
 
         arrayOf(
             scmConfig.cardX1Slot,

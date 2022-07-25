@@ -8,6 +8,7 @@ import fr.xephi.authme.service.BukkitService
 import fr.xephi.authme.service.CommonService
 import fr.xephi.authme.service.ValidationService
 import io.github.mainyf.loginsettings.config.ConfigManager
+import io.github.mainyf.loginsettings.storage.StorageManager
 import io.github.mainyf.newmclib.exts.asPlugin
 import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.newmclib.exts.toReflect
@@ -40,6 +41,7 @@ class LoginSettings : JavaPlugin() {
         INSTANCE = this
         val authMe = "AuthMe".asPlugin() as AuthMe
 
+        StorageManager.init()
         authMeInject = authMe.toReflect().get("injector")
 
         validationService = tryGetAuthMeService(ValidationService::class.java, "无法检测到AuthMe插件的密码验证器，插件工作已停止")

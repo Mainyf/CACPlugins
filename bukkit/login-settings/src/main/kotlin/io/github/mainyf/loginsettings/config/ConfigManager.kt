@@ -16,6 +16,10 @@ object ConfigManager {
     lateinit var resourcePack: ResourcePack
     lateinit var teachingMenuConfig: TeachingMenuConfig
 
+    var teachingMenuSlotA: MultiAction? = null
+    var playRuleNoExpired: MultiAction? = null
+    var playRuleSuccess: MultiAction? = null
+
     fun load() {
         LoginSettings.INSTANCE.saveDefaultConfig()
         LoginSettings.INSTANCE.reloadConfig()
@@ -61,6 +65,10 @@ object ConfigManager {
             teachingMenuSect.asTeachSlotAConfig("slotA"),
             teachingMenuSect.asTeachSlotConfig("slotB"),
         )
+
+        teachingMenuSlotA = ActionParser.parseAction(mainConfigFile, "teachingMenu.slotA.playRules", false)
+        playRuleNoExpired = ActionParser.parseAction(mainConfigFile, "playRuleNoExpired", false)
+        playRuleSuccess = ActionParser.parseAction(mainConfigFile, "playRuleSuccess", false)
     }
 
     private fun ConfigurationSection.asTeachSlotAConfig(key: String): TeachSlotAConfig {

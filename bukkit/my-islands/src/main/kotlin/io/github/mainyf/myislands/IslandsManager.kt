@@ -283,7 +283,7 @@ object IslandsManager {
         )
         PaperLib.getChunkAtAsync(loc, true).thenAccept {
             MyIslands.INSTANCE.submitTask {
-                loc.add(0.5, 0.0, 0.5)
+                fixIslandHomeLoc(loc)
                 MyIslands.INSTANCE.submitTask(delay = 3 * 20L) {
                     setupPlotCore(loc)
                     resetingIslands.remove(plot.owner!!)
@@ -298,6 +298,11 @@ object IslandsManager {
 //                player.successMsg("成功领取你的私人岛屿")
             }
         }
+    }
+
+    fun fixIslandHomeLoc(loc: Location): Location {
+        loc.add(0.5, 0.0, 0.5)
+        return loc
     }
 
     fun getHomeLoc(loc: Location): Location {
@@ -389,9 +394,15 @@ object IslandsManager {
         val coreLoc = getIslandCoreLoc(islandData)
         val pLoc = player.location
         if (pLoc.world == coreLoc.world && pLoc.distanceSquared(coreLoc) <= 20) {
-            setupPlotCore(coreLoc.clone().add(0.5, 0.0, 0.5))
+            setupPlotCore(fixIslandHomeLoc(coreLoc.clone()))
         }
     }
+
+//    private fun debug(player: Player, debug: String) {
+//        if (player.isOp) {
+//            player.msg(debug)
+//        }
+//    }
 
     fun replaceVarByLoreList(
         lore: List<Component>?,

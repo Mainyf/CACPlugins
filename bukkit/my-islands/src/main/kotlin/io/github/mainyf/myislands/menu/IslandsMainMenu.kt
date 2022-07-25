@@ -213,7 +213,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
                             }
                             val coreLoc = IslandsManager.getIslandCoreLoc(islandData)
                             val homeLoc = IslandsManager.getHomeLoc(coreLoc)
-                            MyIslands.plotUtils.teleportPlayerToLoc(player, homeLoc.add(0.5, 0.0, 0.5), coreLoc)
+                            MyIslands.plotUtils.teleportPlayerToLoc(player, homeLoc, coreLoc)
 //                            plot.getHome { loc ->
 //                                it.teleport(BukkitUtil.adapt(loc).add(0.5, 0.0, 0.5))
 //                            }

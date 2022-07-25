@@ -34,7 +34,7 @@ login:
       - "message: &c&l！&4密码错误，错误5次将半小时不能登陆。"
       - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
 resourcePack:
-  url: "https://mokier-cnc.oss-cn-hangzhou.aliyuncs.com/%E9%95%BF%E5%AE%89%E5%9F%8E_v0.1.3.zip"
+  url: "https://mokier-cnc.oss-cn-hangzhou.aliyuncs.com/v0.2.6.zip"
   declined:
     - 'console: cmi warp help {player}'
     - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
@@ -46,22 +46,35 @@ resourcePack:
 teachingMenu:
   cooldown: 250
   row: 6
-  background: ':offset_-8::view_login_teaching::offset_-125::view_login_teaching_msg:'
+  background: ':offset_-8::view_login_teaching::offset_-136::view_login_teaching_msg::offset_-115:'
   # 正确选择
   slotA:
-    slot: "37-44"
-    iaIcons: ["0:offset_-8::xxx:", "0:offset_-9::xxx:", "0:offset_-10::xxx:", "0:offset_11::xxx:"]
+    slot: [28,29,30,31,32]
+    iaIcons: [
+      "0:view_login_teaching_yes:",
+      "0:offset_18::view_login_teaching_yes:",
+      "0:offset_36::view_login_teaching_yes:",
+      "0:offset_54::view_login_teaching_yes:",
+      "0:offset_72::view_login_teaching_yes:"
+    ]
     actions:
       - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-    type: itemsadder:air
-    name: " &c&l> &3传送主城"
+      - "console: trmenu open servers {player}"
+    playRules:
+      - "message: slot a click"
+    type: air
+    name: ""
   # 错误选择
   slotB:
-    slot: "2-12"
+    slot: "37-43"
     iaIcons: 'xx'
     actions:
       - 'console: cmi warp help1 {player}'
       - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
       - 'console: cmi effect {player} blindness 1'
-    type: itemsadder:air
-    name: " &c&l> &3传送教学房间"
+    type: RED_STAINED_GLASS_PANE
+    name: ""
+playRuleNoExpired:
+  - "message: 游玩条约未过期"
+playRuleSuccess:
+  - "message: 游玩条约签署完成"

@@ -32,7 +32,8 @@ import java.util.*
 
 object MoveIslandCore : Listener {
 
-    private val cooldown = Cooldown()
+    private val moveingCooldown = Cooldown()
+    private val interactCooldown = Cooldown()
     private val moveingCorePlayer = mutableMapOf<UUID, PlayerIsland>()
     private val playerToPlot = mutableMapOf<UUID, Plot>()
     private val playerTempCoreLoc = mutableMapOf<UUID, Pair<Location, Int>>()
@@ -41,9 +42,12 @@ object MoveIslandCore : Listener {
 
     val playerCoreRemove = mutableSetOf<UUID>()
 
+
     fun init() {
         MyIslands.INSTANCE.addLeftClickListener { player, packetEvent ->
-            handlePlayerInteract(player, packetEvent)
+            interactCooldown.invoke(player.uuid, 200L, {
+                handlePlayerInteract(player, packetEvent)
+            }, {})
         }
         MyIslands.INSTANCE.submitTask(
             delay = 0,
@@ -119,7 +123,7 @@ object MoveIslandCore : Listener {
     fun onMove(event: PlayerMoveEvent) {
         val player = event.player
         if (!moveingCorePlayer.containsKey(player.uniqueId)) return
-        cooldown.invoke(player.uniqueId, 100L, {
+        moveingCooldown.invoke(player.uniqueId, 100L, {
             if (!checkPlayerLoc(player)) {
                 return@invoke
             }
@@ -178,20 +182,22 @@ object MoveIslandCore : Listener {
         event.isCancelled = true
 
         val (newLoc, entityID) = playerTempCoreLoc[player.uniqueId]!!
+        val homeLoc = IslandsManager.getHomeLoc(newLoc)
+        if (MyIslands.plotUtils.hasDanger(homeLoc, -1.0)) {
+            player.sendLang("setupIslandCoreDanger")
+            return false
+        }
         val entities = IslandsManager.getIslandCoreEntity(islandData)
         IslandsManager.markMoveingIslandCore(islandData.id.value)
         entities.forEach {
             IslandsManager.deleteIslandCore(player, it)
         }
         deleteEntity(player, entityID)
-//            oldLoc.block.type = Material.AIR
         StorageManager.updateCoreLoc(islandData.id.value, newLoc.toVector())
         IslandsManager.setupPlotCore(newLoc)
         MyIslands.INSTANCE.submitTask(delay = 40L) {
             IslandsManager.cleanMoveingIslandCore(islandData.id.value)
         }
-//            CustomBlock.place(ConfigManager.coreId, newLoc)
-        val homeLoc = IslandsManager.getHomeLoc(newLoc)
         IslandsManager.setPlotHome(playerToPlot[player.uniqueId]!!, homeLoc)
         player.teleport(homeLoc)
         player.velocity = Vector(0, 0, 0)
