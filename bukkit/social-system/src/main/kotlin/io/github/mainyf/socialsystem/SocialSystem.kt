@@ -1,6 +1,7 @@
 package io.github.mainyf.socialsystem
 
 import io.github.mainyf.bungeesettingsbukkit.ServerPacket
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.newmclib.exts.tvar
 import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
@@ -11,10 +12,8 @@ import io.github.mainyf.socialsystem.listeners.PlayerListeners
 import io.github.mainyf.socialsystem.module.FriendHandler
 import io.github.mainyf.socialsystem.storage.StorageManager
 import org.apache.logging.log4j.LogManager
-import org.bukkit.Bukkit
-import org.bukkit.plugin.java.JavaPlugin
 
-class SocialSystem : JavaPlugin() {
+class SocialSystem : BasePlugin() {
 
     companion object {
 
@@ -30,16 +29,23 @@ class SocialSystem : JavaPlugin() {
 
         val FRIEND_TP_INVITE = ServerPacket.registerPacket("broadcast_social_friend_tp_invite")
 
-//        val FRIEND_TP_INVITE_AGREE = ServerPacket.registerPacket("broadcast_social_friend_tp_invite_agree")
+        val ISLAND_TP_REQ = ServerPacket.registerPacket("broadcast_island_tp_req")
+
+        val ISLAND_TP_RES = ServerPacket.registerPacket("broadcast_island_tp_res")
+
+        val ISLAND_EMPTY_RES = ServerPacket.registerPacket("broadcast_island_empty_res")
+
+        val ISLAND_NOT_ALLOWED_ACCESS = ServerPacket.registerPacket("broadcast_island_empty_not_allowed_access")
 
     }
 
-    override fun onEnable() {
+    override fun enable() {
         INSTANCE = this
         ConfigManager.load()
         StorageManager.init()
         CommandHandler.register()
         pluginManager().registerEvents(PlayerListeners, this)
+        pluginManager().registerEvents(CrossServerHandler, this)
         addPlaceholderExpansion("socialcard") papi@{ offlinePlayer, params ->
             val player = offlinePlayer?.player ?: return@papi null
             when (params) {

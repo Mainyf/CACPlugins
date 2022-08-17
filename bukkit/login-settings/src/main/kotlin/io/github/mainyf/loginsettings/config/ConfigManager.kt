@@ -5,6 +5,9 @@ package io.github.mainyf.loginsettings.config
 import io.github.mainyf.loginsettings.LoginSettings
 import io.github.mainyf.newmclib.config.*
 import io.github.mainyf.newmclib.config.action.MultiAction
+import io.github.mainyf.newmclib.exts.toComp
+import io.github.mainyf.newmclib.exts.tvar
+import net.kyori.adventure.text.Component
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 
@@ -16,6 +19,7 @@ object ConfigManager {
     lateinit var resourcePack: ResourcePack
     lateinit var teachingMenuConfig: TeachingMenuConfig
 
+    var noUsageCommand: MultiAction? = null
     var teachingMenuSlotA: MultiAction? = null
     var playRuleNoExpired: MultiAction? = null
     var playRuleSuccess: MultiAction? = null
@@ -35,6 +39,7 @@ object ConfigManager {
     }
 
     private fun loadMainConfig() {
+        noUsageCommand = ActionParser.parseAction(mainConfigFile, "noUsageCommand", false)
         playerRegister = PlayerRegister(
             mainConfigFile.getLong("register.stage1.period"),
             ActionParser.parseAction(mainConfigFile, "register.stage1.actions", false),
@@ -51,6 +56,19 @@ object ConfigManager {
 
             ActionParser.parseAction(mainConfigFile, "login.stage1.loginSuccess", false),
             ActionParser.parseAction(mainConfigFile, "login.stage1.passwordWrong", false),
+
+            mainConfigFile.getInt("login.stage1.passwordAttempts", 5),
+            mainConfigFile.getLong("login.stage1.passwordWrongBlackListTime", 5L),
+            mainConfigFile.getStringList("login.stage1.blackListKickFormat").let { list ->
+                Component.text { builder ->
+                    list.forEachIndexed { index, s ->
+                        builder.append(s.toComp())
+                        if(index < list.size - 1) {
+                            builder.append(Component.text("\n"))
+                        }
+                    }
+                }
+            }
         )
         resourcePack = ResourcePack(
             mainConfigFile.getString("resourcePack.url", "")!!,
@@ -107,7 +125,11 @@ object ConfigManager {
         val stage1Actions: MultiAction?,
 
         val loginSuccess: MultiAction?,
-        val passwordWrong: MultiAction?
+        val passwordWrong: MultiAction?,
+
+        val passwordAttempts: Int,
+        val passwordWrongBlackListTime: Long,
+        val blackListKickFormat: Component
     )
 
     class ResourcePack(

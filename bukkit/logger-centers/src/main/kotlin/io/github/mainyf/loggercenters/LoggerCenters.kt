@@ -1,11 +1,11 @@
 package io.github.mainyf.loggercenters
 
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.exts.registerCommand
-import org.bukkit.plugin.java.JavaPlugin
 
-class LoggerCenters : JavaPlugin() {
+class LoggerCenters : BasePlugin() {
 
-    override fun onEnable() {
+    override fun enable() {
 
         registerCommand("mlog", MoneyLoggerCommand)
 

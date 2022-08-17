@@ -1,9 +1,9 @@
 package io.github.mainyf.bungeesettingsbukkit
 
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.getLogger
-import org.bukkit.plugin.java.JavaPlugin
 
-class BungeeSettingsBukkit : JavaPlugin() {
+class BungeeSettingsBukkit : BasePlugin() {
 
     var bcSocketPort = 24440
 
@@ -21,7 +21,7 @@ class BungeeSettingsBukkit : JavaPlugin() {
         CrossServerManager.loadSocket(bcSocketPort)
     }
 
-    override fun onEnable() {
+    override fun enable() {
         INSTANCE = this
         loadConfig()
         CommandHandler.init()

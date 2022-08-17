@@ -1,38 +1,53 @@
 alreadyFriend:
-  - "minimessage: <red>对方已经是你的好友了，你无法在向他发送好友请求</red>"
+  - "message: &c&l！&4对方已经是你的好友了。"
 
 sendFriendRequestCooldown:
   - "minimessage: <color:#FF5555>发送好友请求冷却: <eTime></color>"
+repairCooldown:
+  - "minimessage: <color:#FF5555>修复装备冷却: <eTime></color>"
 sendFriendRequestToSender:
-  - "minimessage: <color:#FFFFF>好友请求已发送给对方</color>"
+  - "message: &c&l！&4已向对方发送好友申请。"
 sendFriendRequestToReceiver:
   - "minimessage: <player> 请求添加你为好友 <click:run_command:/social agree {player}><hover:show_text:'同意请求'>✔</hover></click> | <click:run_command:/social refuse {player}><hover:show_text:'拒绝请求'>✘</hover></click>"
 
 agressFriendRequestToSender:
-  - "minimessage: <color:#FFFFF>发送给 <receiver> 的好友申请已被接受，你们已经是好友了</color>"
+  - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  - "message: &c&l！&4玩家 &c{receiver} &4已同意你的好友申请。"
 agressFriendRequestToReceiver:
-  - "minimessage: <color:#FFFFF>你已接受 <sender> 发送给你的好友申请，你们已经是好友了</color>"
+  - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  - "message: &c&l！&4你接受了 &c{sender} &4的好友申请。"
 
 refuseFriendRequestToSender:
-  - "minimessage: <color:#FF5555>发送给 <receiver> 的好友申请已被拒绝</color>"
+  - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  - "message: &c&l！&4玩家 {receiver} 已拒绝你的好友申请。"
 refuseFriendRequestToReceiver:
-  - "minimessage: <color:#FF5555>你已拒绝 <sender> 发送给你的好友申请</color>"
+  - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  - "message: &c&l！&4你拒绝了 {sender} 的好友申请。"
 
 sendRepairHandEquipmentToSender:
-  - "minimessage: <color:#FFFFF>已经帮对方修复手中物品</color>"
+  - "message: &c&l！&4成功修复对方手上的装备。"
 sendRepairHandEquipmentToReceiver:
-  - "minimessage: <color:#FFFFF><player> 帮你修复了手中物品</color>"
+  - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  - "message: &c&l！&4 玩家 &c{player} &4帮你修复了手上的装备。"
+
+targetNoAllowRepairHand:
+  - "minimessage: <color:#FFFFF><player> 不允许别人帮他修复手中装备</color>"
+noPermissionRepairHand: []
+targetOffline:
+  - "minimessage: <color:#FFFFF><player> 不在线</color>"
+
 friendRequestsNoExists:
   - "minimessage: <color:#FF5555>好友申请列表中没有此玩家</color>"
 deleteFriendToSender:
-  - "minimessage: <color:#FFFFF>删除好友 <friend> 成功</color>"
+  - "message: &c&l！&4成功删除 &c{friend} &4好友。"
 deleteFriendToRecevier:
-  - "minimessage: <color:#FF5555>你被 <friend> 删除了好友</color>"
+  - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  - "message: &c&l！&4你被 &c{friend} &4删除了好友。"
 
 tpRequestCooldown:
   - "minimessage: <color:#FFFFF>传送请求正在冷却: <eTime></color>"
 tpTargetOffline:
-  - "minimessage: <color:#FF5555>该玩家不在线</color>"
+  - "message: &c&l！&4这个好友是离线状态。"
 sendTPRequestToSender:
   - "minimessage: <color:#FFFFF>传送请求已发送给对方</color>"
 sendTPRequestToReceiver:
@@ -43,8 +58,12 @@ tpRequestSuccessToReceiver:
   - "minimessage: <color:#FFFFF>您已答应了 <friend> 的传送请求，正在传送中</color>"
 tpRequestInvalid:
   - "minimessage: <color:#FF5555>该传送请求已失效</color>"
-refuseTPRequest:
-  - "minimessage: <color:#FF5555>你的传送请求对方已经拒绝</color>"
+tpRequestExpired:
+  - "mini: &4传送请求时效已过"
+refuseTPRequestToSender:
+  - "minimessage: <color:#FF5555>{friend} 拒绝了你的传送请求</color>"
+refuseTPRequestToReceiver:
+  - "minimessage: <color:#FF5555>你拒绝了 {friend} 的传送请求</color>"
 
 inviteTPToSender:
   - "minimessage: <color:#FFFFF>邀请传送已发送给对方</color>"
@@ -57,5 +76,11 @@ inviteTPSuccessToReceiver:
 
 inviteTPInvalid:
   - "minimessage: <color:#FF5555>该邀请传送已失效</color>"
-refuseTPInv:
-  - "minimessage: <color:#FF5555>你的邀请传送对方已经拒绝</color>"
+inviteTPExpired:
+  - "mini: &4传送邀请时效已过"
+refuseTPInvToSender:
+  - "minimessage: <color:#FF5555>{friend} 拒绝了你的传送邀请</color>"
+refuseTPInvToReceiver:
+  - "minimessage: <color:#FF5555>你拒绝了 {friend} 的邀请传送</color>"
+friendNonOwnIsland:
+  - "mini: 好友 {friend} 没有岛屿或设置了不允许访问，你无法传送"

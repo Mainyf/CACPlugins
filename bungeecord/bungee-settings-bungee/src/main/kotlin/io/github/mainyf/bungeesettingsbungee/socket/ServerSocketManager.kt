@@ -156,11 +156,17 @@ object ServerSocketManager {
             else -> {
                 if (packetName.startsWith("broadcast_")) {
                     clientSockets.map { it.first }.forEach {
-                        if (it.serverID != client.serverID) {
-                            it.sendData(buf.toByteArray())
-                        }
+                        it.sendData(buf.toByteArray())
+//                        if (it.serverID != client.serverID) {
+//                            it.sendData(buf.toByteArray())
+//                        }
                     }
                 }
+//                if (packetName.startsWith("broadcast_all")) {
+//                    clientSockets.map { it.first }.forEach {
+//                        it.sendData(buf.toByteArray())
+//                    }
+//                }
             }
         }
     }

@@ -1,6 +1,7 @@
 package io.github.mainyf.shopmanager
 
 import dev.jorel.commandapi.arguments.ItemStackArgument
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.offlinePlayerArguments
 import io.github.mainyf.newmclib.command.playerArguments
@@ -13,10 +14,9 @@ import net.kyori.adventure.text.Component
 import org.apache.logging.log4j.LogManager
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.plugin.java.JavaPlugin
 import kotlin.math.floor
 
-class ShopManager : JavaPlugin() {
+class ShopManager : BasePlugin() {
 
     companion object {
 
@@ -26,7 +26,7 @@ class ShopManager : JavaPlugin() {
 
     }
 
-    override fun onEnable() {
+    override fun enable() {
         INSTANCE = this
         ConfigManager.load()
         StorageManager.init()

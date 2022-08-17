@@ -5,18 +5,18 @@ import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.arguments.GreedyStringArgument
 import dev.jorel.commandapi.arguments.TextArgument
 import io.github.mainyf.mcrmbmigration.storage.StorageManager
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.command.apiCommand
+import io.github.mainyf.newmclib.command.offlinePlayerArguments
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.*
 import org.apache.logging.log4j.LogManager
 import org.black_ixx.playerpoints.PlayerPoints
-import org.bukkit.command.CommandExecutor
-import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.util.*
 import kotlin.collections.find
 
-class McrmbMigration : JavaPlugin() {
+class McrmbMigration : BasePlugin() {
 
     private val LOGGER = LogManager.getLogger("McrmbMigration")
 
@@ -24,20 +24,18 @@ class McrmbMigration : JavaPlugin() {
 
     private val pointList = mutableListOf<Point>()
 
-    override fun onEnable() {
-        saveDefaultConfig()
-        reloadConfig()
-        Lang.load(config)
-        StorageManager.init()
+    override fun enable() {
         loadConfig()
+        StorageManager.init()
         apiCommand("getoldpoints") {
             withHelp("领取点券补偿", "/getoldpoints <密码> 领取补偿的点券")
             withArguments(GreedyStringArgument("密码"))
             executePlayer {
                 val player = sender
                 val password = args[0] as String
-                if (StorageManager.hasClaimed(player)) {
-                    player.sendLang("alreadyClaim")
+                val claimed = StorageManager.getClaimed(player.uuid)
+                if (claimed != null) {
+                    player.sendLang("alreadyClaim", "{date}", claimed.createTime.formatYMDHM())
                     return@executePlayer
                 }
 
@@ -56,12 +54,28 @@ class McrmbMigration : JavaPlugin() {
                 }
             }
         }.register()
-        registerCommand("mcrmreload", CommandExecutor cmd@{ sender, command, label, args ->
-            if (!sender.isOp) return@cmd false
-            loadConfig()
-            sender.successMsg("重载完成")
-            return@cmd true
-        })
+        apiCommand("mmi") {
+            "view" {
+                withArguments(
+                    offlinePlayerArguments("玩家名")
+                )
+                executeOP {
+                    val offlinePlayer = offlinePlayer()
+                    val claimed = StorageManager.getClaimed(offlinePlayer.uuid)
+                    if(claimed == null) {
+                        sender.msg("该玩家没有领取过")
+                    } else {
+                        sender.msg("该玩家在 ${claimed.createTime.formatYMDHM()} 时领取了 ${claimed.value}")
+                    }
+                }
+            }
+            "reload" {
+                executeOP {
+                    loadConfig()
+                    sender.successMsg("重载完成")
+                }
+            }
+        }
     }
 
     override fun onDisable() {
@@ -69,6 +83,9 @@ class McrmbMigration : JavaPlugin() {
     }
 
     private fun loadConfig() {
+        saveDefaultConfig()
+        reloadConfig()
+        Lang.load(config)
         if (!dataFolder.exists()) {
             dataFolder.mkdirs()
         }

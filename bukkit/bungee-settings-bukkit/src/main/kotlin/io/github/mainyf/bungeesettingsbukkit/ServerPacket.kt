@@ -26,7 +26,8 @@ data class ServerPacket(
 
         fun registerPacket(name: String): ServerPacket {
             if (packets.containsKey(name)) {
-                throw java.lang.RuntimeException("$name 已经注册过")
+                return packets[name]!!
+//                throw java.lang.RuntimeException("$name 已经注册过")
             }
             val packet = ServerPacket(name)
             packets[name] = packet

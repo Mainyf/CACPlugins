@@ -3,18 +3,19 @@ package io.github.mainyf.myislands
 import com.plotsquared.core.PlotAPI
 import com.plotsquared.core.PlotSquared
 import com.plotsquared.core.player.PlotPlayer
+import io.github.mainyf.bungeesettingsbukkit.ServerPacket
 import io.github.mainyf.myislands.config.ConfigManager
 import io.github.mainyf.myislands.features.MoveIslandCore
 import io.github.mainyf.myislands.listeners.AuthListeners
 import io.github.mainyf.myislands.listeners.NoAuthListeners
 import io.github.mainyf.myislands.listeners.PlayerListeners
 import io.github.mainyf.myislands.storage.StorageManager
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.exts.*
 import org.apache.logging.log4j.LogManager
 import org.bukkit.entity.Player
-import org.bukkit.plugin.java.JavaPlugin
 
-class MyIslands : JavaPlugin() {
+class MyIslands : BasePlugin() {
 
     companion object {
 
@@ -25,10 +26,18 @@ class MyIslands : JavaPlugin() {
         lateinit var plotAPI: PlotAPI
 
         lateinit var plotUtils: PlotUtils
+
+        val ISLAND_TP_REQ = ServerPacket.registerPacket("broadcast_island_tp_req")
+
+        val ISLAND_TP_RES = ServerPacket.registerPacket("broadcast_island_tp_res")
+
+        val ISLAND_EMPTY_RES = ServerPacket.registerPacket("broadcast_island_empty_res")
+
+        val ISLAND_NOT_ALLOWED_ACCESS = ServerPacket.registerPacket("broadcast_island_empty_not_allowed_access")
+
     }
 
-
-    override fun onEnable() {
+    override fun enable() {
         INSTANCE = this
         plotAPI = PlotAPI()
         ConfigManager.load()
@@ -39,6 +48,7 @@ class MyIslands : JavaPlugin() {
         MoveIslandCore.init()
         pluginManager().registerEvents(MoveIslandCore, this)
         pluginManager().registerEvents(PlayerListeners, this)
+        pluginManager().registerEvents(CrossServerHandler, this)
         CommandHandler.init()
         CommandHandler.register()
         if (isPlugin("AuthMe")) {

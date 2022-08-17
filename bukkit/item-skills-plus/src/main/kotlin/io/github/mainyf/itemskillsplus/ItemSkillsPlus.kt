@@ -6,17 +6,17 @@ import io.github.mainyf.itemskillsplus.skill.PowerSkill
 import io.github.mainyf.itemskillsplus.skill.SharpSkill
 import io.github.mainyf.itemskillsplus.skill.ExpandSkill
 import io.github.mainyf.itemskillsplus.storage.StorageManager
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.exts.registerCommand
 import org.bukkit.Bukkit
-import org.bukkit.plugin.java.JavaPlugin
 
-class ItemSkillsPlus : JavaPlugin() {
+class ItemSkillsPlus : BasePlugin() {
 
     companion object {
         lateinit var INSTANCE: ItemSkillsPlus
     }
 
-    override fun onEnable() {
+    override fun enable() {
         INSTANCE = this
         kotlin.runCatching {
             ConfigManager.load()

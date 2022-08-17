@@ -10,6 +10,7 @@ import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.storage.AbstractStorageManager
 import io.github.mainyf.newmclib.storage.newByID
 import io.github.mainyf.newmclib.utils.Heads
+import io.github.mainyf.socialsystem.module.FriendHandler
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -199,7 +200,15 @@ object StorageManager : AbstractStorageManager() {
                     val onlinePlayers = onlinePlayers()
                     islands.filter { island -> onlinePlayers.any { it.uuid == island.id.value } }.size
                 }
-                FRIEND -> PlayerIsland.count(PlayerIslands.visibility neq IslandVisibility.NONE).toInt()
+                FRIEND -> {
+                    val friends = FriendHandler.getFriends(player)
+                    friends.mapNotNull {
+                        PlayerIsland.findById(it.uuid)
+                    }.filter {
+                        it.visibility != IslandVisibility.NONE
+                    }.size
+//                    PlayerIsland.count(PlayerIslands.visibility neq IslandVisibility.NONE).toInt()
+                }
                 PERMISSION -> {
                     PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
                         .filter { island ->
@@ -235,11 +244,18 @@ object StorageManager : AbstractStorageManager() {
                         }
 //                        .pagination(pageIndex, pageSize)
                         .toList()
-                    FRIEND -> PlayerIsland
-                        .find { PlayerIslands.visibility neq IslandVisibility.NONE }
-                        .orderBy(PlayerIslands.heats to SortOrder.DESC)
-//                        .pagination(pageIndex, pageSize)
-                        .toList()
+                    FRIEND -> {
+                        val friends = FriendHandler.getFriends(player)
+                        friends
+                            .mapNotNull { PlayerIsland.findById(it.uuid) }
+                            .filter { it.visibility != IslandVisibility.NONE }
+                            .pagination(pageIndex, pageSize)
+//                        PlayerIsland
+//                            .find { PlayerIslands.visibility neq IslandVisibility.NONE }
+//                            .orderBy(PlayerIslands.heats to SortOrder.DESC)
+////                        .pagination(pageIndex, pageSize)
+//                            .toList()
+                    }
                     PERMISSION -> {
                         PlayerIsland.find { PlayerIslands.visibility neq IslandVisibility.NONE }
                             .filter { island ->

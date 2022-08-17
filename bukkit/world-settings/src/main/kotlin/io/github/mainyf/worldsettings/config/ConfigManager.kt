@@ -41,16 +41,16 @@ object ConfigManager {
                     .associateWith { loadSetting(worldSect.getConfigurationSection(it)!!, globalConfig) }
             }
         )
-        val serversSect = config.getConfigurationSection("servers")!!
-        serversSect.getKeys(false).forEach { serverId ->
+        val serversSect = config.getConfigurationSection("servers")
+        serversSect?.getKeys(false)?.forEach { serverId ->
             val serverSect = serversSect.getConfigurationSection(serverId)!!
             val serverGlobal = loadSetting(serverSect.getConfigurationSection("global")!!, globalServerConfig!!.global)
             serverConfigMap[serverId] = ServerConfig(
                 serverGlobal,
-                serverSect.getConfigurationSection("worlds")!!.let { worldSect ->
+                serverSect.getConfigurationSection("worlds")?.let { worldSect ->
                     worldSect.getKeys(false)
                         .associateWith { loadSetting(worldSect.getConfigurationSection(it)!!, serverGlobal) }
-                }
+                } ?: emptyMap()
             )
         }
     }
@@ -77,6 +77,13 @@ object ConfigManager {
                 type == Boolean::class.java -> {
                     if (config.contains(configKey, true)) {
                         wsc.setValue(configKey, config.getBoolean(configKey))
+                    } else {
+                        wsc.setDefault(configKey, parent)
+                    }
+                }
+                type == Long::class.java -> {
+                    if (config.contains(configKey, true)) {
+                        wsc.setValue(configKey, config.getLong(configKey))
                     } else {
                         wsc.setDefault(configKey, parent)
                     }
@@ -229,7 +236,10 @@ data class WorldSettingConfig(
     val deleteEnchantsAction: MultiAction? = null,
     val antiTrampleTurtleEgg: Boolean = false,
     val antiGoatHornSound: Boolean = true,
-    val antiCampfireInteract: Boolean = true
+    val antiCampfireInteract: Boolean = true,
+    val antiSpawnEnderDragonEgg: Boolean = true,
+    val antiChat: Boolean = false,
+    val antiPlayerMoveToInhabitedTimeChunk: Long = 0L
 )
 
 enum class CommandMatchType {

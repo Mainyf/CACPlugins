@@ -5,6 +5,7 @@ import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketAdapter
 import com.comphenix.protocol.events.PacketEvent
 import dev.jorel.commandapi.CommandAPI
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.exts.registerCommand
 import io.github.mainyf.newmclib.exts.runTaskTimerBR
 import io.github.mainyf.newmclib.exts.submitTask
@@ -15,11 +16,11 @@ import io.github.mainyf.worldsettings.config.WorldSettingConfig
 import io.github.mainyf.worldsettings.listeners.BlockListener
 import io.github.mainyf.worldsettings.listeners.PlayerListener
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Player
-import org.bukkit.plugin.java.JavaPlugin
 
-class WorldSettings : JavaPlugin() {
+class WorldSettings : BasePlugin() {
 
     companion object {
 
@@ -29,7 +30,7 @@ class WorldSettings : JavaPlugin() {
 
     private var packetListener: PacketAdapter? = null
 
-    override fun onEnable() {
+    override fun enable() {
         INSTANCE = this
         ConfigManager.load()
         PlayerDropItemStorage.init(this)
@@ -38,6 +39,18 @@ class WorldSettings : JavaPlugin() {
         CommandHandler.register()
         Bukkit.getServer().pluginManager.registerEvents(BlockListener, this)
         Bukkit.getServer().pluginManager.registerEvents(PlayerListener, this)
+        submitTask(delay = 20L, period = 5L) {
+            Bukkit.getWorlds().filter { it.environment == World.Environment.THE_END }.forEach { world ->
+                val settings = ConfigManager.getSetting(world) ?: return@submitTask
+                if (!settings.antiSpawnEnderDragonEgg) return@submitTask
+                repeat(9) {
+                    val eggLoc = world.getBlockAt(0, 58 + it, 0)
+                    if (eggLoc.type == Material.DRAGON_EGG) {
+                        eggLoc.type = Material.AIR
+                    }
+                }
+            }
+        }
         submitTask(
             delay = 20L,
             period = 20L

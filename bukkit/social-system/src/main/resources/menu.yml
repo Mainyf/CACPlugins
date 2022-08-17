@@ -10,23 +10,23 @@ socialCardMenu:
     slot: [ 11 ]
     default:
       type: BLACK_STAINED_GLASS_PANE
-      name: " &c&l> &3头颅"
+      name: " "
+      lore:
+        - " &7玩家: &f{player} "
+        - ""
+      customModelData: 10010
   # 第一个
   cardX1Slot:
     slot: [ 21 ]
     default:
       type: 'gui:view_contact_info_1'
-      name: " &c&l> &3玩家名: %player_name%"
-      lore:
-        - " &c&l> &3是否是op: %player_is_op%"
+      name: " &c&l> &3金币: %xconomy_balance%"
   # 第二个
   cardX2Slot:
     slot: [ 22 ]
     default:
       type: 'gui:view_contact_info_2'
-      name: " &c&l> &3玩家名: %player_name%"
-      lore:
-        - " &c&l> &3是否是op: %player_is_op%"
+      name: " &c&l> &3绯石: %playerpoints_points%"
   # 第三个
   cardX3Slot:
     slot: [  ]
@@ -38,22 +38,20 @@ socialCardMenu:
     slot: [  ]
     default:
       type: BLACK_STAINED_GLASS_PANE
-      name: " &c&l> &3玩家名: %player_name%"
-      lore:
-        - " &c&l> &3是否是op: %player_is_op%"
+      name: " &c&l> &3绯石: %playerpoints_points%"
 
   # 好友申请
   requestSlot:
     slot: [ 27 ]
     default:
-      type: BLACK_STAINED_GLASS_PANE
-      name: " &c&l> &3好友申请"
+      type: itemsadder:air
+      name: " &c&l> &3申请成为好友"
   # 修复装备
   repairSlot:
     slot: [ 28 ]
     default:
-      type: BLACK_STAINED_GLASS_PANE
-      name: " &c&l> &3修复装备"
+      type: itemsadder:air
+      name: " &c&l> &3帮对方修复装备 &c&l[MVP]"
   # 是否在线
   onlineSlot:
     slot: [ 6 ]
@@ -95,7 +93,7 @@ socialMainMenu:
   # ia背景图片
   row: 6
   background: ':offset_-8::view_contact_main_own:'
-  backgroundFriend: ':offset_-8::view_contact_main_own:'
+  backgroundFriend: ':offset_-8::view_contact_main_other:'
   globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   # 上一页
   prevSlot:
@@ -109,16 +107,33 @@ socialMainMenu:
     default:
       type: itemsadder:air
       name: " &c&l> &3下一页"
+  # 返回菜单
+  backSlot:
+    slot: [ 49 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3返回主菜单"
+      actions:
+        - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+        - "console: trmenu open main {player}"
   friendsSlot:
     slot: [ 1,2,3,4,5,6,7 ]
     default:
       name: " &c&l> &3{player}"
+      customModelData: 10000
+    empty:
+      type: gui:view_add
+      name: " &c&l> &3蹲下右键玩家打开对方名片"
   # 头颅格子
   headSlot:
     slot: [ 21 ]
     default:
       type: BLACK_STAINED_GLASS_PANE
-      name: " &c&l> &3头颅"
+      name: " "
+      lore:
+        - " &7玩家: &f{player} "
+        - ""
+      customModelData: 10010
   # 第一个
   cardX1Slot:
     slot: [ 31 ]
@@ -130,9 +145,7 @@ socialMainMenu:
     slot: [ 32 ]
     default:
       type: 'gui:view_contact_info_2'
-      name: " &c&l> &3玩家名: %player_name%"
-      lore:
-        - " &c&l> &3是否是op: %player_is_op%"
+      name: " &c&l> &3绯石: %playerpoints_points%"
   # 第三个
   cardX3Slot:
     slot: [  ]
@@ -161,17 +174,66 @@ socialMainMenu:
       actions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
       name: " &c&l> &3离线"
   deleteSlot:
+    slot: [ 52 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3删除好友"
+  allowRepairSlot:
     slot: [ 46 ]
     default:
       type: itemsadder:air
-      name: " &c&l> &3删除玩家好友"
-  allowRepairSlot:
+      name: " &c&l> &3别人帮自己修复装备 &7（当前: &f{status}&7修复）"
+  tpSlot:
+    slot: [ 46 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3传送好友"
+      lore:
+        - ''
+        - ' &7▪ &f左键&7申请传送到对方身边'
+        - ' &7▪ &f右键&7邀请传送到自己身边'
+        - ''
+  tpIsland:
     slot: [ 47 ]
     default:
       type: itemsadder:air
-      name: " &c&l> &3他人帮自己修复装备 &7（状态: {status}）"
-  tpSlot:
-    slot: [ 48 ]
+      name: " &c&l> &3好友岛屿"
+socialIslandTPMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 5
+  background: ':offset_-8::view_cd_servers: :offset_-156::view_cd_servers_yes: :offset_13::view_cd_servers_yes: :offset_13::view_cd_servers_air:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  plot1Slot:
+    slot: [ 1, 10 ]
     default:
       type: itemsadder:air
-      name: " &c&l> &3左键发起传送，右键邀请传送"
+      name: " &c&l> &3私人岛屿 &lI"
+    empty:
+      type: itemsadder:air
+      name: " &c&l> &3私人岛屿 &lI &7[&7未拥有&7]"
+    accessNotAllowed:
+      type: itemsadder:air
+      name: " &c&l> &3私人岛屿 &lI &7[&7禁止访问&7]"
+  plot2Slot:
+    slot: [ 3, 12 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3私人岛屿 &lII"
+    empty:
+      type: itemsadder:air
+      name: " &c&l> &3私人岛屿 &lII &7[&7未拥有&7]"
+    accessNotAllowed:
+      type: itemsadder:air
+      name: " &c&l> &3私人岛屿 &lII &7[&7禁止访问&7]"
+  infoSlot:
+    slot: [ 5, 14 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &7待开发"
+  backSlot:
+    slot: [ 5, 15 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &7返回"

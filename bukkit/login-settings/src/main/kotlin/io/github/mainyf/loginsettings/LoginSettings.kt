@@ -9,14 +9,13 @@ import fr.xephi.authme.service.CommonService
 import fr.xephi.authme.service.ValidationService
 import io.github.mainyf.loginsettings.config.ConfigManager
 import io.github.mainyf.loginsettings.storage.StorageManager
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.exts.asPlugin
 import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.newmclib.exts.toReflect
 import org.apache.logging.log4j.LogManager
-import org.bukkit.Bukkit
-import org.bukkit.plugin.java.JavaPlugin
 
-class LoginSettings : JavaPlugin() {
+class LoginSettings : BasePlugin() {
 
     companion object {
 
@@ -37,7 +36,7 @@ class LoginSettings : JavaPlugin() {
         lateinit var bukkitService: BukkitService
     }
 
-    override fun onEnable() {
+    override fun enable() {
         INSTANCE = this
         val authMe = "AuthMe".asPlugin() as AuthMe
 
@@ -55,7 +54,6 @@ class LoginSettings : JavaPlugin() {
         PlayerAuthHandler.runTaskTimer(this, 10, 10)
         pluginManager().registerEvents(PlayerAuthHandler, this)
     }
-
 
     @Suppress("UNCHECKED_CAST")
     private fun <T> tryGetAuthMeService(clazz: Class<*>, msg: String): T {

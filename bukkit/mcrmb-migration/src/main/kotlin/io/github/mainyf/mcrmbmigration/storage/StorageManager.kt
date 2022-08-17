@@ -5,6 +5,7 @@ import io.github.mainyf.newmclib.storage.AbstractStorageManager
 import io.github.mainyf.newmclib.storage.newByID
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.SchemaUtils
+import java.util.UUID
 
 object StorageManager : AbstractStorageManager() {
 
@@ -19,9 +20,9 @@ object StorageManager : AbstractStorageManager() {
         }
     }
 
-    fun hasClaimed(player: Player): Boolean {
+    fun getClaimed(uuid: UUID): PlayerClaimOldPoint? {
         return transaction {
-            PlayerClaimOldPoint.findById(player.uuid) != null
+            PlayerClaimOldPoint.findById(uuid)
         }
     }
 

@@ -20,11 +20,15 @@ object ConfigManager {
     private lateinit var langConfigFile: FileConfiguration
 
     lateinit var repairPermission: String
-    var friendRequestCooldown: Long = 60L
+    var friendRequestCooldown = 60L
+    var repairCooldown = 60L
     var tpRequestCooldown = 60L
+    var tpReqExpired = 20L
+    var inviteTpExpired = 20L
 
     lateinit var socialCardMenuConfig: SocialCardMenuConfig
     lateinit var socialMainMenuConfig: SocialMainMenuConfig
+    lateinit var socialIslandTPMenuConfig: SocialIslandTPMenuConfig
 
     private var cardPermission = "social.card"
     private var tabCardDefault = ""
@@ -81,6 +85,7 @@ object ConfigManager {
             socialMainSect.getString("backgroundFriend")!!,
             socialMainSect.asDefaultSlotConfig("prevSlot"),
             socialMainSect.asDefaultSlotConfig("nextSlot"),
+            socialMainSect.asDefaultSlotConfig("backSlot"),
             socialMainSect.asDefaultSlotConfig("friendsSlot"),
             socialMainSect.asDefaultSlotConfig("headSlot"),
             socialMainSect.asDefaultSlotConfig("cardX1Slot"),
@@ -90,14 +95,26 @@ object ConfigManager {
             socialMainSect.asDefaultSlotConfig("onlineSlot"),
             socialMainSect.asDefaultSlotConfig("deleteSlot"),
             socialMainSect.asDefaultSlotConfig("allowRepairSlot"),
-            socialMainSect.asDefaultSlotConfig("tpSlot")
+            socialMainSect.asDefaultSlotConfig("tpSlot"),
+            socialMainSect.asDefaultSlotConfig("tpIsland")
+        )
+        val socialIslandTPSect = menuConfigFile.getConfigurationSection("socialIslandTPMenu")!!
+        socialIslandTPMenuConfig = SocialIslandTPMenuConfig(
+            socialIslandTPSect.asMenuSettingsConfig(),
+            socialIslandTPSect.asDefaultSlotConfig("plot1Slot"),
+            socialIslandTPSect.asDefaultSlotConfig("plot2Slot"),
+            socialIslandTPSect.asDefaultSlotConfig("infoSlot"),
+            socialIslandTPSect.asDefaultSlotConfig("backSlot")
         )
     }
 
     private fun loadMainConfig() {
         repairPermission = mainConfigFile.getString("repairPermission")!!
-        friendRequestCooldown = mainConfigFile.getLong("friendRequestCooldown", 60L)
-        tpRequestCooldown = mainConfigFile.getLong("tpRequestCooldown", 60L)
+        friendRequestCooldown = mainConfigFile.getLong("friendRequestCooldown", friendRequestCooldown)
+        repairCooldown = mainConfigFile.getLong("repairCooldown", repairCooldown)
+        tpRequestCooldown = mainConfigFile.getLong("tpRequestCooldown", tpRequestCooldown)
+        tpReqExpired = mainConfigFile.getLong("tpReqExpired", tpReqExpired)
+        inviteTpExpired = mainConfigFile.getLong("inviteTpExpired", inviteTpExpired)
 
         cardPermission = mainConfigFile.getString("card.permission", "social.card")!!
         tabCardDefault = mainConfigFile.getString("card.tab.default", "")!!.colored()

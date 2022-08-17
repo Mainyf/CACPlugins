@@ -1,13 +1,13 @@
 package io.github.mainyf.playeraccount
 
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.utils.ExtractPluginLib
 import io.github.mainyf.playeraccount.config.ConfigManager
 import io.github.mainyf.playeraccount.storage.StorageManager
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.bukkit.plugin.java.JavaPlugin
 
-class PlayerAccount : JavaPlugin() {
+class PlayerAccount : BasePlugin() {
 
     companion object {
 
@@ -16,7 +16,7 @@ class PlayerAccount : JavaPlugin() {
 
     }
 
-    override fun onEnable() {
+    override fun enable() {
         INSTANCE = this
 
         ExtractPluginLib.extractLibs(this)

@@ -1,5 +1,6 @@
 package io.github.mainyf.playersettings
 
+import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.exts.errorMsg
 import io.github.mainyf.newmclib.exts.registerCommand
@@ -10,13 +11,9 @@ import io.github.mainyf.playersettings.listeners.LoginListener
 import io.github.mainyf.playersettings.listeners.PlayerListener
 import io.github.mainyf.playersettings.storage.StorageManager
 import org.bukkit.Bukkit
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.plugin.java.JavaPlugin
 
-class PlayerSettings : JavaPlugin() {
+class PlayerSettings : BasePlugin() {
 
     companion object {
         lateinit var INSTANCE: PlayerSettings
@@ -24,7 +21,7 @@ class PlayerSettings : JavaPlugin() {
 
     private val LOG = io.github.mainyf.newmclib.getLogger("PlayerSettings")
 
-    override fun onEnable() {
+    override fun enable() {
         INSTANCE = this
         ConfigManager.load()
         StorageManager.init()

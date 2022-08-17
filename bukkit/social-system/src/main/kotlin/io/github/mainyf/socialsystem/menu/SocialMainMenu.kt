@@ -13,6 +13,9 @@ import io.github.mainyf.socialsystem.SocialSystem
 import io.github.mainyf.socialsystem.config.ConfigManager
 import io.github.mainyf.socialsystem.config.sendLang
 import io.github.mainyf.socialsystem.module.FriendHandler
+import io.github.mainyf.socialsystem.module.FriendInvites
+import io.github.mainyf.socialsystem.module.FriendIslandTPRequests
+import io.github.mainyf.socialsystem.module.FriendTPRequests
 import io.github.mainyf.socialsystem.storage.PlayerSocial
 import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
@@ -22,8 +25,6 @@ import java.util.*
 import kotlin.math.ceil
 
 class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler() {
-
-    constructor(target: Player) : this(target.uuid.asOfflineData()!!)
 
     private var pageIndex = 1
     private var pageSize = 0
@@ -57,7 +58,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         this.targetSocial = FriendHandler.getPlayerSocial(offlineData.uuid)
         updateFriends()
         updateCurrentFriends()
-        if(hasOwner) {
+        if (hasOwner) {
             setup(ConfigManager.socialMainMenuConfig.settings)
         } else {
             setup(ConfigManager.socialMainMenuConfig.settings.copy(background = ConfigManager.socialMainMenuConfig.backgroundFriend))
@@ -74,6 +75,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
 
         icons.addAll(smmConfig.prevSlot.iaIcon())
         icons.addAll(smmConfig.nextSlot.iaIcon())
+        icons.addAll(smmConfig.backSlot.iaIcon())
         icons.addAll(smmConfig.friendsSlot.iaIcon())
         icons.addAll(smmConfig.headSlot.iaIcon())
         icons.addAll(smmConfig.cardX1Slot.iaIcon())
@@ -88,6 +90,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         }
         if (!hasOwner) {
             icons.addAll(smmConfig.tpSlot.iaIcon())
+            icons.addAll(smmConfig.tpIsland.iaIcon())
         }
 
         return applyTitle(player, icons)
@@ -95,6 +98,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
 
     private fun updateFriends() {
         this.friends.clear()
+        this.friends.add(player.uuid.asOfflineData()!!)
         this.friends.addAll(FriendHandler.getFriends(player))
         this.maxPageIndex = ceil(
             friends.size.toDouble() / pageSize.toDouble()
@@ -123,13 +127,12 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                 updateFriends(player, inv)
             }
         }
-
-//        inv.setIcon(smmConfig.headSlot, itemStack = Heads.getPlayerHead(offlineData.name))
+        inv.setIcon(smmConfig.backSlot)
 
         inv.setIcon(
             smmConfig.headSlot.slot,
             smmConfig.headSlot.default()!!
-                .toItemStack(Heads.getPlayerHead(offlineData.name)).tvar("player", offlineData.name)
+                .toItemStack(Heads.getPlayerHead(offlineData.name).clone()).tvar("player", offlineData.name)
         )
 
         arrayOf(
@@ -146,7 +149,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         inv.setIcon(smmConfig.onlineSlot, if (isTargetOnline) "online" else "offline")
         if (hasOwner) {
             inv.setIcon(smmConfig.allowRepairSlot, itemBlock = {
-                tvar("status", if (targetSocial.allowRepair) "开启" else "关闭")
+                tvar("status", if (targetSocial.allowRepair) "允许" else "不允许")
             }) {
                 FriendHandler.setAllowRepair(targetSocial, !targetSocial.allowRepair)
                 updateInv(player, inv)
@@ -172,7 +175,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     return@setIcon
                 }
                 sendTPRequestCooldown.invoke(p.uuid, ConfigManager.tpRequestCooldown * 1000L, {
-                    FriendHandler.sendTPRequest(p, offlineData)
+                    FriendTPRequests.sendTPRequest(p, offlineData)
                 }, {
                     p.sendLang("tpRequestCooldown", "{eTime}", it.timestampConvertTime())
                 })
@@ -182,11 +185,14 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     return@setIcon
                 }
                 sendTPRequestCooldown.invoke(p.uuid, ConfigManager.tpRequestCooldown * 1000L, {
-                    FriendHandler.sendInviteTP(p, offlineData)
+                    FriendInvites.sendInviteTP(p, offlineData)
                 }, {
                     p.sendLang("tpRequestCooldown", "{eTime}", it.timestampConvertTime())
                 })
             })
+            inv.setIcon(smmConfig.tpIsland) {
+                FriendIslandTPRequests.sendTpIslandReq(it.uuid, offlineData.uuid)
+            }
         }
         updateFriends(player, inv)
     }
@@ -194,17 +200,17 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
     private fun updateFriends(player: Player, inv: Inventory) {
         val smmConfig = ConfigManager.socialMainMenuConfig
         val friendsSlot = smmConfig.friendsSlot.slot
-        val barFriends = mutableListOf<OfflinePlayerData>()
-        barFriends.add(player.uuid.asOfflineData()!!)
-        barFriends.addAll(currentFriends)
-        barFriends.forEachIndexed { index, offlinePlayerData ->
+        inv.setIcon(friendsSlot, smmConfig.friendsSlot["empty"]!!.toItemStack().tvar("player", player.name))
+        currentFriends.forEachIndexed { index, offlinePlayerData ->
             val skullItem = Heads.getPlayerHead(offlinePlayerData.name).clone()
             skullItem.setDisplayName(offlinePlayerData.name)
             inv.setIcon(friendsSlot[index], smmConfig.friendsSlot.default()!!.toItemStack(skullItem) {
                 tvar("player", offlinePlayerData.name)
             }) {
                 smmConfig.friendsSlot.default()!!.execAction(it)
-                SocialMainMenu(offlinePlayerData).open(it)
+                SocialMainMenu(offlinePlayerData).apply {
+                    this.pageIndex = this@SocialMainMenu.pageIndex
+                }.open(it)
             }
         }
 

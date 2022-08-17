@@ -27,6 +27,7 @@ import io.github.mainyf.newmclib.exts.uuid
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.UUID
 
@@ -185,7 +186,7 @@ class PlotUtils @Inject constructor(
         teleportPlayerToLoc(player, homeLoc, coreLoc)
     }
 
-    fun findSafeLoc(player: Player, loc: Location, coreLoc: Location, msg: Boolean = true): Location {
+    fun findSafeLoc(sender: CommandSender?, loc: Location, coreLoc: Location, msg: Boolean = true): Location {
         if (hasDanger(loc, -1.0)) {
             val z = 0.0
             repeat(2) {
@@ -195,7 +196,7 @@ class PlotUtils @Inject constructor(
                         continue
                     }
                     if (msg) {
-                        player.sendLang("dangerHomeLoc")
+                        sender?.sendLang("dangerHomeLoc")
                     }
                     return loc
                 }
@@ -208,7 +209,7 @@ class PlotUtils @Inject constructor(
                         continue
                     }
                     if (msg) {
-                        player.sendLang("dangerHomeLoc")
+                        sender?.sendLang("dangerHomeLoc")
                     }
                     return loc
                 }
@@ -218,7 +219,7 @@ class PlotUtils @Inject constructor(
                 coreLoc
             } else {
                 if (msg) {
-                    player.sendLang("dangerHomeLoc")
+                    sender?.sendLang("dangerHomeLoc")
                 }
                 coreLoc
             }

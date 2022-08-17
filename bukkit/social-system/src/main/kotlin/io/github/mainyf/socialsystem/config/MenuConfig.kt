@@ -25,6 +25,7 @@ class SocialMainMenuConfig(
     val backgroundFriend: String,
     val prevSlot: DefaultSlotConfig,
     val nextSlot: DefaultSlotConfig,
+    val backSlot: DefaultSlotConfig,
     val friendsSlot: DefaultSlotConfig,
     val headSlot: DefaultSlotConfig,
     val cardX1Slot: DefaultSlotConfig,
@@ -34,5 +35,14 @@ class SocialMainMenuConfig(
     val onlineSlot: DefaultSlotConfig,
     val deleteSlot: DefaultSlotConfig,
     val allowRepairSlot: DefaultSlotConfig,
-    val tpSlot: DefaultSlotConfig
+    val tpSlot: DefaultSlotConfig,
+    val tpIsland: DefaultSlotConfig
+)
+
+class SocialIslandTPMenuConfig(
+    val settings: MenuSettingsConfig,
+    val plot1Slot: DefaultSlotConfig,
+    val plot2Slot: DefaultSlotConfig,
+    val infoSlot: DefaultSlotConfig,
+    val backSlot: DefaultSlotConfig
 )

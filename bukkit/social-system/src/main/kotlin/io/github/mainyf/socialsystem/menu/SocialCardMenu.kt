@@ -17,17 +17,19 @@ import org.bukkit.inventory.Inventory
 
 class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler() {
 
-    constructor(target: Player) : this(target.uuid.asOfflineData()!!)
-
     companion object {
 
         val friendRequestCooldown = Cooldown()
+
+        val repairCooldown = Cooldown()
 
     }
 
     private val target = offlineData.uuid.asPlayer()
 
-    private val isTargetOnline get() = CrossServerManager.isOnline(offlineData.uuid)
+    private val isTargetOnlineBC get() = CrossServerManager.isOnline(offlineData.uuid)
+
+    private val isTargetOnline get() = offlineData.uuid.isOnline()
 
     private lateinit var player: Player
 
@@ -53,7 +55,7 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         icons.addAll(scmConfig.cardX3Slot.iaIcon())
         icons.addAll(scmConfig.cardX4Slot.iaIcon())
 
-        if (isTargetOnline) {
+        if (isTargetOnlineBC) {
             icons.addAll(scmConfig.onlineSlot.iaIcon("online"))
         } else {
             icons.addAll(scmConfig.onlineSlot.iaIcon("offline"))
@@ -74,6 +76,10 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     it.sendLang("alreadyFriend")
                     return@setIcon
                 }
+                if (!isTargetOnline) {
+                    player.sendLang("targetOffline", "{player}", offlineData.name)
+                    return@setIcon
+                }
                 friendRequestCooldown.invoke(it.uuid, ConfigManager.friendRequestCooldown * 1000L, {
                     FriendHandler.sendFriendRequest(it, offlineData.uuid)
                     player.sendLang("sendFriendRequestToSender")
@@ -82,19 +88,33 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     it.sendLang("sendFriendRequestCooldown", "{eTime}", eTime.timestampConvertTime())
                 })
             }
-            if (FriendHandler.allowRepair(player, offlineData.uuid) && isTargetOnline) {
-                inv.setIcon(scmConfig.repairSlot) {
+            inv.setIcon(scmConfig.repairSlot) {
+                if (!FriendHandler.allowRepair(offlineData.uuid)) {
+                    player.sendLang("targetNoAllowRepairHand", "{player}", offlineData.name)
+                    return@setIcon
+                }
+                if (!it.hasPermission(ConfigManager.repairPermission)) {
+                    player.sendLang("noPermissionRepairHand")
+                    return@setIcon
+                }
+                if (!isTargetOnline) {
+                    player.sendLang("targetOffline", "{player}", offlineData.name)
+                    return@setIcon
+                }
+                repairCooldown.invoke(it.uuid, ConfigManager.repairCooldown * 1000L, {
                     execmd("cmi repair hand ${target!!.name}")
                     player.sendLang("sendRepairHandEquipmentToSender")
                     target.sendLang("sendRepairHandEquipmentToReceiver", "{player}", player.name)
-                }
+                }, { eTime ->
+                    it.sendLang("repairCooldown", "{eTime}", eTime.timestampConvertTime())
+                })
             }
         }
 
         inv.setIcon(
             scmConfig.headSlot.slot,
             scmConfig.headSlot.default()!!
-                .toItemStack(Heads.getPlayerHead(offlineData.name)).tvar("player", offlineData.name)
+                .toItemStack(Heads.getPlayerHead(offlineData.name).clone()).tvar("player", offlineData.name)
         )
 
         arrayOf(
@@ -108,12 +128,12 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
             })
         }
 
-        if (isTargetOnline) {
+        if (isTargetOnlineBC) {
             inv.setIcon(scmConfig.onlineSlot, "online")
         } else {
             inv.setIcon(scmConfig.onlineSlot, "offline")
         }
-        if (isTargetOnline) {
+        if (isTargetOnlineBC) {
             inv.setIcon(scmConfig.helmetSlot, itemStack = target!!.equipment.helmet ?: AIR_ITEM)
             inv.setIcon(scmConfig.chestplateSlot, itemStack = target.equipment.chestplate ?: AIR_ITEM)
             inv.setIcon(scmConfig.leggingsSlot, itemStack = target.equipment.leggings ?: AIR_ITEM)

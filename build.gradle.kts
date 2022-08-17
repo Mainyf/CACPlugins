@@ -2,7 +2,7 @@ import java.util.regex.Pattern
 
 plugins {
     id("java")
-    kotlin("jvm") version "1.7.0"
+    kotlin("jvm") version "1.7.10"
     id("net.minecrell.plugin-yml.bukkit") version "0.5.1"
 }
 
@@ -74,6 +74,7 @@ subprojects {
         }
         if (hasBukkit(project)) {
             implementation("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
+            compileOnly(rootProject.files("./libs/paper-server-1.19-R0.1-SNAPSHOT-reobf.jar"))
             implementation("org.jetbrains.kotlin:kotlin-stdlib")
             implementation("io.netty:netty-all:4.1.68.Final")
             implementation(rootProject.files("./bukkit-rebel-plugin.jar"))
@@ -106,6 +107,8 @@ subprojects {
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
                     compileOnly(rootProject.files("./libs/datafixerupper-4.1.27.jar"))
                     compileOnly(rootProject.files("./libs/SkinsRestorer.jar"))
+                    compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
+                    compileOnly(rootProject.project(":bukkit:social-system"))
                 }
                 "login-settings" -> {
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
@@ -136,6 +139,10 @@ subprojects {
                 "social-system" -> {
                     compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
+//                    compileOnly(rootProject.project(":bukkit:my-islands"))
+                }
+                "custom-economy" -> {
+                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
                 }
             }
         }
@@ -178,8 +185,8 @@ subprojects {
                     dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
                 }
                 "my-islands" -> {
-                    dd.addAll(listOf("CMI", "PlotSquared", "ItemsAdder", "ProtocolLib"))
-                    sd.addAll(listOf("AuthMe"))
+                    dd.addAll(listOf("CMI", "PlotSquared", "ItemsAdder", "ProtocolLib", "BungeeSettingsBukkit"))
+                    sd.addAll(listOf("AuthMe", "SocialSystem"))
                 }
                 "world-settings" -> {
                     dd.addAll(listOf("ProtocolLib"))
@@ -191,7 +198,8 @@ subprojects {
                     sd.addAll(listOf("AuthMe"))
                 }
                 "command-settings" -> {
-                    dd.addAll(listOf("ItemsAdder", "BungeeSettingsBukkit"))
+                    dd.addAll(listOf("ItemsAdder"))
+                    sd.addAll(listOf("BungeeSettingsBukkit"))
                 }
                 "mcrmb-migration" -> {
                     dd.addAll(listOf("PlayerPoints"))
@@ -204,6 +212,10 @@ subprojects {
                 }
                 "social-system" -> {
                     dd.addAll(listOf("PlaceholderAPI", "BungeeSettingsBukkit"))
+//                    sd.addAll(listOf("MyIslands"))
+                }
+                "custom-economy" -> {
+                    dd.addAll(listOf("PlaceholderAPI"))
                 }
             }
             if (project.name != "plugin-loader") {

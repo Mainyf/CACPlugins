@@ -75,6 +75,12 @@ gloablServer:
     antiGoatHornSound: true
     # 阻止拿下营火上的物品
     antiCampfireInteract: true
+    # 阻止生成龙蛋
+    antiSpawnEnderDragonEgg: true
+    # 禁止聊天
+    antiChat: false
+    # 阻止玩家进入加载时间不足200ms内的区块(0为关闭)
+    antiPlayerMoveToInhabitedTimeChunk: 200
   worlds:
     world:
       difficulty: NORMAL

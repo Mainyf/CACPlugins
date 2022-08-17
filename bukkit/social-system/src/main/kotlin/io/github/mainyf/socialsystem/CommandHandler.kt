@@ -4,12 +4,13 @@ import io.github.mainyf.newmclib.command.APICommand
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.successMsg
-import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.socialsystem.config.ConfigManager
 import io.github.mainyf.socialsystem.menu.SocialCardMenu
 import io.github.mainyf.socialsystem.menu.SocialMainMenu
 import io.github.mainyf.socialsystem.module.FriendHandler
+import io.github.mainyf.socialsystem.module.FriendInvites
+import io.github.mainyf.socialsystem.module.FriendTPRequests
 import org.bukkit.entity.Player
 
 object CommandHandler : APICommand("social") {
@@ -25,20 +26,20 @@ object CommandHandler : APICommand("social") {
         "card" {
             executePlayer {
                 val target = sender
-                SocialCardMenu(target.uuid.asOfflineData()!!).open(target)
+                SocialCardMenu(target.asOfflineData()).open(target)
             }
         }
         "menu" {
             executePlayer {
                 val target = sender
-                SocialMainMenu(target.uuid.asOfflineData()!!).open(target)
+                SocialMainMenu(target.asOfflineData()).open(target)
             }
         }
         "menu-player" {
             withArguments(playerArguments("玩家名"))
-            executePlayer {
+            executeOP {
                 val target = player()
-                SocialMainMenu(target.uuid.asOfflineData()!!).open(target)
+                SocialMainMenu(target.asOfflineData()).open(target)
             }
         }
         "agree" {
@@ -67,7 +68,7 @@ object CommandHandler : APICommand("social") {
             )
             executePlayer {
                 val target = text()
-                FriendHandler.handleTPReqAgree(sender, target)
+                FriendTPRequests.handleTPReqAgree(sender, target)
             }
         }
         "refuseTPReq" {
@@ -76,7 +77,7 @@ object CommandHandler : APICommand("social") {
             )
             executePlayer {
                 val target = text()
-                FriendHandler.handleTPReqRefuse(sender, target)
+                FriendTPRequests.handleTPReqRefuse(sender, target)
             }
         }
         "agreeTPReqInv" {
@@ -85,7 +86,7 @@ object CommandHandler : APICommand("social") {
             )
             executePlayer {
                 val target = text()
-                FriendHandler.handleInviteTPAgree(sender, target)
+                FriendInvites.handleInviteTPAgree(sender, target)
 
             }
         }
@@ -95,7 +96,7 @@ object CommandHandler : APICommand("social") {
             )
             executePlayer {
                 val target = text()
-                FriendHandler.handleInviteTPRefuse(sender, target)
+                FriendInvites.handleInviteTPRefuse(sender, target)
 
             }
         }

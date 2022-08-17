@@ -1,21 +1,32 @@
 repairPermission: "social.repair.use"
-friendRequestCooldown: 60
-tpRequestCooldown: 60
+# 加好友请求冷却
+friendRequestCooldown: 1
+# 帮好友修复手上装备冷却
+repairCooldown: 1
+# 发起传送请求冷却
+tpRequestCooldown: 1
+# 传送请求过期时间
+tpReqExpired: 20
+# 传送邀请过期时间
+inviteTpExpired: 20
 card:
   permission: "social.card"
   tab:
-    default: '&7[&f安&7] &0{player}'
+    default: '#808080[#bebebe安#808080] {player}'
     svip:
       priority: 1
-      value: '&7[&e安&7] &7{player}'
+      value: '#bebebe[&e安#bebebe] {player}'
     mvp:
       priority: 0
-      value: '&7[&e安&7] &f{player}'
+      value: '&f[&c安&f] {player}'
   chat:
-    default: '&7[&f安&7] &0{player} :'
+    default: '#808080[#bebebe安#808080] {player}：'
+    vip:
+      priority: 2
+      value: ':tag_vip: &7{player}：'
     svip:
       priority: 1
-      value: '&7[&e安&7] &7{player} : '
+      value: ':tag_svip: &7{player}：'
     mvp:
       priority: 0
-      value: '&7[&e安&7] &f{player} : '
+      value: ':tag_mvp: &7{player}：'

@@ -1,4 +1,4 @@
-alreadyClaim: "你已经领取过了"
+alreadyClaim: "你已于 {date} 领取过了"
 noPointClaim: "你没有可领的点券补贴或密码错误"
 claimSuccess: "领取成功"
 claimFail: "领取失败，请告知管理员"

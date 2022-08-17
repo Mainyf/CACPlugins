@@ -8,6 +8,7 @@ import io.github.mainyf.worldsettings.config.CommandMatchType.START
 import io.github.mainyf.worldsettings.config.ConfigManager
 import io.github.mainyf.worldsettings.getWorldSettings
 import io.github.mainyf.worldsettings.ignorePermAndGetWorldSettings
+import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.block.Campfire
@@ -29,6 +30,19 @@ import org.bukkit.event.server.TabCompleteEvent
 object PlayerListener : Listener {
 
     @EventHandler
+    fun onMove(event: PlayerMoveEvent) {
+        val player = event.player
+        ignorePermAndGetWorldSettings(player) { settings ->
+            if (settings.antiPlayerMoveToInhabitedTimeChunk <= 0) {
+                return@ignorePermAndGetWorldSettings
+            }
+            if (event.to.chunk.inhabitedTime < settings.antiPlayerMoveToInhabitedTimeChunk) {
+                event.isCancelled = true
+            }
+        }
+    }
+
+    @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         getWorldSettings(event.player) { settings ->
             settings.joinServerAction?.execute(event.player)
@@ -42,7 +56,7 @@ object PlayerListener : Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     fun onCommand(event: PlayerCommandPreprocessEvent) {
         val player = event.player
         ignorePermAndGetWorldSettings(player) { settings ->
@@ -94,6 +108,16 @@ object PlayerListener : Listener {
         }
     }
 
+    @EventHandler
+    fun onChat(event: AsyncChatEvent) {
+        val player = event.player
+        ignorePermAndGetWorldSettings(player) { settings ->
+            if (settings.antiChat) {
+                event.isCancelled = true
+            }
+        }
+    }
+
     @EventHandler(ignoreCancelled = true)
     fun onToggleFlight(event: PlayerToggleFlightEvent) {
         val player = event.player
@@ -111,6 +135,7 @@ object PlayerListener : Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     fun onDamage(event: EntityDamageByEntityEvent) {
         val damager = event.damager.getShooterPlayer() ?: return
+//        event.damage += 200000.0
         ignorePermAndGetWorldSettings(damager) { settings ->
             if (event.entity !is Monster && settings.antiDamageFriendEntityLiving) {
                 event.isCancelled = true
@@ -171,9 +196,16 @@ object PlayerListener : Listener {
                 event.isCancelled = true
                 return@getWorldSettings
             }
+            if (settings.antiSpawnEnderDragonEgg && event.clickedBlock?.type == Material.DRAGON_EGG) {
+                event.clickedBlock?.type = Material.AIR
+                event.isCancelled = true
+                event.setUseItemInHand(Event.Result.DENY)
+                event.setUseInteractedBlock(Event.Result.DENY)
+                return@getWorldSettings
+            }
         }
         ignorePermAndGetWorldSettings(event.player) { settings ->
-            if(settings.antiCampfireInteract && event.clickedBlock?.state is Campfire) {
+            if (settings.antiCampfireInteract && event.clickedBlock?.state is Campfire) {
                 event.setUseItemInHand(Event.Result.DENY)
                 event.setUseInteractedBlock(Event.Result.DENY)
                 event.isCancelled = true
