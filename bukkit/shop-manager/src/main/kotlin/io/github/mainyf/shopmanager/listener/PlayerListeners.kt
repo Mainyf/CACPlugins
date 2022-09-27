@@ -21,6 +21,7 @@ object PlayerListeners : Listener {
         val shop = event.shop
         val material = shop.item.type
         val sellShop = ConfigManager.getSellShop(material) ?: return
+        if (shop.shopType != ShopType.BUYING) return
         if (!shop.isUnlimited) return
         if (shop.price != sellShop.price) {
             shop.price = sellShop.price
@@ -31,7 +32,7 @@ object PlayerListeners : Listener {
     fun onPurchase(event: ShopPurchaseEvent) {
         val player = event.purchaser.asPlayer() ?: return
         val totalPrice = event.total
-        if (totalPrice > player.money()) return
+//        if (totalPrice > player.money()) return
         val shop = event.shop
         if (shop.shopType != ShopType.BUYING) return
         val material = shop.item.type

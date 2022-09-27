@@ -1,6 +1,7 @@
 package io.github.mainyf.loginsettings
 
 import io.github.mainyf.loginsettings.config.ConfigManager
+import io.github.mainyf.loginsettings.module.ResetPasswords
 import io.github.mainyf.loginsettings.storage.StorageManager
 import io.github.mainyf.newmclib.command.APICommand
 import io.github.mainyf.newmclib.command.playerArguments
@@ -26,6 +27,17 @@ object CommandHandler : APICommand("loginsettings") {
                 }
                 StorageManager.addPlayRuleAgreeLog(player)
                 ConfigManager.playRuleSuccess?.execute(player)
+            }
+        }
+        "resetpasswd" {
+            withArguments(playerArguments("玩家名"))
+            executeOP {
+                val player = player()
+                if(!ConfigManager.qqEnable) {
+                    ConfigManager.emergencyAction?.execute(player)
+                    return@executeOP
+                }
+                ResetPasswords.startResetPassword(player)
             }
         }
     }

@@ -1,0 +1,9 @@
+questPool:
+  - "every_deepslate"
+  - "every_granite"
+  - "every_iron"
+  - "every_skeleton"
+  - "every_spider"
+  - "every_zombie"
+  - "every_coal"
+  - "every_cow"

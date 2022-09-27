@@ -6,18 +6,17 @@ import com.comphenix.protocol.events.PacketAdapter
 import com.comphenix.protocol.events.PacketEvent
 import dev.jorel.commandapi.CommandAPI
 import io.github.mainyf.newmclib.BasePlugin
-import io.github.mainyf.newmclib.exts.registerCommand
-import io.github.mainyf.newmclib.exts.runTaskTimerBR
 import io.github.mainyf.newmclib.exts.submitTask
-import io.github.mainyf.newmclib.hooks.registerPacketListener
 import io.github.mainyf.newmclib.protocolManager
 import io.github.mainyf.worldsettings.config.ConfigManager
 import io.github.mainyf.worldsettings.config.WorldSettingConfig
 import io.github.mainyf.worldsettings.listeners.BlockListener
+import io.github.mainyf.worldsettings.listeners.EntityListener
 import io.github.mainyf.worldsettings.listeners.PlayerListener
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.World
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 
 class WorldSettings : BasePlugin() {
@@ -37,6 +36,7 @@ class WorldSettings : BasePlugin() {
 //        server.pluginManager.getPlugin("AuthMe")
         CommandHandler.init()
         CommandHandler.register()
+        Bukkit.getServer().pluginManager.registerEvents(EntityListener, this)
         Bukkit.getServer().pluginManager.registerEvents(BlockListener, this)
         Bukkit.getServer().pluginManager.registerEvents(PlayerListener, this)
         submitTask(delay = 20L, period = 5L) {
@@ -126,8 +126,8 @@ class WorldSettings : BasePlugin() {
 
 }
 
-fun ignorePermAndGetWorldSettings(player: Player, world: World = player.world, block: (WorldSettingConfig) -> Unit) {
-    if (player.hasPermission(ConfigManager.ignorePermission)) return
+fun ignorePermAndGetWorldSettings(entity: Entity?, world: World? = entity?.world, block: (WorldSettingConfig) -> Unit) {
+    if (entity?.hasPermission(ConfigManager.ignorePermission) == true) return
     val settings = ConfigManager.getSetting(world) ?: return
     block.invoke(settings)
 }

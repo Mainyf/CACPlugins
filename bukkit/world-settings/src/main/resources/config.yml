@@ -81,6 +81,12 @@ gloablServer:
     antiChat: false
     # 阻止玩家进入加载时间不足200ms内的区块(0为关闭)
     antiPlayerMoveToInhabitedTimeChunk: 200
+    # 阻止铁毡的损坏
+    antiAnvilsDamage: true
+    # 随机的青蛙颜色
+    randomFrogColor: true
+    # 随机的兔子颜色
+    randomRabbitColor: true
   worlds:
     world:
       difficulty: NORMAL

@@ -12,6 +12,7 @@ import io.github.mainyf.myislands.listeners.PlayerListeners
 import io.github.mainyf.myislands.storage.StorageManager
 import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
 import org.apache.logging.log4j.LogManager
 import org.bukkit.entity.Player
 
@@ -65,6 +66,18 @@ class MyIslands : BasePlugin() {
         }
         submitTask(async = true, period = 20L) {
             IslandsManager.checkIslandHeatsAttenuation()
+        }
+        addPlaceholderExpansion("myislands") papi@{ _, params ->
+//            val uuid = offlinePlayer?.uniqueId ?: return@papi null
+//
+//            val player = offlinePlayer.player ?: return@papi null
+            when (params) {
+                "cost_reset" -> ConfigManager.myislandCost.reset.toDisplayText()
+                "cost_movecore" -> ConfigManager.myislandCost.moveCore.toDisplayText()
+                "cost_switchvisibility" -> ConfigManager.myislandCost.switchVisibility.toDisplayText()
+                "cost_addhelper" -> ConfigManager.myislandCost.addHelper.toDisplayText()
+                else -> null
+            }
         }
     }
 

@@ -36,6 +36,8 @@ object ClientSocketManager {
 
     private var hasClose = false
 
+    private var retryInfo = true
+
     private fun loadClientSocket(): Boolean {
         kotlin.runCatching {
             clientSocket = Socket("127.0.0.1", this.bcPort)
@@ -45,9 +47,13 @@ object ClientSocketManager {
             dos = DataOutputStream(BufferedOutputStream(clientSocket!!.getOutputStream(), 5120))
             CrossServerManager.updateServerID()
         }.onFailure {
-            BungeeSettingsBukkit.LOG.info("未连接到根节点，等待重试")
+            if(retryInfo) {
+                retryInfo = false
+                BungeeSettingsBukkit.LOG.info("未连接到根节点，等待重试")
+            }
             return false
         }
+        retryInfo = true
         BungeeSettingsBukkit.LOG.info("连接成功")
         return true
     }

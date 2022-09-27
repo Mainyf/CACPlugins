@@ -1,25 +1,38 @@
 package io.github.mainyf.playersettings
 
+import io.github.mainyf.bungeesettingsbukkit.CrossServerManager
+import io.github.mainyf.bungeesettingsbukkit.ServerPacket
+import io.github.mainyf.bungeesettingsbukkit.events.ServerPacketReceiveEvent
 import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.command.apiCommand
-import io.github.mainyf.newmclib.exts.errorMsg
-import io.github.mainyf.newmclib.exts.registerCommand
-import io.github.mainyf.newmclib.exts.runTaskTimerBR
-import io.github.mainyf.newmclib.exts.successMsg
+import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.serverId
 import io.github.mainyf.playersettings.config.ConfigManager
 import io.github.mainyf.playersettings.listeners.LoginListener
 import io.github.mainyf.playersettings.listeners.PlayerListener
 import io.github.mainyf.playersettings.storage.StorageManager
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
+import java.util.*
 
-class PlayerSettings : BasePlugin() {
+class PlayerSettings : BasePlugin(), Listener {
 
     companion object {
+
         lateinit var INSTANCE: PlayerSettings
+
+        val FLY_STATUS_REQ = ServerPacket.registerPacket("broadcast_fly_status_req")
+
+        val FLY_STATUS_RES = ServerPacket.registerPacket("broadcast_fly_status_res")
+
     }
 
     private val LOG = io.github.mainyf.newmclib.getLogger("PlayerSettings")
+    private val playerFlyMap = mutableMapOf<UUID, Pair<Boolean, Float>>()
 
     override fun enable() {
         INSTANCE = this
@@ -27,6 +40,7 @@ class PlayerSettings : BasePlugin() {
         StorageManager.init()
         CommandHandler.init()
         CommandHandler.register()
+        pluginManager().registerEvents(this, this)
         apiCommand("sop") {
             withRequirement { if (it is Player) ConfigManager.opWhiteList.contains(it.name) else false }
             executePlayer {
@@ -54,6 +68,45 @@ class PlayerSettings : BasePlugin() {
                 StorageManager.addPlayerLoc(it)
             }
         }
+    }
+
+    @EventHandler
+    fun onJoin(event: PlayerJoinEvent) {
+        if (serverId() == "lobby") return
+        CrossServerManager.sendData(FLY_STATUS_REQ) {
+            writeUUID(event.player.uuid)
+        }
+    }
+
+    @EventHandler
+    fun onPacket(event: ServerPacketReceiveEvent) {
+        val buf = event.buf
+        when (event.packet) {
+            FLY_STATUS_REQ -> {
+                val uuid = buf.readUUID()
+                if (playerFlyMap.containsKey(uuid)) {
+                    val (allowFlight, speed) = playerFlyMap.remove(uuid)!!
+                    CrossServerManager.sendData(FLY_STATUS_RES) {
+                        writeUUID(uuid)
+                        writeBoolean(allowFlight)
+                        writeFloat(speed)
+                    }
+                }
+            }
+            FLY_STATUS_RES -> {
+                val player = buf.readUUID().asPlayer() ?: return
+                val allowFlight = buf.readBoolean()
+                val speed = buf.readFloat()
+                player.allowFlight = allowFlight
+                player.flySpeed = speed
+            }
+        }
+    }
+
+    @EventHandler
+    fun onQuit(event: PlayerQuitEvent) {
+        val player = event.player
+        playerFlyMap[player.uuid] = player.allowFlight to player.flySpeed
     }
 
 }

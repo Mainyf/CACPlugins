@@ -82,6 +82,7 @@ subprojects {
             compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
             implementation("io.github.mainyf:newmclib-craftbukkit:1.7.3:")
             compileOnly(rootProject.files("./plugins/ProtocolLib.jar"))
+            compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
             compileOnly(rootProject.files("./plugins/CommandAPI-8.4.1.jar"))
 
             when (project.name) {
@@ -92,6 +93,12 @@ subprojects {
                     )))
                     embed("net.bytebuddy:byte-buddy:1.11.22")
                 }
+//                "linkQQ" -> {
+//                    implementation("io.github.dreamvoid:MiraiMC-Integration:1.7")
+//                    implementation(rootProject.files("./libs/MiraiMC-Bukkit.jar"))
+//                    implementation("net.mamoe:mirai-core-jvm:2.11.1")
+//                    compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
+//                }
                 "item-skills-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
                     compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
@@ -111,18 +118,27 @@ subprojects {
                     compileOnly(rootProject.project(":bukkit:social-system"))
                 }
                 "login-settings" -> {
+                    implementation("io.github.dreamvoid:MiraiMC-Integration:1.7")
+                    implementation(rootProject.files("./libs/MiraiMC-Bukkit.jar"))
+                    implementation("net.mamoe:mirai-core-jvm:2.11.1")
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
+                    compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
                 "bungee-settings-bukkit" -> {
                     compileOnly(rootProject.files("./plugins/CMI9.2.1.0.jar"))
-                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
                 }
                 "player-account" -> {
                     embed("com.aliyun:alibabacloud-dysmsapi20170525:1.0.1")
                 }
                 "player-settings" -> {
-                    embed("com.alibaba:easyexcel:3.0.5")
+//                    embed("com.alibaba:easyexcel:3.0.5")
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
+                    compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
+                }
+                "quest-extension" -> {
+                    implementation(rootProject.files("./plugins/GCore.jar"))
+                    implementation(rootProject.files("./plugins/QuestCreator.jar"))
+                    compileOnly(rootProject.project(":bukkit:custom-economy"))
                 }
                 "command-settings" -> {
                     compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
@@ -131,6 +147,9 @@ subprojects {
                 "mcrmb-migration" -> {
 //                    compileOnly(rootProject.files("./plugins/MCRMB-2.0b19-12fe19a.jar"))
                     compileOnly(rootProject.files("./plugins/PlayerPoints-3.2.4.jar"))
+                }
+                "mcrmb-tools" -> {
+                    compileOnly(rootProject.files("./plugins/MCRMB-2.0b19-12fe19a.jar"))
                 }
                 "shop-manager" -> {
                     compileOnly(rootProject.files("./libs/QuickShop.jar"))
@@ -195,7 +214,10 @@ subprojects {
                     dd.addAll(listOf("CMI", "PlaceholderAPI"))
                 }
                 "player-settings" -> {
-                    sd.addAll(listOf("AuthMe"))
+                    sd.addAll(listOf("AuthMe", "BungeeSettingsBukkit"))
+                }
+                "quest-extension" -> {
+                    dd.addAll(listOf("QuestCreator", "CustomEconomy"))
                 }
                 "command-settings" -> {
                     dd.addAll(listOf("ItemsAdder"))
@@ -204,8 +226,11 @@ subprojects {
                 "mcrmb-migration" -> {
                     dd.addAll(listOf("PlayerPoints"))
                 }
+                "mcrmb-tools" -> {
+                    dd.addAll(listOf("Mcrmb"))
+                }
                 "login-settings" -> {
-                    dd.addAll(listOf("AuthMe"))
+                    dd.addAll(listOf("AuthMe", "MiraiMC", "BungeeSettingsBukkit"))
                 }
                 "shop-manager" -> {
                     dd.addAll(listOf("QuickShop", "Vault"))
@@ -217,6 +242,9 @@ subprojects {
                 "custom-economy" -> {
                     dd.addAll(listOf("PlaceholderAPI"))
                 }
+//                "linkQQ" -> {
+//                    dd.addAll(listOf("MiraiMC", "AuthMe"))
+//                }
             }
             if (project.name != "plugin-loader") {
                 dd.add("NewMCLib")

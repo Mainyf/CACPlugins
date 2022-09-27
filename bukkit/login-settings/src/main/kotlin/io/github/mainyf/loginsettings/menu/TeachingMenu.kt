@@ -2,9 +2,11 @@ package io.github.mainyf.loginsettings.menu
 
 import io.github.mainyf.loginsettings.LoginSettings
 import io.github.mainyf.loginsettings.config.ConfigManager
+import io.github.mainyf.loginsettings.module.BindQQs
 import io.github.mainyf.loginsettings.storage.StorageManager
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
+import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
@@ -51,6 +53,11 @@ class TeachingMenu : AbstractMenuHandler() {
         val slotAConfig = teachingMenuConfig.slotA
         inv.setRightIcon(slotA, slotAConfig.itemSlot.toItemStack()) {
             ok = true
+            if (ConfigManager.qqEnable && !BindQQs.hasLinkQQ(it.uuid)) {
+                it.closeInventory()
+                BindQQs.startLinkQQ(it, true) {}
+                return@setRightIcon
+            }
             if (!StorageManager.hasAgreePlayRuleInWeek(it)) {
                 ConfigManager.teachingMenuSlotA?.execute(it)
             } else {

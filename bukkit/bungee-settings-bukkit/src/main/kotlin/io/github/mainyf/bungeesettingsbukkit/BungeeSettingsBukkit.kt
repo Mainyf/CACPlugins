@@ -2,8 +2,9 @@ package io.github.mainyf.bungeesettingsbukkit
 
 import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.getLogger
+import org.bukkit.event.Listener
 
-class BungeeSettingsBukkit : BasePlugin() {
+class BungeeSettingsBukkit : BasePlugin(), Listener {
 
     var bcSocketPort = 24440
 

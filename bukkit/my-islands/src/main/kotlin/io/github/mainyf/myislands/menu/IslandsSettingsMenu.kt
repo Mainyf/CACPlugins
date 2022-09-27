@@ -114,9 +114,14 @@ class IslandsSettingsMenu(
         }
 
         val moveCoreSlot = settingsMenuConfig.moveCoreSlot
-        inv.setIcon(moveCoreSlot) {
+        inv.setIcon(moveCoreSlot, itemBlock = {
+            setPlaceholder(player)
+        }) {
             if (plot.owner != it.uuid) {
                 it.sendLang("noOwnerMoveCore")
+                return@setIcon
+            }
+            if (!ConfigManager.tryPayMyIslandCost(it, ConfigManager.myislandCost.moveCore, "moveCore")) {
                 return@setIcon
             }
             MoveIslandCore.tryStartMoveCore(it, plot)
@@ -125,18 +130,32 @@ class IslandsSettingsMenu(
         val visibilitySlot = settingsMenuConfig.visibilitySlot
         val resetIslandSlot = settingsMenuConfig.resetIslandSlot
         inv.setIcon(visibilitySlot, itemBlock = {
-            withMetaText(displayNameBlock = {
-                it?.tvar("visibility", island.visibility.text)
-            })
+            this.tvar("visibility", island.visibility.text).setPlaceholder(player)
+//            withMetaText(displayNameBlock = {
+//                it?.tvar("visibility", island.visibility.text)
+//            })
         }) { p ->
+            if (!ConfigManager.tryPayMyIslandCost(
+                    player,
+                    ConfigManager.myislandCost.switchVisibility,
+                    "switchVisibility"
+                )
+            ) {
+                return@setIcon
+            }
             IslandsManager.setIslandVisibility(
                 island,
                 values().find { it.count > island.visibility.count } ?: ALL)
             updateInv(player, inv)
         }
-        inv.setIcon(resetIslandSlot) { p ->
+        inv.setIcon(resetIslandSlot, itemBlock = {
+            setPlaceholder(player)
+        }) { p ->
             if (plot.owner != p.uuid) {
                 p.sendLang("noOwnerResetIslands")
+                return@setIcon
+            }
+            if (!ConfigManager.tryPayMyIslandCost(p, ConfigManager.myislandCost.reset, "reset")) {
                 return@setIcon
             }
             val prevResetMilli = IslandsManager.getIslandLastResetDate(island)?.toMilli()
@@ -147,10 +166,8 @@ class IslandsSettingsMenu(
                 if (eMillis < cooldownMilli) {
                     p.sendLang(
                         "resetCooldown",
-                        mapOf(
-                            "{player}" to p.name,
-                            "{surplusTime}" to (cooldownMilli - eMillis).timestampConvertTime()
-                        )
+                        "{player}", p.name,
+                        "{surplusTime}", (cooldownMilli - eMillis).timestampConvertTime()
                     )
                     return@setIcon
                 }
@@ -187,22 +204,29 @@ class IslandsSettingsMenu(
         inv.unSetIcon(helpersSlot)
         repeat(currentEmptySlot) { i ->
             inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot["empty"]!!.toItemStack().apply {
-                val meta = itemMeta
-                meta.displayName(
-                    meta.displayName()?.text()?.tvar(
-                        "curHelpers", curHelpers.toString(),
-                        "maxHelpers", maxHelpers.toString()
-                    )?.toComp()
-                )
-                meta.lore(meta.lore()?.map {
-                    it.text().tvar(
-                        "curHelpers", curHelpers.toString(),
-                        "maxHelpers", maxHelpers.toString()
-                    ).toComp()
-                })
-                this.itemMeta = meta
+//                val meta = itemMeta
+                this.tvar(
+                    "curHelpers", curHelpers.toString(),
+                    "maxHelpers", maxHelpers.toString()
+                ).setPlaceholder(player)
+//                meta.displayName(
+//                    meta.displayName()?.text()?.tvar(
+//                        "curHelpers", curHelpers.toString(),
+//                        "maxHelpers", maxHelpers.toString()
+//                    )?.toComp()
+//                )
+//                meta.lore(meta.lore()?.map {
+//                    it.text().tvar(
+//                        "curHelpers", curHelpers.toString(),
+//                        "maxHelpers", maxHelpers.toString()
+//                    ).toComp()
+//                })
+//                this.itemMeta = meta
             }) {
                 settingsMenuConfig.helpersSlot["empty"]!!.execAction(it)
+                if (!ConfigManager.tryPayMyIslandCost(player, ConfigManager.myislandCost.addHelper, "addHelper")) {
+                    return@setIcon
+                }
                 IslandsManager.openHelperSelectMenu(it, plot, island, helpers)
 //                if (plot.owner != it.uuid) {
 //                    it.sendLang("noOwnerOpenHelperSelectMenu")
@@ -238,6 +262,7 @@ class IslandsSettingsMenu(
                     meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer.name)))
                     meta.lore(IslandsManager.replaceVarByLoreList(meta.lore(), plot, islandsData))
                     this.itemMeta = meta
+                    setPlaceholder(player)
                 }) { p ->
                     settingsMenuConfig.helpersSlot.default()!!.execAction(p)
                     if (plot.owner != p.uuid) {

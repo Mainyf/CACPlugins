@@ -1,5 +1,6 @@
 package io.github.mainyf.socialsystem.menu
 
+import com.mojang.authlib.GameProfile
 import io.github.mainyf.bungeesettingsbukkit.CrossServerManager
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
@@ -12,6 +13,7 @@ import io.github.mainyf.socialsystem.config.ConfigManager
 import io.github.mainyf.socialsystem.config.sendLang
 import io.github.mainyf.socialsystem.module.FriendHandler
 import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 
@@ -33,9 +35,12 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
 
     private lateinit var player: Player
 
-    private val offlinePlayer = Bukkit.getOfflinePlayer(offlineData.name)
+    private lateinit var offlinePlayer: OfflinePlayer
 
     override fun open(player: Player) {
+        offlinePlayer =
+            Bukkit.getServer().toReflect().call("getOfflinePlayer", GameProfile(offlineData.uuid, offlineData.name))
+                .get()
         this.player = player
         setup(ConfigManager.socialCardMenuConfig.settings)
         val inv = createInv(player)

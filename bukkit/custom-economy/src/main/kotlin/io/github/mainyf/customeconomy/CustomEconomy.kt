@@ -102,8 +102,9 @@ class CustomEconomy : JavaPlugin() {
             }
         }.register()
         addPlaceholderExpansion("customeconomy") papi@{ offlinePlayer, params ->
-            val player = offlinePlayer?.player ?: return@papi null
-            StorageManager.getMoney(player.uuid, params!!).toInt().toString()
+            val uuid = offlinePlayer?.uniqueId ?: return@papi null
+//            val player = offlinePlayer?.player ?: return@papi null
+            StorageManager.getMoney(uuid, params!!).toInt().toString()
         }
     }
 

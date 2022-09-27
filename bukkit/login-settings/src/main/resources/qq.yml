@@ -1,0 +1,69 @@
+enable: true
+emergencyAction:
+  - "mini: 当前系统正在维护"
+qqBot: 3521083461
+qqGroup:
+  - 870756835
+  - 916760896
+monitor:
+  enable: true
+  qqList:
+    - 31395967
+  qqGroupList:
+    - 870756835
+bindStage:
+  actions:
+    - "title: &7[&e绑定&7],&3请在聊天栏发送你要绑定的QQ号,0,30,10"
+    - 'console: cmi bossbarmsg {player} &7&l[&c注意&7&l] &7绑定QQ号后将无法更换，请选择常用的QQ号 &7&l[&c注意&7&l] -t:3 -c:WHITE -s:1 -n:join -p:1/1'
+    - 'console: cmi effect {player} blindness 300'
+    - 'console: cmi effect {player} invisibility 300'
+  nextStage:
+    - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  qqRegex: "^\\d{5,}$"
+  formatError:
+    - "message: &c&l！&4请发送你需要绑定的QQ号"
+    - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  qqAlreadyBind:
+    - "message: &c&l！&4这个QQ号已有绑定的游戏账号。"
+    - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+codeStage:
+  actions:
+    - "title: &7[&e绑定&7],&3向上方官方群发送 &b{code} &3验证码,0,30,10"
+    - "actionbar: &6按键盘 &eF键 &6可重新发送QQ号,&c◆"
+    - 'console: cmi bossbarmsg {player} &7&l[&c官方群&7&l] &7请使用QQ加入 916760896 官方群聊 &7&l[&c官方群&7&l] -t:3 -c:WHITE -s:1 -n:join -p:1/1'
+    - 'console: cmi effect {player} blindness 300'
+    - 'console: cmi effect {player} invisibility 300'
+  veritySuccess: "游戏账号 {player} 已通过验证。"
+  loginFinish:
+    - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+    - "console: trmenu open servers {player}"
+  registerFinish:
+    - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+resetPasswd:
+  actions:
+    # - "title: ,请使用绑定的QQ号({qqNum})在QQ群内发送验证码:{code},0,30,10"
+
+    - "title: &7[&e验证&7],&3向上方官方群发送 &b{code} &3验证码,0,30,10"
+    - "actionbar: &6使用游戏账号绑定的 &e{qqNum} &6QQ号,&c◆"
+    - 'console: cmi bossbarmsg {player} &7&l[&c官方群&7&l] &7请使用QQ加入 916760896 官方群聊 &7&l[&c官方群&7&l] -t:3 -c:WHITE -s:1 -n:join -p:1/1'
+    - 'console: cmi effect {player} blindness 300'
+    - 'console: cmi effect {player} invisibility 300'
+  nextStage:
+    - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  veritySuccess: "游戏账号 {player} 已通过验证。"
+  sendNewPasswd:
+    - "title: &7[&e修改&7],&3请在聊天栏发送你的新密码,0,30,10"
+    - 'console: cmi bossbarmsg {player} &7&l[&c注意&7&l] &7请确保密码复杂性， 以免出现盗号情况 &7&l[&c注意&7&l] -t:3 -c:WHITE -s:1 -n:join -p:1/1'
+    - 'console: cmi effect {player} blindness 300'
+    - 'console: cmi effect {player} invisibility 300'
+  confirmNewPasswd:
+    - "title: &7[&e修改&7],&3请在聊天栏再次发送你的新密码,0,30,10"
+    - 'console: cmi bossbarmsg {player} &7&l[&c注意&7&l] &7请确保密码复杂性， 以免出现盗号情况 &7&l[&c注意&7&l] -t:3 -c:WHITE -s:1 -n:join -p:1/1'
+    - 'console: cmi effect {player} blindness 300'
+    - 'console: cmi effect {player} invisibility 300'
+  passwdDiscrepancy:
+    - "message: &c&l！&4输入的两次密码不相同，请重新发送。"
+    - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+  finish:
+    - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+    # - "console: trmenu open servers {player}"

@@ -4,6 +4,11 @@ resetCooldown: 1
 coreId: "plot:plot_main"
 backLobby:
   - "console: cmi server spawn {player}"
+cost:
+  reset: 10.0
+  moveCore: 10.0
+  switchVisibility: 10.0
+  addHelper: 10.0
 schematics:
   hupo:
     iaIcons: '0:offset_-174::view_plot_types_0:'

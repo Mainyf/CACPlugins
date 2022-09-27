@@ -156,7 +156,8 @@ object ConfigManager {
                 configKey == "deleteEnchants" -> {
                     if (config.contains(configKey, true)) {
                         wsc.setValue(configKey, config.getStringList("deleteEnchants").mapNotNull {
-                            kotlin.runCatching { Enchantment.getByKey(NamespacedKey.fromString(it.lowercase())) }.getOrNull()
+                            kotlin.runCatching { Enchantment.getByKey(NamespacedKey.fromString(it.lowercase())) }
+                                .getOrNull()
                         })
                     } else {
                         wsc.setDefault(configKey, parent)
@@ -239,7 +240,10 @@ data class WorldSettingConfig(
     val antiCampfireInteract: Boolean = true,
     val antiSpawnEnderDragonEgg: Boolean = true,
     val antiChat: Boolean = false,
-    val antiPlayerMoveToInhabitedTimeChunk: Long = 0L
+    val antiPlayerMoveToInhabitedTimeChunk: Long = 0L,
+    val antiAnvilsDamage: Boolean = false,
+    val randomFrogColor: Boolean = false,
+    val randomRabbitColor: Boolean = false
 )
 
 enum class CommandMatchType {

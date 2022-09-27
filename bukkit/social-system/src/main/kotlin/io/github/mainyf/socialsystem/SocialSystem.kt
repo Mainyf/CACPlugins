@@ -5,11 +5,10 @@ import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.newmclib.exts.tvar
 import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
-import io.github.mainyf.newmclib.serverId
-import io.github.mainyf.newmclib.serverName
+import io.github.mainyf.newmclib.hooks.placeholders
 import io.github.mainyf.socialsystem.config.ConfigManager
 import io.github.mainyf.socialsystem.listeners.PlayerListeners
-import io.github.mainyf.socialsystem.module.FriendHandler
+import io.github.mainyf.socialsystem.module.SocialManager
 import io.github.mainyf.socialsystem.storage.StorageManager
 import org.apache.logging.log4j.LogManager
 
@@ -47,10 +46,14 @@ class SocialSystem : BasePlugin() {
         pluginManager().registerEvents(PlayerListeners, this)
         pluginManager().registerEvents(CrossServerHandler, this)
         addPlaceholderExpansion("socialcard") papi@{ offlinePlayer, params ->
+            if (params == "qqnum") {
+                return@papi SocialManager.getPlayerQQNum(offlinePlayer?.uniqueId ?: return@papi null)?.toString()
+                    ?: "未绑定QQ"
+            }
             val player = offlinePlayer?.player ?: return@papi null
             when (params) {
-                "tab" -> ConfigManager.getPlayerTabCard(player).tvar("player", player.name)
-                "chat" -> ConfigManager.getPlayerChatCard(player).tvar("player", player.name)
+                "tab" -> ConfigManager.getPlayerTabCard(player).tvar("player", player.name).placeholders(player)
+                "chat" -> ConfigManager.getPlayerChatCard(player).tvar("player", player.name).placeholders(player)
                 else -> null
             }
         }

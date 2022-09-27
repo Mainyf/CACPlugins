@@ -3,7 +3,6 @@ package io.github.mainyf.toolsplugin
 import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.exts.AIR_ITEM
-import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.newmclib.exts.successMsg
 import io.github.mainyf.toolsplugin.config.ConfigManager

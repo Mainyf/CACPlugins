@@ -7,6 +7,7 @@ import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.select
 import java.util.*
 
 object StorageManager : AbstractStorageManager() {
@@ -17,7 +18,8 @@ object StorageManager : AbstractStorageManager() {
             arrayOf(
                 PlayerSocials,
                 PlayerFriends,
-                PlayerFriendRequests
+                PlayerFriendRequests,
+                PlayerLinkQQs
             ).forEach {
                 SchemaUtils.createMissingTablesAndColumns(it)
             }
@@ -126,6 +128,17 @@ object StorageManager : AbstractStorageManager() {
     fun setAllowRepair(social: PlayerSocial, value: Boolean) {
         transaction {
             social.allowRepair = value
+        }
+    }
+
+    fun getPlayerQQNum(uuid: UUID): Long? {
+        return transaction {
+            PlayerLinkQQs
+                .select { PlayerLinkQQs.id eq uuid }
+                .firstOrNull()
+                ?.let {
+                    it[PlayerLinkQQs.qqNum]
+                }
         }
     }
 

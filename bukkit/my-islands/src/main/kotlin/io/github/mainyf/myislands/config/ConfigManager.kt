@@ -5,10 +5,13 @@ package io.github.mainyf.myislands.config
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.newmclib.config.*
 import io.github.mainyf.newmclib.config.action.MultiAction
+import io.github.mainyf.newmclib.hooks.money
+import io.github.mainyf.newmclib.hooks.takeMoney
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 
 fun CommandSender.sendLang(key: String, vararg data: Any) {
@@ -28,6 +31,7 @@ object ConfigManager {
 
     lateinit var coreId: String
     lateinit var backLobbyAction: MultiAction
+    lateinit var myislandCost: MyIsLandsCost
     val schematicMap = mutableMapOf<String, PlotSchematicConfig>()
 //    var islandHelperMaxCount = 6
 
@@ -109,7 +113,7 @@ object ConfigManager {
         )
     }
 
-//    private fun ConfigurationSection.asIslandHelperSlotConfig(key: String): IslandHelperSlotConfig {
+    //    private fun ConfigurationSection.asIslandHelperSlotConfig(key: String): IslandHelperSlotConfig {
 //        return getConfigurationSection(key)!!.let {
 //            IslandHelperSlotConfig(
 //                it.getIntegerList("slot"),
@@ -162,6 +166,12 @@ object ConfigManager {
         debug = mainConfigFile.getBoolean("debug", false)
         coreId = mainConfigFile.getString("coreId") ?: "itemsadder:amethyst_block"
         backLobbyAction = ActionParser.parseAction(mainConfigFile.getStringList("backLobby"))!!
+        myislandCost = MyIsLandsCost(
+            mainConfigFile.getDouble("cost.reset", 10.0),
+            mainConfigFile.getDouble("cost.moveCore", 10.0),
+            mainConfigFile.getDouble("cost.switchVisibility", 10.0),
+            mainConfigFile.getDouble("cost.addHelper", 10.0)
+        )
 //        islandHelperMaxCount = mainConfigFile.getInt("islandHelperMaxCount", 6)
         resetCooldown = mainConfigFile.getLong("resetCooldown", 1)
         val schematicListSection = mainConfigFile.getConfigurationSection("schematics")!!
@@ -186,6 +196,16 @@ object ConfigManager {
         moveCoreAction = ActionParser.parseAction(mainConfigFile.getStringList("moveCoreAction"))!!
     }
 
+    fun tryPayMyIslandCost(player: Player, cost: Double, langKey: String): Boolean {
+        val money = player.money()
+        if (money < cost) {
+            player.sendLang("costMoneyLack.${langKey}", "{money}", money, "{cost}", cost)
+            return false
+        }
+        player.takeMoney(cost)
+        return true
+    }
+
     class PlotSchematicConfig(
         val iaIcons: IaIcons,
         val name: String,
@@ -196,6 +216,13 @@ object ConfigManager {
     class PlotSchematicUIConfig(
         val name: String,
         val lore: List<String>
+    )
+
+    class MyIsLandsCost(
+        val reset: Double,
+        val moveCore: Double,
+        val switchVisibility: Double,
+        val addHelper: Double
     )
 
 }

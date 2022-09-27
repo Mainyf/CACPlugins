@@ -64,3 +64,12 @@ dangerHomeLoc:
   - "message: &c&l！&4落脚点危险，已经将您传送至安全的位置，请确认岛屿落脚点安全"
 setupIslandCoreDanger:
   - "message: &c&l！&4岛屿核心位置危险"
+costMoneyLack:
+  reset:
+    - "mini: &c&l！&4当前金钱不足，无法完成此操作，当前拥有: {money}，需要: {cost}"
+  moveCore:
+    - "mini: &c&l！&4当前金钱不足，无法完成此操作，当前拥有: {money}，需要: {cost}"
+  switchVisibility:
+    - "mini: &c&l！&4当前金钱不足，无法完成此操作，当前拥有: {money}，需要: {cost}"
+  addHelper:
+    - "mini: &c&l！&4当前金钱不足，无法完成此操作，当前拥有: {money}，需要: {cost}"

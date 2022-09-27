@@ -1,0 +1,243 @@
+questListMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  background: ':offset_-8::view_task_list:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  quest1Slot:
+    slot: [ 20 ]
+    default:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务已经完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+  quest2Slot:
+    slot: [ 22 ]
+    default:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务已经完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+  quest3Slot:
+    slot: [ 24 ]
+    default:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务已经完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+  quest4Slot:
+    slot: [ 30 ]
+    default:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务已经完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+  quest5Slot:
+    slot: [ 32 ]
+    default:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3任务已经完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+  rewardSlot:
+    slot: [ 8 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3奖励 &4(维护中)"
+  backSlot:
+    slot: [ 49 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3返回主菜单"
+      actions:
+        - "console: trmenu open main {player}"
+        - 'sound: BLOCK_NOTE_BLOCK_BELL,1,1'
+questDetailMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  # 两个任务步骤
+  background: ':offset_-8::view_task_2:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  fsSlot:
+    slot: [ 4 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3绯石: {count}"
+  xypSlot:
+    slot: [ 39 ]
+    default:
+      iaIcons: ''
+      type: view_token_1_2
+      name: " &c&l> &3缃云珀: {count}"
+  moneySlot:
+    slot: [ 41 ]
+    default:
+      iaIcons: ''
+      type: view_money_1
+      name: " &c&l> &3金币: {count}"
+  rewardSlot:
+    slot: [ 8 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3奖励 &4(维护中)"
+  backSlot:
+    slot: [ 49 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3返回界面"
+questDetail2XMenu:
+  step1Slot:
+    slot: [ 21 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3第一阶段"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3第一阶段已完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+  step2Slot:
+    slot: [ 23 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3第二阶段"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3第二阶段已完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+questDetail3XMenu:
+  background: ':offset_-8::view_task_list:'
+  step1Slot:
+    slot: [ 1 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3第一阶段"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3第一阶段已完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+  step2Slot:
+    slot: [ 2 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3第二阶段"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3第二阶段已完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+  step3Slot:
+    slot: [ 3 ]
+    default:
+      iaIcons: ''
+      type: air
+      name: " &c&l> &3第三阶段"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
+    complete:
+      iaIcons: ''
+      type: gui:task
+      name: " &c&l> &3第三阶段已完成: &b{displayName}"
+      lore:
+        - ""
+        - " &7▪ {desc}"
+        - ""
