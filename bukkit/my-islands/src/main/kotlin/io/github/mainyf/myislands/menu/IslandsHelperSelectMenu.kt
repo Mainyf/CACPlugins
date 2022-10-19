@@ -2,7 +2,7 @@ package io.github.mainyf.myislands.menu
 
 import com.plotsquared.core.plot.Plot
 import io.github.mainyf.myislands.IslandsManager
-import io.github.mainyf.myislands.config.ConfigManager
+import io.github.mainyf.myislands.config.ConfigMI
 import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.newmclib.config.IaIcon
@@ -28,10 +28,10 @@ class IslandsHelperSelectMenu(
     private val currentPlayers = mutableListOf<Player>()
 
     override fun open(player: Player) {
-        setup(ConfigManager.helperSelectMenuConfig.settings)
+        setup(ConfigMI.helperSelectMenuConfig.settings)
 
         maxPageIndex =
-            ceil(players.size.toDouble() / ConfigManager.helperSelectMenuConfig.playerListSlot.slot.size.toDouble()).toInt()
+            ceil(players.size.toDouble() / ConfigMI.helperSelectMenuConfig.playerListSlot.slot.size.toDouble()).toInt()
 
         val inv = createInv(player)
 
@@ -41,7 +41,7 @@ class IslandsHelperSelectMenu(
     }
 
     override fun updateTitle(player: Player): String {
-        val menuConfig = ConfigManager.helperSelectMenuConfig
+        val menuConfig = ConfigMI.helperSelectMenuConfig
         val icons = mutableListOf<IaIcon>()
         icons.addAll(menuConfig.prevSlot.iaIcon())
         icons.addAll(menuConfig.nextSlot.iaIcon())
@@ -51,7 +51,7 @@ class IslandsHelperSelectMenu(
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
-        val menuConfig = ConfigManager.helperSelectMenuConfig
+        val menuConfig = ConfigMI.helperSelectMenuConfig
 
         inv.setIcon(menuConfig.prevSlot) {
             menuConfig.prevSlot
@@ -76,14 +76,14 @@ class IslandsHelperSelectMenu(
     }
 
     private fun updateList() {
-        val menuConfig = ConfigManager.helperSelectMenuConfig
+        val menuConfig = ConfigMI.helperSelectMenuConfig
         currentPlayers.clear()
         currentPlayers.addAll(players.pagination(pageIndex, menuConfig.playerListSlot.slot.size))
     }
 
     private fun updatePlayerList(player: Player, inv: Inventory) {
         updateList()
-        val menuConfig = ConfigManager.helperSelectMenuConfig
+        val menuConfig = ConfigMI.helperSelectMenuConfig
         inv.unSetIcon(menuConfig.playerListSlot.slot)
         currentPlayers.forEachIndexed { index, p ->
             val slot = menuConfig.playerListSlot.slot.getOrNull(index) ?: return@forEachIndexed

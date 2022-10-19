@@ -22,8 +22,6 @@ class QuestExtension : JavaPlugin() {
 
         lateinit var INSTANCE: QuestExtension
 
-        val TOKEN_1 = Currency.register(CurrencyToken1())
-
     }
 
     override fun onEnable() {
@@ -39,6 +37,17 @@ class QuestExtension : JavaPlugin() {
                     val player = player()
                     QuestManager.addDailyQuestToPlayer(player)
                     player.msg("添加成功")
+                }
+            }
+            "reset" {
+                withArguments(
+                    playerArguments("玩家名")
+                )
+                executeOP {
+                    val player = player()
+                    QuestManager.cleanDailyQuestToPlayer(player)
+                    QuestManager.addDailyQuestToPlayer(player)
+                    player.msg("重置成功")
                 }
             }
             "clean" {

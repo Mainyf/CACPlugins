@@ -2,11 +2,12 @@ package io.github.mainyf.questextension.storage
 
 import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.storage.AbstractStorageManager
-import io.github.mainyf.newmclib.storage.insertByID
 import io.github.mainyf.newmclib.storage.newByID
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.joda.time.DateTime
 
 object StorageManager : AbstractStorageManager() {
@@ -42,6 +43,15 @@ object StorageManager : AbstractStorageManager() {
 //                it[questStartTime] = DateTime.now().withTimeAtStartOfDay()
 //                it[questList] = list.joinToString(",")
 //            }
+        }
+    }
+
+    fun cleanDailyQuest(player: Player) {
+        transaction {
+            val curDate = DateTime.now().withTimeAtStartOfDay()
+            PlayerDailyQuests.deleteWhere {
+                (PlayerDailyQuests.pUUID eq player.uuid) and (PlayerDailyQuests.questStartTime eq curDate)
+            }
         }
     }
 

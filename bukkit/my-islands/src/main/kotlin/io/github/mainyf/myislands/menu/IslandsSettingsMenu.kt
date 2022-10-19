@@ -4,9 +4,9 @@ import com.plotsquared.core.plot.Plot
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.asPlotPlayer
-import io.github.mainyf.myislands.config.ConfigManager
+import io.github.mainyf.myislands.config.ConfigMI
 import io.github.mainyf.myislands.config.sendLang
-import io.github.mainyf.myislands.features.MoveIslandCore
+import io.github.mainyf.myislands.features.MoveIsLandCore
 import io.github.mainyf.myislands.storage.IslandVisibility.*
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.newmclib.config.IaIcon
@@ -43,9 +43,9 @@ class IslandsSettingsMenu(
     private var pageSize = 0
 
     override fun open(player: Player) {
-        setup(ConfigManager.settingsMenuConfig.settings)
+        setup(ConfigMI.settingsMenuConfig.settings)
         this.maxHelpers = IslandsManager.getPlayerMaxHelperCount(player)
-        this.pageSize = ConfigManager.settingsMenuConfig.helpersSlot.slot.size
+        this.pageSize = ConfigMI.settingsMenuConfig.helpersSlot.slot.size
         updateHelpers()
         updateHelperList()
         val inv = createInv(player)
@@ -73,11 +73,11 @@ class IslandsSettingsMenu(
         this.currentEmptySlot =
             if (pageIndex != maxPageIndex) pageSize else pageSize - ((pageIndex * pageSize) % maxHelpers)
         currentHelpers.clear()
-        currentHelpers.addAll(helpers.pagination(pageIndex, ConfigManager.settingsMenuConfig.helpersSlot.slot.size))
+        currentHelpers.addAll(helpers.pagination(pageIndex, ConfigMI.settingsMenuConfig.helpersSlot.slot.size))
     }
 
     override fun updateTitle(player: Player): String {
-        val menuConfig = ConfigManager.settingsMenuConfig
+        val menuConfig = ConfigMI.settingsMenuConfig
         val icons = mutableListOf<IaIcon>()
         icons.addAll(menuConfig.moveCoreSlot.iaIcon())
         when (island.visibility) {
@@ -96,7 +96,7 @@ class IslandsSettingsMenu(
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
-        val settingsMenuConfig = ConfigManager.settingsMenuConfig
+        val settingsMenuConfig = ConfigMI.settingsMenuConfig
 
         inv.setIcon(settingsMenuConfig.prevSlot) {
             if (pageIndex > 1) {
@@ -121,10 +121,10 @@ class IslandsSettingsMenu(
                 it.sendLang("noOwnerMoveCore")
                 return@setIcon
             }
-            if (!ConfigManager.tryPayMyIslandCost(it, ConfigManager.myislandCost.moveCore, "moveCore")) {
+            if (!ConfigMI.tryPayMyIslandCost(it, ConfigMI.myislandCost.moveCore, "moveCore")) {
                 return@setIcon
             }
-            MoveIslandCore.tryStartMoveCore(it, plot)
+            MoveIsLandCore.tryStartMoveCore(it, plot)
             it.closeInventory()
         }
         val visibilitySlot = settingsMenuConfig.visibilitySlot
@@ -135,9 +135,9 @@ class IslandsSettingsMenu(
 //                it?.tvar("visibility", island.visibility.text)
 //            })
         }) { p ->
-            if (!ConfigManager.tryPayMyIslandCost(
+            if (!ConfigMI.tryPayMyIslandCost(
                     player,
-                    ConfigManager.myislandCost.switchVisibility,
+                    ConfigMI.myislandCost.switchVisibility,
                     "switchVisibility"
                 )
             ) {
@@ -155,14 +155,11 @@ class IslandsSettingsMenu(
                 p.sendLang("noOwnerResetIslands")
                 return@setIcon
             }
-            if (!ConfigManager.tryPayMyIslandCost(p, ConfigManager.myislandCost.reset, "reset")) {
-                return@setIcon
-            }
             val prevResetMilli = IslandsManager.getIslandLastResetDate(island)?.toMilli()
             if (!p.isOp && prevResetMilli != null) {
                 val cur = LocalDateTime.now().toMilli()
                 val eMillis = cur - prevResetMilli
-                val cooldownMilli = ConfigManager.resetCooldown * 24 * 60 * 60 * 1000L
+                val cooldownMilli = ConfigMI.resetCooldown * 24 * 60 * 60 * 1000L
                 if (eMillis < cooldownMilli) {
                     p.sendLang(
                         "resetCooldown",
@@ -173,7 +170,9 @@ class IslandsSettingsMenu(
                 }
             }
             IslandsChooseMenu(false, { chooseMenu, player, schematicConfig ->
-
+                if (!ConfigMI.tryPayMyIslandCost(p, ConfigMI.myislandCost.reset, "reset")) {
+                    return@IslandsChooseMenu
+                }
                 onlinePlayers().forEach {
                     if (it.uuid == p.uuid) return@forEach
                     val pPlot = MyIslands.plotUtils.getPlotByPLoc(it) ?: return@forEach
@@ -198,7 +197,7 @@ class IslandsSettingsMenu(
     }
 
     private fun updateHelperInv(player: Player, inv: Inventory) {
-        val settingsMenuConfig = ConfigManager.settingsMenuConfig
+        val settingsMenuConfig = ConfigMI.settingsMenuConfig
 
         val helpersSlot = settingsMenuConfig.helpersSlot.slot
         inv.unSetIcon(helpersSlot)
@@ -224,7 +223,7 @@ class IslandsSettingsMenu(
 //                this.itemMeta = meta
             }) {
                 settingsMenuConfig.helpersSlot["empty"]!!.execAction(it)
-                if (!ConfigManager.tryPayMyIslandCost(player, ConfigManager.myislandCost.addHelper, "addHelper")) {
+                if (!ConfigMI.tryPayMyIslandCost(player, ConfigMI.myislandCost.addHelper, "addHelper")) {
                     return@setIcon
                 }
                 IslandsManager.openHelperSelectMenu(it, plot, island, helpers)

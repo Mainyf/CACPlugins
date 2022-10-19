@@ -6,6 +6,7 @@ import io.github.mainyf.bungeesettingsbukkit.events.ServerPacketReceiveEvent
 import io.github.mainyf.commandsettings.config.ConfigManager
 import io.github.mainyf.commandsettings.config.ItemAction
 import io.github.mainyf.newmclib.BasePlugin
+import io.github.mainyf.newmclib.config.ActionParser
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.serverId
 import org.bukkit.entity.Player
@@ -19,6 +20,8 @@ class CommandSettings : BasePlugin(), Listener {
         lateinit var INSTANCE: CommandSettings
 
         val ACTION_ID = ServerPacket.registerPacket("broadcast_action_id")
+
+        val UNPARSE_ACTION_ID = ServerPacket.registerPacket("broadcast_unparse_action_id")
 
         val ACTION_ID_PLAYER = ServerPacket.registerPacket("broadcast_action_id_player")
 
@@ -40,10 +43,10 @@ class CommandSettings : BasePlugin(), Listener {
             val action = ConfigManager.getAction(id) ?: return
             action.actions?.execute(console())
         } else {
-            if(serverId == "all") {
-                val action = ConfigManager.getAction(id) ?: return
-                action.actions?.execute(console())
-            }
+//            if (serverId == "all") {
+//                val action = ConfigManager.getAction(id) ?: return
+//                action.actions?.execute(console())
+//            }
             CrossServerManager.sendData(ACTION_ID) {
                 writeString(serverId)
                 writeString(id)
@@ -59,14 +62,32 @@ class CommandSettings : BasePlugin(), Listener {
             val action = ConfigManager.getAction(id) ?: return
             action.actions?.execute(console(), "{player}", playerName)
         } else {
-            if(serverId == "all") {
-                val action = ConfigManager.getAction(id) ?: return
-                action.actions?.execute(console(), "{player}", playerName)
-            }
+//            if (serverId == "all") {
+//                val action = ConfigManager.getAction(id) ?: return
+//                action.actions?.execute(console(), "{player}", playerName)
+//            }
             CrossServerManager.sendData(ACTION_ID_PLAYER) {
+                writeString(serverId())
                 writeString(serverId)
                 writeString(id)
                 writeString(playerName)
+            }
+        }
+    }
+
+    fun sendUnparseAction(serverId: String, msg: String) {
+        if (serverId == serverId()) {
+            val parsedAction = ActionParser.parseAction(msg)
+            parsedAction.execute(console())
+        } else {
+//            if (serverId == "all") {
+//                val parsedAction = ActionParser.parseAction(msg)
+//                parsedAction.execute(console())
+//            }
+            CrossServerManager.sendData(UNPARSE_ACTION_ID) {
+                writeString(serverId())
+                writeString(serverId)
+                writeString(msg)
             }
         }
     }
@@ -82,6 +103,13 @@ class CommandSettings : BasePlugin(), Listener {
                 val action = ConfigManager.getAction(ID) ?: return
                 action.actions?.execute(console())
 //                action.plays?.execute(player.location)
+            }
+            UNPARSE_ACTION_ID -> {
+                val type = buf.readString()
+                if (type != serverId() && type != "all") return
+                val msg = buf.readString()
+                val parsedAction = ActionParser.parseAction(msg)
+                parsedAction.execute(console())
             }
             ACTION_ID_PLAYER -> {
                 val type = buf.readString()

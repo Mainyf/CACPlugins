@@ -121,6 +121,17 @@ object CommandHandler : APICommand("cset") {
                     }
                 }
             }
+            "serverSendMsg" {
+                withArguments(
+                    stringArguments("类型") { _ -> arrayOf("all", *CrossServerManager.serverIds.toTypedArray()) },
+                    GreedyStringArgument("msg")
+                )
+                executeOP {
+                    val serverId = text()
+                    val msg = text()
+                    CommandSettings.INSTANCE.sendUnparseAction(serverId, msg)
+                }
+            }
         }
     }
 

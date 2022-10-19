@@ -1,0 +1,24 @@
+dungeonMenu:
+  # 点击速度限制
+  cooldown: 250
+  row: 3
+  background: ':offset_-8::view_plot_set::offset_-150:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  level1Slot:
+    slot: [ 0 ]
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3低级副本"
+  level2Slot:
+    slot: [ 8 ]
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3中级副本"
+  level3Slot:
+    slot: [ 20 ]
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3高级副本"

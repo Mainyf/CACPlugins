@@ -4,12 +4,13 @@ import com.plotsquared.core.PlotAPI
 import com.plotsquared.core.PlotSquared
 import com.plotsquared.core.player.PlotPlayer
 import io.github.mainyf.bungeesettingsbukkit.ServerPacket
-import io.github.mainyf.myislands.config.ConfigManager
-import io.github.mainyf.myislands.features.MoveIslandCore
+import io.github.mainyf.myislands.config.ConfigMI
+import io.github.mainyf.myislands.features.IsLandCreatureLimit
+import io.github.mainyf.myislands.features.MoveIsLandCore
 import io.github.mainyf.myislands.listeners.AuthListeners
 import io.github.mainyf.myislands.listeners.NoAuthListeners
 import io.github.mainyf.myislands.listeners.PlayerListeners
-import io.github.mainyf.myislands.storage.StorageManager
+import io.github.mainyf.myislands.storage.StorageMI
 import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
@@ -41,13 +42,15 @@ class MyIslands : BasePlugin() {
     override fun enable() {
         INSTANCE = this
         plotAPI = PlotAPI()
-        ConfigManager.load()
-        StorageManager.init()
+        ConfigMI.load()
+        StorageMI.init()
         val injector = PlotSquared.platform().injector()
         plotUtils = injector.getInstance(PlotUtils::class.java)
 
-        MoveIslandCore.init()
-        pluginManager().registerEvents(MoveIslandCore, this)
+        MoveIsLandCore.init()
+        IsLandCreatureLimit.init()
+        pluginManager().registerEvents(MoveIsLandCore, this)
+        pluginManager().registerEvents(IsLandCreatureLimit, this)
         pluginManager().registerEvents(PlayerListeners, this)
         pluginManager().registerEvents(CrossServerHandler, this)
         CommandHandler.init()
@@ -72,17 +75,17 @@ class MyIslands : BasePlugin() {
 //
 //            val player = offlinePlayer.player ?: return@papi null
             when (params) {
-                "cost_reset" -> ConfigManager.myislandCost.reset.toDisplayText()
-                "cost_movecore" -> ConfigManager.myislandCost.moveCore.toDisplayText()
-                "cost_switchvisibility" -> ConfigManager.myislandCost.switchVisibility.toDisplayText()
-                "cost_addhelper" -> ConfigManager.myislandCost.addHelper.toDisplayText()
+                "cost_reset" -> ConfigMI.myislandCost.reset.toDisplayText()
+                "cost_movecore" -> ConfigMI.myislandCost.moveCore.toDisplayText()
+                "cost_switchvisibility" -> ConfigMI.myislandCost.switchVisibility.toDisplayText()
+                "cost_addhelper" -> ConfigMI.myislandCost.addHelper.toDisplayText()
                 else -> null
             }
         }
     }
 
     override fun onDisable() {
-        StorageManager.close()
+        StorageMI.close()
     }
 
 }

@@ -24,6 +24,8 @@ data class ServerPacket(
 
         val KEEP_ALIVE = registerPacket("keep_alive")
 
+        val PLAYER_DISCONNECT = registerPacket("player_disconnect")
+
         fun registerPacket(name: String): ServerPacket {
             if (packets.containsKey(name)) {
                 throw java.lang.RuntimeException("$name 已经注册过")

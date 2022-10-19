@@ -24,6 +24,8 @@ data class ServerPacket(
 
         val KEEP_ALIVE = registerPacket("keep_alive")
 
+        val PLAYER_DISCONNECT = registerPacket("player_disconnect")
+
         fun registerPacket(name: String): ServerPacket {
             if (packets.containsKey(name)) {
                 return packets[name]!!

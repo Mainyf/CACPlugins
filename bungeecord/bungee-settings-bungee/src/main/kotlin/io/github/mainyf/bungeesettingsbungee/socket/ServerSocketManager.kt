@@ -20,7 +20,7 @@ object ServerSocketManager {
 
     private var serverLoop: Future<*>? = null
 
-    private val clientSockets = CopyOnWriteArrayList<Pair<ClientMessageHandler, Future<*>>>()
+    val clientSockets = CopyOnWriteArrayList<Pair<ClientMessageHandler, Future<*>>>()
 
     private lateinit var logger: Logger
 

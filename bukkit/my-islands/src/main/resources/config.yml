@@ -43,3 +43,17 @@ schematics:
 moveCoreAction:
   - "title: ,&3使用&b左键确认&3核心水晶位置,0,20,10"
   - "actionbar: &6&l使用 &e&lShift+左键 &6&l取消移动,&c◆"
+creatureLimit:
+  period: 20
+  animals:
+    count: 10
+    msg:
+      - "mini: 动物数量已达到上限(10)"
+  monster:
+    count: 20
+    msg:
+      - "mini: 怪物数量已达到上限(20)"
+  villager:
+    count: 10
+    msg:
+      - "mini: 村民数量已达到上限(10)"

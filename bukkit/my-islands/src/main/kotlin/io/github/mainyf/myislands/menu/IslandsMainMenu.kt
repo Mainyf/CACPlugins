@@ -1,27 +1,22 @@
 package io.github.mainyf.myislands.menu
 
-import com.plotsquared.bukkit.util.BukkitUtil
 import com.plotsquared.core.plot.Plot
 import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
-import io.github.mainyf.myislands.config.ConfigManager
+import io.github.mainyf.myislands.config.ConfigMI
 import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.myislands.menu.IslandViewListType.*
 import io.github.mainyf.myislands.storage.PlayerIsland
-import io.github.mainyf.myislands.storage.StorageManager
+import io.github.mainyf.myislands.storage.StorageMI
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
-import io.github.mainyf.newmclib.utils.Cooldown
 import io.github.mainyf.newmclib.utils.Heads
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.ItemStack
 import kotlin.math.ceil
-import kotlin.system.measureTimeMillis
 
 class IslandsMainMenu : AbstractMenuHandler() {
 
@@ -37,7 +32,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
     private var hasOwner = false
 
     override fun open(player: Player) {
-        setup(ConfigManager.mainMenuConfig.settings)
+        setup(ConfigMI.mainMenuConfig.settings)
         updateMaxPageIndex(player)
         islandAbs = IslandsManager.getIslandAbs(player)
         plotAbs = MyIslands.plotUtils.getPlotByPLoc(player)
@@ -52,8 +47,8 @@ class IslandsMainMenu : AbstractMenuHandler() {
 
     private fun updateMaxPageIndex(player: Player) {
         maxPageIndex = ceil(
-            StorageManager.getIsLandsCount(player, viewIslandType)
-                .toDouble() / ConfigManager.mainMenuConfig.islandViewSlot.slot.size.toDouble()
+            StorageMI.getIsLandsCount(player, viewIslandType)
+                .toDouble() / ConfigMI.mainMenuConfig.islandViewSlot.slot.size.toDouble()
         ).toInt()
     }
 
@@ -63,7 +58,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
     }
 
     override fun updateTitle(player: Player): String {
-        val menuConfig = ConfigManager.mainMenuConfig
+        val menuConfig = ConfigMI.mainMenuConfig
         val icons = mutableListOf<IaIcon>()
         icons.addAll(menuConfig.prevSlot.iaIcon())
         icons.addAll(menuConfig.nextSlot.iaIcon())
@@ -94,7 +89,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
 
     private fun updateInvSlot(player: Player, inv: Inventory) {
         inv.clearIcon()
-        val menuConfig = ConfigManager.mainMenuConfig
+        val menuConfig = ConfigMI.mainMenuConfig
         inv.setIcon(menuConfig.prevSlot) {
             if (pageIndex > 1) {
                 pageIndex--
@@ -177,10 +172,10 @@ class IslandsMainMenu : AbstractMenuHandler() {
 //    }
 
     private fun updateInvIslandList(player: Player, inv: Inventory) {
-        val viewListSlots = ConfigManager.mainMenuConfig.islandViewSlot
+        val viewListSlots = ConfigMI.mainMenuConfig.islandViewSlot
         inv.unSetIcon(viewListSlots.slot)
         val type = values()[viewIslandTypeIndex]
-        val islands = StorageManager.getIsLandsOrderByKudos(
+        val islands = StorageMI.getIsLandsOrderByKudos(
             pageIndex,
             viewListSlots.slot.size,
             player,

@@ -1,17 +1,15 @@
 package io.github.mainyf.myislands
 
 import dev.jorel.commandapi.arguments.DoubleArgument
-import io.github.mainyf.myislands.config.ConfigManager
-import io.github.mainyf.myislands.features.MoveIslandCore
+import io.github.mainyf.myislands.config.ConfigMI
+import io.github.mainyf.myislands.features.MoveIsLandCore
 import io.github.mainyf.myislands.menu.IslandsChooseMenu
 import io.github.mainyf.myislands.menu.IslandsMainMenu
-import io.github.mainyf.myislands.storage.StorageManager
+import io.github.mainyf.myislands.storage.StorageMI
 import io.github.mainyf.newmclib.command.APICommand
 import io.github.mainyf.newmclib.command.playerArguments
-import io.github.mainyf.newmclib.exts.errorMsg
-import io.github.mainyf.newmclib.exts.msg
-import io.github.mainyf.newmclib.exts.successMsg
-import io.github.mainyf.newmclib.exts.uuid
+import io.github.mainyf.newmclib.exts.*
+import org.bukkit.Material
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 
@@ -20,9 +18,17 @@ object CommandHandler : APICommand("myislands") {
     fun init() {
         withPermission("${MyIslands.INSTANCE.name}.command")
         apply {
+            "test" {
+                executeOP {
+                    val values = Material.values()
+                    sender.msg("${values.count {
+                        it.name.contains("_EGG") && it != Material.DRAGON_EGG
+                    }}")
+                }
+            }
             "reload" {
                 executeOP {
-                    ConfigManager.load()
+                    ConfigMI.load()
                     sender.successMsg("[MyIsLands] 重载成功")
                 }
             }
@@ -64,7 +70,7 @@ object CommandHandler : APICommand("myislands") {
             }
             "initHeat" {
                 executeOP {
-                    StorageManager.initHeat()
+                    StorageMI.initHeat()
                     sender.successMsg("[MyIsLands] 成功初始化热力值")
                 }
             }
@@ -72,19 +78,19 @@ object CommandHandler : APICommand("myislands") {
                 withArguments(playerArguments("玩家名"))
                 executeOP {
                     val target = args[0] as Player
-                    MoveIslandCore.tryStartMoveCore(target, MyIslands.plotUtils.getPlotByPLoc(target)!!)
+                    MoveIsLandCore.tryStartMoveCore(target, MyIslands.plotUtils.getPlotByPLoc(target)!!)
                 }
             }
             "endMove" {
                 withArguments(playerArguments("玩家名"))
                 executeOP {
                     val target = args[0] as Player
-                    if (!MoveIslandCore.hasMoveingCore(target.uniqueId)) {
+                    if (!MoveIsLandCore.hasMoveingCore(target.uniqueId)) {
                         target.errorMsg("你不在移动核心的状态")
                         return@executeOP
                     }
-                    MoveIslandCore.endMoveCore(target)
-                    MoveIslandCore.removePlayerLater20Tick(target)
+                    MoveIsLandCore.endMoveCore(target)
+                    MoveIsLandCore.removePlayerLater20Tick(target)
                     target.successMsg("结束移动核心水晶")
                 }
             }

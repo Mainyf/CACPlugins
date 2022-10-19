@@ -73,3 +73,5 @@ costMoneyLack:
     - "mini: &c&l！&4当前金钱不足，无法完成此操作，当前拥有: {money}，需要: {cost}"
   addHelper:
     - "mini: &c&l！&4当前金钱不足，无法完成此操作，当前拥有: {money}，需要: {cost}"
+useEggcreatureLimit:
+  - "mini: &c&l！&4生成失败，原因：你的 {cType} 超出限制 {curCount}/{maxCount}"

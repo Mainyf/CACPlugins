@@ -12,6 +12,7 @@ import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.questextension.config.ConfigManager
 import io.github.mainyf.questextension.menu.QuestListMenu
+import io.github.mainyf.questextension.storage.PlayerDailyQuest
 import io.github.mainyf.questextension.storage.StorageManager
 import org.bukkit.entity.Player
 import org.joda.time.DateTime
@@ -38,13 +39,13 @@ object QuestManager {
         val currentTime = DateTime.now().withTimeAtStartOfDay()
         var questData = StorageManager.findDailyQuest(player)
         if (questData == null) {
-            questData = StorageManager.addDailyQuestData(player, addDailyQuestToPlayer(player).map { it.modelId })
+            questData = addDailyQuestToPlayer(player)
         } else {
             if (questData.questStartTime.isBefore(currentTime)) {
 //                val quests = getPlayerDailyQuest(userQC)
 //                player.msg("任务 ${quests.joinToString(", ") { it.model.displayName.getRawValueLine(0) }} 已失效")
                 cleanDailyQuestToPlayer(player)
-                questData = StorageManager.addDailyQuestData(player, addDailyQuestToPlayer(player).map { it.modelId })
+                questData = addDailyQuestToPlayer(player)
             }
         }
         QuestListMenu(
@@ -53,7 +54,7 @@ object QuestManager {
             questData.questList.mapNotNull { ConfigQC.models.getElement(it).orNull() }).open(player)
     }
 
-    fun addDailyQuestToPlayer(player: Player): List<Quest> {
+    fun addDailyQuestToPlayer(player: Player): PlayerDailyQuest {
         val rs = mutableListOf<Quest>()
         val quests = mutableSetOf<String>()
         val questPool = ConfigManager.questPool.toMutableSet()
@@ -71,7 +72,8 @@ object QuestManager {
             rs.add(QuestUtilsFlowStart.doStartQuest(model.orNull(), player, QuestStartCause.PLUGIN))
         }
 //        player.msg("任务 ${rs.joinToString(", ") { it.model.displayName.getRawValueLine(0) }} 已接受")
-        return rs
+//        return rs
+        return StorageManager.addDailyQuestData(player, rs.map { it.modelId })
     }
 
     fun cleanDailyQuestToPlayer(player: Player) {
@@ -81,6 +83,7 @@ object QuestManager {
             val quest = userQC.getCachedActiveQuest(it) ?: return@forEach
             QuestUtilsFlowStop.attemptStopOrLeave(quest, player.uuid, QuestStopCause.PLUGIN)
         }
+        StorageManager.cleanDailyQuest(player)
     }
 
 }

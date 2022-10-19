@@ -73,8 +73,8 @@ subprojects {
             compileOnly(rootProject.files("libs/BungeeCord.jar"))
         }
         if (hasBukkit(project)) {
-            implementation("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
-            compileOnly(rootProject.files("./libs/paper-server-1.19-R0.1-SNAPSHOT-reobf.jar"))
+            implementation("io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT")
+            compileOnly(rootProject.files("./libs/paper-server-1.19.2-R0.1-SNAPSHOT-reobf.jar"))
             implementation("org.jetbrains.kotlin:kotlin-stdlib")
             implementation("io.netty:netty-all:4.1.68.Final")
             implementation(rootProject.files("./bukkit-rebel-plugin.jar"))
@@ -82,8 +82,9 @@ subprojects {
             compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
             implementation("io.github.mainyf:newmclib-craftbukkit:1.7.3:")
             compileOnly(rootProject.files("./plugins/ProtocolLib.jar"))
-            compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
-            compileOnly(rootProject.files("./plugins/CommandAPI-8.4.1.jar"))
+            compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.2.jar"))
+            compileOnly(rootProject.files("./plugins/CommandAPI-8.5.1.jar"))
+            compileOnly(rootProject.files("./libs/Vault.jar"))
 
             when (project.name) {
                 "plugin-loader" -> {
@@ -93,24 +94,17 @@ subprojects {
                     )))
                     embed("net.bytebuddy:byte-buddy:1.11.22")
                 }
-//                "linkQQ" -> {
-//                    implementation("io.github.dreamvoid:MiraiMC-Integration:1.7")
-//                    implementation(rootProject.files("./libs/MiraiMC-Bukkit.jar"))
-//                    implementation("net.mamoe:mirai-core-jvm:2.11.1")
-//                    compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
-//                }
                 "item-skills-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
-                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3.jar"))
                 }
                 "my-islands" -> {
 //                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
 
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
-                    compileOnly(rootProject.files("./plugins/PlotSquared-Bukkit-6.9.1-Premium.jar"))
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3.jar"))
+                    compileOnly(rootProject.files("./plugins/PlotSquared-Bukkit-6.9.3-Premium.jar"))
 //                    compileOnly(rootProject.files("./libs/PlotSquared-Bukkit-6.6.2-Premium.jar"))
-                    compileOnly(rootProject.files("./plugins/CMI9.2.1.0.jar"))
+                    compileOnly(rootProject.files("./plugins/CMI9.2.2.0.jar"))
                     compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
                     compileOnly(rootProject.files("./libs/datafixerupper-4.1.27.jar"))
                     compileOnly(rootProject.files("./libs/SkinsRestorer.jar"))
@@ -125,7 +119,7 @@ subprojects {
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
                 "bungee-settings-bukkit" -> {
-                    compileOnly(rootProject.files("./plugins/CMI9.2.1.0.jar"))
+                    compileOnly(rootProject.files("./plugins/CMI9.2.2.0.jar"))
                 }
                 "player-account" -> {
                     embed("com.aliyun:alibabacloud-dysmsapi20170525:1.0.1")
@@ -141,7 +135,7 @@ subprojects {
                     compileOnly(rootProject.project(":bukkit:custom-economy"))
                 }
                 "command-settings" -> {
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.0c-beta6.jar"))
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3.jar"))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
                 "mcrmb-migration" -> {
@@ -153,15 +147,16 @@ subprojects {
                 }
                 "shop-manager" -> {
                     compileOnly(rootProject.files("./libs/QuickShop.jar"))
-                    compileOnly(rootProject.files("./libs/Vault.jar"))
                 }
                 "social-system" -> {
-                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
 //                    compileOnly(rootProject.project(":bukkit:my-islands"))
                 }
                 "custom-economy" -> {
-                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.1.jar"))
+                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.2.jar"))
+                }
+                "cs-dungeon" -> {
+                    compileOnly(rootProject.files("./plugins/CustomStructures-1.8.0.jar"))
                 }
             }
         }
@@ -242,6 +237,9 @@ subprojects {
                 "custom-economy" -> {
                     dd.addAll(listOf("PlaceholderAPI"))
                 }
+                "cs-dungeon" -> {
+                    dd.addAll(listOf("CustomStructures"))
+                }
 //                "linkQQ" -> {
 //                    dd.addAll(listOf("MiraiMC", "AuthMe"))
 //                }
@@ -307,7 +305,7 @@ class $pluginName : JavaPlugin() {
 
         tasks.register<JavaExec>("runServer") {
             dependsOn(tasks.findByName("copyPlugin"))
-            classpath = rootProject.files("./server/${folder}/paper-1.19-41.jar")
+            classpath = rootProject.files("./server/${folder}/paper-1.19.2-211.jar")
             mainClass.set("io.papermc.paperclip.Paperclip")
             val jvmArgsText =
                 "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
@@ -327,7 +325,7 @@ class $pluginName : JavaPlugin() {
 
         tasks.register<JavaExec>("runServer2") {
             dependsOn(tasks.findByName("copyPlugin2"))
-            classpath = rootProject.files("./server/bukkit2/paper-1.19-41.jar")
+            classpath = rootProject.files("./server/bukkit2/paper-1.19.2-211.jar")
             mainClass.set("io.papermc.paperclip.Paperclip")
             val jvmArgsText =
                 "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
@@ -347,7 +345,7 @@ class $pluginName : JavaPlugin() {
 
         tasks.register<JavaExec>("runTestServer") {
             dependsOn(tasks.findByName("copyPlugin"))
-            classpath = rootProject.files("./server/test/paper-1.19-41.jar")
+            classpath = rootProject.files("./server/test/paper-1.19.2-211.jar")
             mainClass.set("io.papermc.paperclip.Paperclip")
             val jvmArgsText =
                 "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"

@@ -7,6 +7,7 @@ import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.ComponentBuilder
+import net.md_5.bungee.api.event.PlayerDisconnectEvent
 import net.md_5.bungee.api.event.PluginMessageEvent
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.Listener
@@ -101,6 +102,17 @@ class BungeeSettingsBungee : Plugin(), Listener {
                     writeUUID(playerUUID)
                     writeUUID(targetUUID)
                 }.toByteArray())
+            }
+        }
+    }
+
+    @EventHandler
+    fun onDisconnect(event: PlayerDisconnectEvent) {
+        val player = event.player
+        ServerSocketManager.clientSockets.map { it.first }.forEach {
+            it.sendData(ServerPacket.PLAYER_DISCONNECT) {
+                writeUUID(player.uniqueId)
+                writeString(player.name)
             }
         }
     }

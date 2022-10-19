@@ -32,6 +32,7 @@ class PlayerSettings : BasePlugin(), Listener {
     }
 
     private val LOG = io.github.mainyf.newmclib.getLogger("PlayerSettings")
+    private val playerDisconnect = mutableSetOf<UUID>()
     private val playerFlyMap = mutableMapOf<UUID, Pair<Boolean, Float>>()
 
     override fun enable() {
@@ -73,6 +74,11 @@ class PlayerSettings : BasePlugin(), Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         if (serverId() == "lobby") return
+        if(playerDisconnect.contains(event.player.uuid)) {
+            event.player.allowFlight = false
+            event.player.flySpeed = 0.1f
+        }
+        playerDisconnect.remove(event.player.uuid)
         CrossServerManager.sendData(FLY_STATUS_REQ) {
             writeUUID(event.player.uuid)
         }
@@ -83,10 +89,12 @@ class PlayerSettings : BasePlugin(), Listener {
         val buf = event.buf
         when (event.packet) {
             FLY_STATUS_REQ -> {
+                if (serverId() == "lobby") return
                 val uuid = buf.readUUID()
                 if (playerFlyMap.containsKey(uuid)) {
                     val (allowFlight, speed) = playerFlyMap.remove(uuid)!!
                     CrossServerManager.sendData(FLY_STATUS_RES) {
+                        writeString(serverId())
                         writeUUID(uuid)
                         writeBoolean(allowFlight)
                         writeFloat(speed)
@@ -94,11 +102,19 @@ class PlayerSettings : BasePlugin(), Listener {
                 }
             }
             FLY_STATUS_RES -> {
+                val serverId = buf.readString()
+                if (serverId == serverId()) return
                 val player = buf.readUUID().asPlayer() ?: return
                 val allowFlight = buf.readBoolean()
                 val speed = buf.readFloat()
                 player.allowFlight = allowFlight
                 player.flySpeed = speed
+            }
+            ServerPacket.PLAYER_DISCONNECT -> {
+                val uuid = buf.readUUID()
+
+                playerDisconnect.add(uuid)
+                playerFlyMap.remove(uuid)
             }
         }
     }
@@ -106,6 +122,7 @@ class PlayerSettings : BasePlugin(), Listener {
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
+        if (playerDisconnect.contains(player.uuid)) return
         playerFlyMap[player.uuid] = player.allowFlight to player.flySpeed
     }
 

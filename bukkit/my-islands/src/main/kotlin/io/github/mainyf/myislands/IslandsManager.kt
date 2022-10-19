@@ -7,15 +7,15 @@ import com.plotsquared.core.plot.Plot
 import com.shopify.promises.Promise
 import dev.lone.itemsadder.api.CustomFurniture
 import dev.lone.itemsadder.api.CustomStack
-import io.github.mainyf.myislands.config.ConfigManager
+import io.github.mainyf.myislands.config.ConfigMI
 import io.github.mainyf.myislands.config.sendLang
 import io.github.mainyf.myislands.exceptions.IslandException
-import io.github.mainyf.myislands.features.MoveIslandCore
+import io.github.mainyf.myislands.features.MoveIsLandCore
 import io.github.mainyf.myislands.menu.IslandsChooseMenu
 import io.github.mainyf.myislands.menu.IslandsHelperSelectMenu
 import io.github.mainyf.myislands.storage.IslandVisibility
 import io.github.mainyf.myislands.storage.PlayerIsland
-import io.github.mainyf.myislands.storage.StorageManager
+import io.github.mainyf.myislands.storage.StorageMI
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.VectorUtils
@@ -68,17 +68,17 @@ object IslandsManager {
     }
 
     fun removeHelpers(plot: Plot, player: Player, island: PlayerIsland, helperUUID: UUID) {
-        StorageManager.transaction {
+        StorageMI.transaction {
             if (!island.helpers.toList().any { it.helperUUID == helperUUID }) {
                 throw IslandException("${player.name} 尝试删除授权者 $helperUUID,但是这个授权者并不是他的授权者")
             }
-            StorageManager.removeHelpers(island, helperUUID)
+            StorageMI.removeHelpers(island, helperUUID)
             plot.removeTrusted(helperUUID)
         }
     }
 
     fun addHelpers(plot: Plot, player: Player, island: PlayerIsland, helperUUID: UUID) {
-        StorageManager.transaction {
+        StorageMI.transaction {
             if (island.helpers.toList().size >= getPlayerMaxHelperCount(player)) {
                 throw IslandException("${player.name} 尝试添加授权者，但授权者已满")
             }
@@ -87,13 +87,13 @@ object IslandsManager {
 //                    player.msg("已经添加此授权者")
                 return@transaction
             }
-            StorageManager.addHelpers(island, helperUUID)
+            StorageMI.addHelpers(island, helperUUID)
             plot.addTrusted(helperUUID)
         }
     }
 
     fun getIslandHelpers(uuid: UUID): List<UUID> {
-        return StorageManager.transaction {
+        return StorageMI.transaction {
             val data = getIslandData(uuid)
             if (data == null) return@transaction emptyList()
             data.helpers.map { it.helperUUID }
@@ -101,18 +101,18 @@ object IslandsManager {
     }
 
     fun getIslandHelpers(island: PlayerIsland?): List<UUID> {
-        return StorageManager.transaction {
+        return StorageMI.transaction {
             if (island == null) return@transaction emptyList()
             island.helpers.map { it.helperUUID }
         }
     }
 
     fun setIslandVisibility(/*player: Player, */island: PlayerIsland, visibility: IslandVisibility) {
-        StorageManager.setVisibility(island, visibility)
+        StorageMI.setVisibility(island, visibility)
     }
 
     fun addKudoToIsland(island: PlayerIsland, player: Player): Boolean {
-        return if (!StorageManager.addKudos(player.uuid, island)) {
+        return if (!StorageMI.addKudos(player.uuid, island)) {
             player.sendLang("kudoRepeat")
             false
         } else {
@@ -146,7 +146,7 @@ object IslandsManager {
                     MyIslands.INSTANCE.submitTask {
                         loc.block.type = Material.AIR
                         MyIslands.plotUtils.removePlot(pp, plot).whenComplete {
-                            StorageManager.removePlayerIsland(data, hasReset)
+                            StorageMI.removePlayerIsland(data, hasReset)
                             resolve(Unit)
                         }
                     }
@@ -163,14 +163,14 @@ object IslandsManager {
     }
 
     fun getIslandLastResetDate(islandData: PlayerIsland?): LocalDateTime? {
-        return StorageManager.transaction {
+        return StorageMI.transaction {
             val millis = islandData?.resetCooldown?.firstOrNull()?.prevTime?.millis ?: return@transaction null
             LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneOffset.systemDefault())
         }
     }
 
     fun getIslandData(uuid: UUID): PlayerIsland? {
-        return StorageManager.getPlayerIsland(uuid)
+        return StorageMI.getPlayerIsland(uuid)
     }
 
     fun getIslandAbs(player: Player): PlayerIsland? {
@@ -187,7 +187,7 @@ object IslandsManager {
     fun hasPermission(player: Player, plot: Plot?): Boolean {
         if (plot == null || plot.owner == null) return false
         if (plot.owner == player.uuid) return true
-        return StorageManager.hasPermission(player, plot.owner!!)
+        return StorageMI.hasPermission(player, plot.owner!!)
     }
 
     fun tryOpenPlayerIslandMenu(player: Player, join: Boolean = true) {
@@ -235,7 +235,7 @@ object IslandsManager {
     fun chooseIslandSchematic(
         chooseMenu: IslandsChooseMenu,
         player: Player,
-        plotSchematic: ConfigManager.PlotSchematicConfig
+        plotSchematic: ConfigMI.PlotSchematicConfig
     ) {
         val plotPlayer = MyIslands.plotAPI.wrapPlayer(player.uniqueId)
         if (plotPlayer == null) {
@@ -269,7 +269,7 @@ object IslandsManager {
         }
     }
 
-    fun createPlayerIsland(player: Player, plot: Plot, plotSchematic: ConfigManager.PlotSchematicConfig) {
+    fun createPlayerIsland(player: Player, plot: Plot, plotSchematic: ConfigMI.PlotSchematicConfig) {
         val coreVector = plotSchematic.core
 
         val dLoc = plot.bottomAbs
@@ -293,7 +293,7 @@ object IslandsManager {
                 val homeLoc = getHomeLoc(loc)
                 setPlotHome(plot, homeLoc)
                 player.teleport(homeLoc)
-                StorageManager.createPlayerIsland(player.uniqueId, loc.let { Vector(it.x, it.y, it.z) })
+                StorageMI.createPlayerIsland(player.uniqueId, loc.let { Vector(it.x, it.y, it.z) })
                 player.sendLang("islandClaimSuccess")
 //                player.successMsg("成功领取你的私人岛屿")
             }
@@ -314,7 +314,7 @@ object IslandsManager {
 //        Thread.currentThread().stackTrace.forEach {
 //            println(it)
 //        }
-        return CustomFurniture.spawnPreciseNonSolid(ConfigManager.coreId, loc)!!.apply {
+        return CustomFurniture.spawnPreciseNonSolid(ConfigMI.coreId, loc)!!.apply {
             armorstand?.isInvulnerable = true
         }
 //        MyIslands.INSTANCE.runTaskLaterBR(5 * 20L) {
@@ -358,16 +358,16 @@ object IslandsManager {
         if (CustomFurniture.byAlreadySpawned(armorStand) == null) {
             return false
         }
-        return CustomStack.byItemStack(armorStand.equipment.helmet)?.namespacedID == ConfigManager.coreId
+        return CustomStack.byItemStack(armorStand.equipment.helmet)?.namespacedID == ConfigMI.coreId
     }
 
     fun deleteIslandCore(player: Player, armorStand: ArmorStand) {
-        MoveIslandCore.markCoreRemove(player)
+        MoveIsLandCore.markCoreRemove(player)
         armorStand.equipment.helmet = ItemStack(Material.AIR)
         CustomFurniture.remove(armorStand, true)
         armorStand.remove()
         MyIslands.INSTANCE.submitTask(delay = 20L) {
-            MoveIslandCore.unMarkCoreRemove(player)
+            MoveIsLandCore.unMarkCoreRemove(player)
         }
     }
 
@@ -381,7 +381,7 @@ object IslandsManager {
     }
 
     fun checkIslandHeatsAttenuation() {
-        StorageManager.updateHeat()
+        StorageMI.updateHeat()
     }
 
     fun fixIslandCore(player: Player) {

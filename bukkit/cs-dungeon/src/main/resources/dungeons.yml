@@ -1,0 +1,18 @@
+dungeon1:
+  structureName: ruins_1
+  protectBuild: true
+  mobs:
+    zombie:
+      total: 20
+      spawnPeriod: 10
+      max: 6
+      mobTypes:
+        - ZOMBIE
+      locationSpacing: 5
+    skeleton:
+      total: 20
+      spawnPeriod: 10
+      max: 6
+      mobTypes:
+        - SKELETON
+      locationSpacing: 5
