@@ -96,12 +96,12 @@ subprojects {
                 }
                 "item-skills-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3.jar"))
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
                 }
                 "my-islands" -> {
 //                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
 
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3.jar"))
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
                     compileOnly(rootProject.files("./plugins/PlotSquared-Bukkit-6.9.3-Premium.jar"))
 //                    compileOnly(rootProject.files("./libs/PlotSquared-Bukkit-6.6.2-Premium.jar"))
                     compileOnly(rootProject.files("./plugins/CMI9.2.2.0.jar"))
@@ -135,7 +135,7 @@ subprojects {
                     compileOnly(rootProject.project(":bukkit:custom-economy"))
                 }
                 "command-settings" -> {
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3.jar"))
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
                 "mcrmb-migration" -> {
@@ -156,7 +156,9 @@ subprojects {
                     compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.2.jar"))
                 }
                 "cs-dungeon" -> {
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
                     compileOnly(rootProject.files("./plugins/CustomStructures-1.8.0.jar"))
+                    compileOnly(rootProject.files("./plugins/MythicMobs-5.1.4.jar"))
                 }
             }
         }
@@ -238,7 +240,7 @@ subprojects {
                     dd.addAll(listOf("PlaceholderAPI"))
                 }
                 "cs-dungeon" -> {
-                    dd.addAll(listOf("CustomStructures"))
+                    dd.addAll(listOf("CustomStructures", "ItemsAdder", "MythicMobs"))
                 }
 //                "linkQQ" -> {
 //                    dd.addAll(listOf("MiraiMC", "AuthMe"))

@@ -4,6 +4,7 @@ import io.github.mainyf.newmclib.storage.AbstractStorageManager
 import io.github.mainyf.newmclib.storage.newByID
 import org.bukkit.Location
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.and
 
 object StorageCSD : AbstractStorageManager() {
@@ -20,7 +21,12 @@ object StorageCSD : AbstractStorageManager() {
         }
     }
 
+    fun getDungeonMobSpawnLoc(dungeon: DungeonStructure): List<DungeonMobSpawnLoc> {
+        return transaction { dungeon.mobSpawnLocs.toList() }
+    }
+
     fun tryAddDungeonStructure(
+        dungeonName: String,
         structureName: String,
         coreLoc: Location,
         minLoc: Location,
@@ -30,7 +36,8 @@ object StorageCSD : AbstractStorageManager() {
         val worldName = minLoc.world.name
         transaction {
             val rs = DungeonStructure.find {
-                (DungeonStructures.structureName eq structureName) and
+                (DungeonStructures.dungeonName eq dungeonName) and
+                        (DungeonStructures.structureName eq structureName) and
                         (DungeonStructures.worldName eq worldName) and
                         (DungeonStructures.coreX eq coreLoc.blockX.toDouble()) and
                         (DungeonStructures.coreY eq coreLoc.blockY.toDouble()) and
@@ -40,6 +47,7 @@ object StorageCSD : AbstractStorageManager() {
                 return@transaction
             }
             val dungeon = DungeonStructure.newByID {
+                this.dungeonName = dungeonName
                 this.structureName = structureName
                 this.worldName = worldName
                 this.coreX = coreLoc.blockX.toDouble()
@@ -61,6 +69,14 @@ object StorageCSD : AbstractStorageManager() {
                     this.z = loc.blockZ.toDouble()
                 }
             }
+        }
+    }
+
+    fun findAllDungeon(pageIndex: Int = 1, pageSize: Long = 10): List<DungeonStructure> {
+        return transaction {
+            DungeonStructure.all().orderBy(DungeonStructures.createTime to SortOrder.DESC)
+                .limit(pageSize.toInt(), (pageIndex - 1) * pageSize)
+                .toList()
         }
     }
 

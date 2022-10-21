@@ -23,7 +23,8 @@ object ConfigCSD {
     private lateinit var menuConfigFile: FileConfiguration
     private lateinit var langConfigFile: FileConfiguration
 
-    val dungeonConfigList = mutableListOf<DungeonConfig>()
+    val dungeonConfigMap = mutableMapOf<String, DungeonConfig>()
+    var dungeonCoreId = "plot:plot_main"
     lateinit var dungeonMenuConfig: DungeonMenuConfig
 
     lateinit var lang: BaseLang
@@ -52,6 +53,7 @@ object ConfigCSD {
             lang = BaseLang()
 
             loadMenuConfig()
+            loadDungeonsConfig()
             loadMainConfig()
             lang.load(langConfigFile)
         }.onFailure {
@@ -70,8 +72,8 @@ object ConfigCSD {
         )
     }
 
-    private fun loadMainConfig() {
-        dungeonConfigList.clear()
+    private fun loadDungeonsConfig() {
+        dungeonConfigMap.clear()
         val dungeonNames = dungeonConfigFile.getKeys(false)
         dungeonNames.forEach { dungeonName ->
             val dungeonSect = dungeonConfigFile.getConfigurationSection(dungeonName)!!
@@ -84,7 +86,7 @@ object ConfigCSD {
                 val total = mobSect.getInt("total")
                 val spawnPeriod = mobSect.getLong("spawnPeriod")
                 val max = mobSect.getInt("max")
-                val mobTypes = mobSect.getStringList("mobTypes").map { EntityType.valueOf(it.uppercase()) }
+                val mobTypes = mobSect.getStringList("mobTypes").map { MobType(it) }
                 val locs = mobSect.getStringList("locations").map {
                     val pair = it.split(",")
                     Vector(pair[0].toDouble(), pair[1].toDouble(), pair[2].toDouble())
@@ -101,15 +103,17 @@ object ConfigCSD {
                     )
                 )
             }
-            dungeonConfigList.add(
-                DungeonConfig(
-                    dungeonName,
-                    structureName,
-                    protectBuild,
-                    mobs
-                )
+            dungeonConfigMap[dungeonName] = DungeonConfig(
+                dungeonName,
+                structureName,
+                protectBuild,
+                mobs
             )
         }
+    }
+
+    private fun loadMainConfig() {
+        dungeonCoreId = mainConfigFile.getString("dungeonCoreId", dungeonCoreId)!!
     }
 
 }

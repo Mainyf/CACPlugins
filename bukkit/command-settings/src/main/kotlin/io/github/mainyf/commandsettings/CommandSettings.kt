@@ -67,7 +67,6 @@ class CommandSettings : BasePlugin(), Listener {
 //                action.actions?.execute(console(), "{player}", playerName)
 //            }
             CrossServerManager.sendData(ACTION_ID_PLAYER) {
-                writeString(serverId())
                 writeString(serverId)
                 writeString(id)
                 writeString(playerName)
@@ -85,7 +84,6 @@ class CommandSettings : BasePlugin(), Listener {
 //                parsedAction.execute(console())
 //            }
             CrossServerManager.sendData(UNPARSE_ACTION_ID) {
-                writeString(serverId())
                 writeString(serverId)
                 writeString(msg)
             }

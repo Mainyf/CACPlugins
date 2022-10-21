@@ -1,18 +1,20 @@
 package io.github.mainyf.csdungeon
 
-import com.ryandw11.structure.api.StructureSpawnEvent
+import dev.jorel.commandapi.arguments.IntegerArgument
 import io.github.mainyf.csdungeon.config.ConfigCSD
+import io.github.mainyf.csdungeon.listeners.DungeonListeners
+import io.github.mainyf.csdungeon.listeners.PlayerListeners
+import io.github.mainyf.csdungeon.menu.DungeonMenu
+import io.github.mainyf.csdungeon.storage.DungeonStructure
 import io.github.mainyf.csdungeon.storage.StorageCSD
+import io.github.mainyf.newmclib.command.apiCommand
+import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.pluginManager
-import io.github.mainyf.newmclib.exts.text
+import io.github.mainyf.newmclib.exts.successMsg
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.apache.logging.log4j.LogManager
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.block.Sign
-import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 class CsDungeon : JavaPlugin(), Listener {
@@ -25,58 +27,62 @@ class CsDungeon : JavaPlugin(), Listener {
 
     }
 
+    val dungeonBattles = mutableListOf<DungeonBattle>()
+
+    fun addBattles(dungeonStructure: DungeonStructure) {
+        dungeonBattles.add(DungeonBattle(dungeonStructure))
+    }
+
+    fun getBattles(dungeonStructure: DungeonStructure): DungeonBattle? {
+        return dungeonBattles.find {
+            it.dungeon.worldName == dungeonStructure.worldName && it.dungeon.coreX == dungeonStructure.coreX && it.dungeon.coreY == dungeonStructure.coreY && it.dungeon.coreZ == dungeonStructure.coreZ
+        }
+    }
+
     override fun onEnable() {
         INSTANCE = this
         ConfigCSD.load()
         StorageCSD.init()
 
-        pluginManager().registerEvents(this, this)
-    }
-
-    @EventHandler
-    fun onSSpawn(event: StructureSpawnEvent) {
-        val structure = event.structure
-        val minLoc = event.minimumPoint
-        val maxLoc = event.maximumPoint
-        val signs = event.containersAndSignsLocations
-            .filter {
-                it.block.type == Material.OAK_SIGN
-            }
-            .map { it to (it.block.state as? Sign) }
-        var coreLoc: Location? = null
-        val mobLocs = mutableListOf<Pair<Location, String>>()
-        signs.forEach { (loc, sign) ->
-            val line = sign?.lines()?.getOrNull(0)?.text() ?: return@forEach
-            when {
-                line == "[core]" -> {
-                    coreLoc = loc
+        pluginManager().registerEvents(DungeonListeners, this)
+        pluginManager().registerEvents(PlayerListeners, this)
+        apiCommand("csdungeon") {
+            withAliases("csdun", "csd")
+            "reload" {
+                executeOP {
+                    ConfigCSD.load()
+                    sender.successMsg("[CsDungeon] 重载成功")
                 }
-                line.contains("mob") -> {
-                    kotlin.runCatching {
-                        mobLocs.add(loc to line.replace("[", "").replace("]", "").replace("mob_", ""))
-                    }.onFailure {
-                        it.printStackTrace()
+            }
+            "menu" {
+                withArguments(
+                    playerArguments("玩家")
+                )
+                executeOP {
+                    val player = player()
+                    DungeonMenu().open(player)
+                }
+            }
+            "list" {
+                withArguments(
+                    IntegerArgument("页码")
+                )
+                executeOP {
+                    val pageIndex = int()
+                    val dungeons = StorageCSD.findAllDungeon(pageIndex)
+                    if (dungeons.isEmpty()) {
+                        sender.msg("未检测到遗迹")
+                        return@executeOP
+                    }
+                    dungeons.forEach {
+                        sender.sendMessage(
+                            MiniMessage.miniMessage()
+                                .deserialize("结构名: ${it.structureName}, 位置: <click:run_command:/tppos ${it.coreX} ${it.coreY} ${it.coreZ}><hover:show_text:点击传送>${it.coreX} ${it.coreY} ${it.coreZ}</hover></click>")
+                        )
                     }
                 }
             }
-        }
-        if (coreLoc != null) {
-            StorageCSD.tryAddDungeonStructure(structure.name, coreLoc!!, minLoc, maxLoc, mobLocs)
-        }
-    }
-
-    @EventHandler
-    fun onBreak(event: BlockBreakEvent) {
-        val loc = event.block.location
-        val dungeon = StorageCSD.findDungeonByLoc(loc)
-        if (event.player.isOp) return
-        if (dungeon != null) {
-            val dungeonConfig = ConfigCSD.dungeonConfigList.find { it.structureName == dungeon.structureName }
-            if (dungeonConfig?.protectBuild == true) {
-                event.player.msg("你无法破坏 ${dungeon.structureName} 遗迹")
-                event.isCancelled = true
-            }
-        }
+        }.register()
     }
 
 }

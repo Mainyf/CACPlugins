@@ -1,6 +1,7 @@
 package io.github.mainyf.csdungeon.menu
 
 import io.github.mainyf.csdungeon.config.ConfigCSD
+import io.github.mainyf.csdungeon.storage.DungeonStructure
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import org.bukkit.entity.Player
@@ -12,9 +13,8 @@ class DungeonMenu : AbstractMenuHandler() {
         setup(ConfigCSD.dungeonMenuConfig.settings)
         val inv = createInv(player)
 
-        updateInv(player, inv)
-
         player.openInventory(inv)
+        updateInv(player, inv)
     }
 
     override fun updateTitle(player: Player): String {
