@@ -5,7 +5,7 @@ import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.worldsettings.PlayerDropItemStorage
 import io.github.mainyf.worldsettings.config.CommandMatchType.LIKE
 import io.github.mainyf.worldsettings.config.CommandMatchType.START
-import io.github.mainyf.worldsettings.config.ConfigManager
+import io.github.mainyf.worldsettings.config.ConfigWS
 import io.github.mainyf.worldsettings.getWorldSettings
 import io.github.mainyf.worldsettings.ignorePermAndGetWorldSettings
 import io.papermc.paper.event.player.AsyncChatEvent
@@ -281,7 +281,7 @@ object PlayerListener : Listener {
                 PlayerDropItemStorage.removeData(pickupItem)
             }
         } else {
-            val settings = ConfigManager.getSetting(entity.world) ?: return
+            val settings = ConfigWS.getSetting(entity.world) ?: return
             if (settings.antiNoPlayerPickupItem) {
                 event.isCancelled = true
             }
@@ -306,14 +306,14 @@ object PlayerListener : Listener {
     @EventHandler(ignoreCancelled = true)
     fun onInteractAtItemFrame(event: PlayerInteractEntityEvent) {
         val player = event.player
-        if (player.hasPermission(ConfigManager.ignorePermission)) {
+        if (player.hasPermission(ConfigWS.ignorePermission)) {
             val e = event.rightClicked
             if (e is ItemFrame) {
                 e.isFixed = false
             }
             return
         }
-        val settings = ConfigManager.getSetting(player.world) ?: return
+        val settings = ConfigWS.getSetting(player.world) ?: return
         val e = event.rightClicked
         if (e is ItemFrame && settings.antiInteractDisplayFrameAndPaint) {
             e.isFixed = true

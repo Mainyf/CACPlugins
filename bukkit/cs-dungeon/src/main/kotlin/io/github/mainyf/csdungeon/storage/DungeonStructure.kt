@@ -66,7 +66,7 @@ class DungeonStructure(uuid: EntityID<UUID>) : BaseEntity(DungeonStructures, uui
     val mobSpawnLocs by DungeonMobSpawnLoc referrersOn DungeonMobSpawnLocs.dungeon
 
     fun containsDungeonArea(loc: Location): Boolean {
-        return loc.world?.name == worldName && loc.x in minX..maxX && loc.y in minY..maxY && loc.z in minZ..maxZ
+        return loc.world?.name == worldName && loc.x in minX - 1 .. maxX + 1 && loc.y in minY - 1 .. maxY + 1 && loc.z in minZ - 1 .. maxZ + 1
     }
 
 }

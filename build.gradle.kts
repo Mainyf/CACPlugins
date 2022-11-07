@@ -98,6 +98,10 @@ subprojects {
                     embed("com.udojava:EvalEx:2.7")
                     compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
                 }
+                "item-enchant-plus" -> {
+                    embed("com.udojava:EvalEx:2.7")
+                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
+                }
                 "my-islands" -> {
 //                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
 
@@ -159,6 +163,7 @@ subprojects {
                     compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
                     compileOnly(rootProject.files("./plugins/CustomStructures-1.8.0.jar"))
                     compileOnly(rootProject.files("./plugins/MythicMobs-5.1.4.jar"))
+                    compileOnly(rootProject.project(":bukkit:world-settings"))
                 }
             }
         }
@@ -197,7 +202,10 @@ subprojects {
             val dd = mutableListOf<String>()
             val sd = mutableListOf<String>()
             when (project.name) {
-                "item-skills-plus" -> {
+//                "item-skills-plus" -> {
+//                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
+//                }
+                "item-enchant-plus" -> {
                     dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
                 }
                 "my-islands" -> {
@@ -240,7 +248,10 @@ subprojects {
                     dd.addAll(listOf("PlaceholderAPI"))
                 }
                 "cs-dungeon" -> {
-                    dd.addAll(listOf("CustomStructures", "ItemsAdder", "MythicMobs"))
+                    dd.addAll(listOf("CustomStructures", "ItemsAdder", "MythicMobs", "WorldSettings"))
+                }
+                "tools-plugin" -> {
+//                    dd.addAll(listOf("PlaceholderAPI"))
                 }
 //                "linkQQ" -> {
 //                    dd.addAll(listOf("MiraiMC", "AuthMe"))

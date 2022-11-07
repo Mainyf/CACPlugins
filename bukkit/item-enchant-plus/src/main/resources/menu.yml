@@ -1,0 +1,60 @@
+dashboardMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  background: ':offset_-8::view_contact_other:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  # 赋予附灵
+  giveEnchantSlot:
+    slot: [ 1 ]
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: "赋予附灵"
+      lore:
+        - ""
+  # 强化附灵
+  intensifySlot:
+    slot: [ 2 ]
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: "强化附灵"
+      lore:
+        - ""
+  # 附灵升阶
+  upgradeSlot:
+    slot: [ 3 ]
+    default:
+      type: BLACK_STAINED_GLASS_PANE
+      name: "附灵升阶"
+      lore:
+        - ""
+enchantListMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 4
+  background: ':offset_-8::view_contact_other:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  # 上一页
+  prevSlot:
+    slot: [ 1 ]
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3上一页"
+  # 下一页
+  nextSlot:
+    slot: [ 7 ]
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: " &c&l> &3下一页"
+  enchantSlot:
+    slot: [ 2,3,4,5,6 ]
+    default:
+      name: " &c&l> &3{enchantName}"
+  backSlot:
+    slot: [ 8 ]
+    default:
+      name: " &c&l> &3返回"

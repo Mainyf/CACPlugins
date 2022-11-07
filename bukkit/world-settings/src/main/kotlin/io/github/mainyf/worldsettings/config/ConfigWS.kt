@@ -15,7 +15,7 @@ import org.joor.Reflect
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 
-object ConfigManager {
+object ConfigWS {
 
     var debug = false
     lateinit var ignorePermission: String
@@ -23,6 +23,12 @@ object ConfigManager {
     var globalServerConfig: ServerConfig? = null
 
     val serverConfigMap = mutableMapOf<String, ServerConfig>()
+
+    private val areaWSBlockList = mutableListOf<(Location) -> WorldSettingConfig?>()
+
+    fun addAreaWS(block: (Location) -> WorldSettingConfig?) {
+        areaWSBlockList.add(block)
+    }
 
     fun load() {
         WorldSettings.INSTANCE.saveDefaultConfig()
@@ -68,7 +74,7 @@ object ConfigManager {
         }
     }
 
-    private fun loadSetting(config: ConfigurationSection, parent: WorldSettingConfig? = null): WorldSettingConfig {
+    fun loadSetting(config: ConfigurationSection, parent: WorldSettingConfig? = null): WorldSettingConfig {
         val wsc = WorldSettingConfig()
         WorldSettingConfig::class.memberProperties.forEach {
             val configKey = it.name
@@ -81,6 +87,7 @@ object ConfigManager {
                         wsc.setDefault(configKey, parent)
                     }
                 }
+
                 type == Long::class.java -> {
                     if (config.contains(configKey, true)) {
                         wsc.setValue(configKey, config.getLong(configKey))
@@ -88,6 +95,7 @@ object ConfigManager {
                         wsc.setDefault(configKey, parent)
                     }
                 }
+
                 type.isEnum -> {
                     if (config.contains(configKey, true)) {
                         wsc.setValue(
@@ -98,6 +106,7 @@ object ConfigManager {
                         wsc.setDefault(configKey, parent)
                     }
                 }
+
                 type == MultiAction::class.java -> {
                     if (config.contains(configKey, true)) {
                         wsc.setValue(configKey, config.getMultiAction(configKey))
@@ -105,6 +114,7 @@ object ConfigManager {
                         wsc.setDefault(configKey, parent)
                     }
                 }
+
                 configKey == "gameRules" -> {
                     if (config.contains(configKey, true)) {
                         val map = mutableMapOf<GameRule<Boolean>, Boolean>()
@@ -118,6 +128,7 @@ object ConfigManager {
                         wsc.setDefault(configKey, parent)
                     }
                 }
+
                 configKey == "antiItemUse" -> {
                     if (config.contains(configKey, true)) {
                         wsc.setValue(configKey, config.getStringList("antiItemUse").mapNotNull {
@@ -127,6 +138,7 @@ object ConfigManager {
                         wsc.setDefault(configKey, parent)
                     }
                 }
+
                 configKey == "commandWhite" -> {
                     if (config.contains(configKey, true)) {
                         wsc.setValue(configKey, config.getStringList("commandWhite").mapNotNull { line ->
@@ -144,6 +156,7 @@ object ConfigManager {
                         wsc.setDefault(configKey, parent)
                     }
                 }
+
                 configKey == "blockInteractWhite" -> {
                     if (config.contains(configKey, true)) {
                         wsc.setValue(configKey, config.getStringList("blockInteractWhite").mapNotNull {
@@ -153,6 +166,7 @@ object ConfigManager {
                         wsc.setDefault(configKey, parent)
                     }
                 }
+
                 configKey == "deleteEnchants" -> {
                     if (config.contains(configKey, true)) {
                         wsc.setValue(configKey, config.getStringList("deleteEnchants").mapNotNull {
@@ -169,14 +183,25 @@ object ConfigManager {
     }
 
     fun ConfigurationSection.getMultiAction(key: String): MultiAction? {
-//        if (!contains(key)) {
-//            return def
-//        }
+        //        if (!contains(key)) {
+        //            return def
+        //        }
         val lines = getStringList(key)
         return ActionParser.parseAction(lines.map { it.colored() })
     }
 
     fun getSetting(world: World?): WorldSettingConfig? {
+        return if (world == null) null else getSetting(world.name)
+    }
+
+    fun getSetting(loc: Location): WorldSettingConfig? {
+        for (block in areaWSBlockList) {
+            val rs = block.invoke(loc)
+            if (rs != null) {
+                return rs
+            }
+        }
+        val world = loc.world
         return if (world == null) null else getSetting(world.name)
     }
 

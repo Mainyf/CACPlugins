@@ -9,7 +9,6 @@ import io.github.mainyf.newmclib.offline_player_ext.OfflinePlayerData
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.Cooldown
 import io.github.mainyf.newmclib.utils.Heads
-import io.github.mainyf.socialsystem.SocialSystem
 import io.github.mainyf.socialsystem.config.ConfigManager
 import io.github.mainyf.socialsystem.config.sendLang
 import io.github.mainyf.socialsystem.module.FriendHandler
@@ -17,11 +16,9 @@ import io.github.mainyf.socialsystem.module.FriendInvites
 import io.github.mainyf.socialsystem.module.FriendIslandTPRequests
 import io.github.mainyf.socialsystem.module.FriendTPRequests
 import io.github.mainyf.socialsystem.storage.PlayerSocial
-import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import java.util.*
 import kotlin.math.ceil
 
 class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler() {

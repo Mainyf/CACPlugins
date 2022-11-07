@@ -1,12 +1,10 @@
 package io.github.mainyf.worldsettings
 
 import io.github.mainyf.newmclib.command.APICommand
-import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.successMsg
-import io.github.mainyf.worldsettings.config.ConfigManager
+import io.github.mainyf.worldsettings.config.ConfigWS
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 
 object CommandHandler : APICommand("worldsettings") {
 
@@ -16,14 +14,14 @@ object CommandHandler : APICommand("worldsettings") {
         apply {
             "reload" {
                 executeOP {
-                    ConfigManager.load()
+                    ConfigWS.load()
                     sender.successMsg("[WorldSettings] 重载成功")
                 }
             }
             "applyGameRule" {
                 executeOP {
                     Bukkit.getWorlds().forEach {
-                        val settings = ConfigManager.getSetting(it) ?: return@forEach
+                        val settings = ConfigWS.getSetting(it) ?: return@forEach
                         settings.gameRules.forEach { (rule, value) ->
                             val oldValue = it.getGameRuleValue(rule)
                             if (oldValue != value) {

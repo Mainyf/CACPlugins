@@ -1,6 +1,6 @@
 package io.github.mainyf.worldsettings.listeners
 
-import io.github.mainyf.worldsettings.config.ConfigManager
+import io.github.mainyf.worldsettings.config.ConfigWS
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Frog
 import org.bukkit.entity.Rabbit
@@ -14,7 +14,7 @@ object EntityListener : Listener {
     @EventHandler
     fun onEntityTransform(event: EntityTransformEvent) {
         if (event.transformReason == EntityTransformEvent.TransformReason.METAMORPHOSIS) {
-            val settings = ConfigManager.getSetting(event.entity.world) ?: return
+            val settings = ConfigWS.getSetting(event.entity.world) ?: return
             if (settings.randomFrogColor) {
                 (event.entity as? Frog)?.variant = Frog.Variant.values().toList().random()
             }
@@ -23,7 +23,7 @@ object EntityListener : Listener {
 
     @EventHandler
     fun onSpawn(event: CreatureSpawnEvent) {
-        val settings = ConfigManager.getSetting(event.entity.world) ?: return
+        val settings = ConfigWS.getSetting(event.entity.world) ?: return
         if (event.entityType == EntityType.RABBIT) {
             if (settings.randomRabbitColor) {
                 (event.entity as? Rabbit)?.rabbitType = Rabbit.Type.values().toList().random()

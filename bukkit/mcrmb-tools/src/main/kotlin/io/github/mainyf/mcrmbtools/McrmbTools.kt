@@ -24,13 +24,8 @@ class McrmbTools : JavaPlugin(), Listener {
     }
 
     @EventHandler
-    fun onQrRequest(event: QrRequestEvent) {
-        println("qrreq: ${event.id}")
-    }
-
-    @EventHandler
     fun onQrDone(event: QrDoneEvent) {
-        println("qrdone: ${event.id}")
+//        println("qrdone: ${event.response}")
     }
 
 }

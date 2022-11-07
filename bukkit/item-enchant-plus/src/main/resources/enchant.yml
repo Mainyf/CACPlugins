@@ -1,0 +1,81 @@
+expand:
+  # 之后开启时起效果，用于出BUG时临时关闭
+  enable: true
+  # 进阶装备的名称
+  name: '凿石'
+  # 装备lore介绍
+  # {stage}  阶段级别  I、II、III
+  # {exp_progress}  经验进度条
+  description:
+    - '&r'
+    - '&f&l凿石 {stage}'
+    - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
+    - '&r'
+  # 允许一二阶段起效果的方块
+  # 支持 ItemAdders 和原版方块
+  allowBlocks:
+    - sand
+    - sandstone
+    - stone
+    - cobblestone
+    - granite
+    - diorite
+    - andesite
+    - grass_block
+    - dirt
+    - coarse_dirt
+    - podzol
+    - terracotta
+    - white_terracotta
+    - orange_terracotta
+    - magenta_terracotta
+    - light_blue_terracotta
+    - yellow_terracotta
+    - lime_terracotta
+    - pink_terracotta
+    - gray_terracotta
+    - light_gray_terracotta
+    - cyan_terracotta
+    - purple_terracotta
+    - blue_terracotta
+    - brown_terracotta
+    - green_terracotta
+    - red_terracotta
+    - black_terracotta
+  defaultSkin: "expandDefaultSkinA"
+  upgradeMaterials:
+    - "itemskills:eqMaterial1|16,itemskills:eqMaterial2|16,itemskills:eqMaterial3|16,itemskills:eqMaterial4|16,itemskills:eqMaterial5|16"
+    - "itemskills:eqMaterial1|32,itemskills:eqMaterial2|32,itemskills:eqMaterial3|32,itemskills:eqMaterial4|32,itemskills:eqMaterial5|32"
+    - "itemskills:eqMaterial1|64,itemskills:eqMaterial2|64,itemskills:eqMaterial3|64,itemskills:eqMaterial4|64,itemskills:eqMaterial5|64"
+    - "itemskills:eqMaterial1|128,itemskills:eqMaterial2|128,itemskills:eqMaterial3|128,itemskills:eqMaterial4|128,itemskills:eqMaterial5|128"
+
+luck:
+  enabled: true
+  name: '福临'
+  max: 25
+  description:
+    - '&r'
+    - '&f&l福临 {stage}'
+    - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
+    - '&r'
+  # 支持掉落翻倍的方块
+  # 支持 ItemAdders 和原版方块
+  # 玩家放置的不起效果
+  allowBlocks:
+    - enchant_ore_high
+    - enchant_ore
+    - emerald_ore
+    - diamond_ore
+    - gold_ore
+    - iron_ore
+    - coal_ore
+    - lapis_ore
+    - redstone_ore
+    - nether_gold_ore
+    - nether_quartz_ore
+  defaultSkin: "luckDefaultSkinA"
+  upgradeMaterials:
+    - "itemskills:eqMaterial1|16,itemskills:eqMaterial2|16,itemskills:eqMaterial3|16,itemskills:eqMaterial4|16,itemskills:eqMaterial5|16"
+    - "itemskills:eqMaterial1|32,itemskills:eqMaterial2|32,itemskills:eqMaterial3|32,itemskills:eqMaterial4|32,itemskills:eqMaterial5|32"
+    - "itemskills:eqMaterial1|64,itemskills:eqMaterial2|64,itemskills:eqMaterial3|64,itemskills:eqMaterial4|64,itemskills:eqMaterial5|64"
+    - "itemskills:eqMaterial1|128,itemskills:eqMaterial2|128,itemskills:eqMaterial3|128,itemskills:eqMaterial4|128,itemskills:eqMaterial5|128"

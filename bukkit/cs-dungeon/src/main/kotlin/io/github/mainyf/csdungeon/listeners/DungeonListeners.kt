@@ -3,6 +3,7 @@ package io.github.mainyf.csdungeon.listeners
 import com.ryandw11.structure.api.StructureSpawnEvent
 import dev.lone.itemsadder.api.CustomFurniture
 import dev.lone.itemsadder.api.CustomStack
+import io.github.mainyf.csdungeon.CsDungeon
 import io.github.mainyf.csdungeon.config.ConfigCSD
 import io.github.mainyf.csdungeon.config.sendLang
 import io.github.mainyf.csdungeon.menu.DungeonMenu
@@ -117,29 +118,29 @@ object DungeonListeners : Listener {
         return Location(posA.world, lX, lY, lZ) to Location(posA.world, hX, hY, hZ)
     }
 
-    @EventHandler
-    fun onBreak(event: BlockBreakEvent) {
-        val loc = event.block.location
-        val dungeon = StorageCSD.findDungeonByLoc(loc)
-        if (event.player.isOp) return
-        if (dungeon != null) {
-            val dungeonConfig = ConfigCSD.dungeonConfigMap.values.find { it.structureName == dungeon.structureName }
-            if (dungeonConfig?.protectBuild == true) {
-                event.player.sendLang("noBreakDungeon")
-                event.isCancelled = true
-            }
-        }
-    }
+//    @EventHandler
+//    fun onBreak(event: BlockBreakEvent) {
+//        val loc = event.block.location
+//        val dungeon = StorageCSD.findDungeonByLoc(loc)
+//        if (event.player.isOp) return
+//        if (dungeon != null) {
+//            val dungeonConfig = ConfigCSD.dungeonConfigMap.values.find { it.structureName == dungeon.structureName }
+//            if (dungeonConfig?.protectBuild == true) {
+//                event.player.sendLang("noBreakDungeon")
+//                event.isCancelled = true
+//            }
+//        }
+//    }
 
     @EventHandler
     fun onInteractAE(event: PlayerInteractAtEntityEvent) {
         val entity = event.rightClicked
-        if (entity is ArmorStand && isCore(entity)) {
+        if (entity is ArmorStand && isCore(entity) && !CsDungeon.INSTANCE.hasInBattles(event.player)) {
             val player = event.player
             val dungeon = StorageCSD.findDungeonByLoc(player.location) ?: return
             val furniture = CustomFurniture.byAlreadySpawned(entity)
             if (furniture != null) {
-                DungeonMenu().open(event.player)
+                DungeonMenu(dungeon).open(event.player)
             }
         }
     }

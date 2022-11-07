@@ -1,16 +1,12 @@
 package io.github.mainyf.worldsettings.listeners
 
-import io.github.mainyf.worldsettings.config.ConfigManager
+import io.github.mainyf.worldsettings.config.ConfigWS
 import io.github.mainyf.worldsettings.ignorePermAndGetWorldSettings
 import org.bukkit.Material
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.block.BlockBurnEvent
 import org.bukkit.event.block.BlockDamageEvent
-import org.bukkit.event.block.BlockIgniteEvent
-import org.bukkit.event.block.BlockIgniteEvent.IgniteCause
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.PlayerPortalEvent
 import org.bukkit.event.world.PortalCreateEvent
@@ -40,7 +36,7 @@ object BlockListener : Listener {
         val player = event.player
         if (event.block.type != Material.ANVIL) return
         val world = player.world
-        val settings = ConfigManager.getSetting(world) ?: return
+        val settings = ConfigWS.getSetting(world) ?: return
         if(settings.antiAnvilsDamage) {
             event.isCancelled = true
         }

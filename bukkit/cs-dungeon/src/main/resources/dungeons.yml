@@ -1,18 +1,108 @@
 dungeon1:
+  worldName: zy
+  #对应的遗迹ID
   structureName: ruins_1
-  protectBuild: true
-  mobs:
-    zombie:
-      total: 20
-      spawnPeriod: 10
-      max: 6
-      mobTypes:
-        - ZOMBIE
-      locationSpacing: 5
-    skeleton:
-      total: 20
-      spawnPeriod: 10
-      max: 6
-      mobTypes:
-        - SKELETON
-      locationSpacing: 5
+  # 在副本开启时禁止玩家从副本里面走出这个副本（玩家可能会有死亡或者tp到其他玩家身边的情况，这些非走出或飞出副本的情况不做处理）
+  # 玩家每次触碰边界都会扣除设置的血量并且提示警告
+  # 0则只禁止不扣血，-1则关闭
+  boundaryDamage: 2
+  # 如果副本已经没有玩家将自动结束副本
+  noPlayerEnd: true
+  # 在副本开启后禁止切换成飞行模式
+  noFly: false
+  tipPeriod: 5
+  tipActions:
+    - "mini: &b目前进度：{kill}/{total}"
+  startActions:
+    - "mini: &b遗迹开启"
+  startPlays:
+    - "sound: ENTITY_PLAYER_LEVELUP,1,1"
+  endActions:
+    - "mini: &b遗迹结束"
+  endPlays:
+    - "sound: ENTITY_PLAYER_LEVELUP,1,1"
+  wsConfig:
+    antiItemUse:
+      - 'FISHING_ROD'
+      - 'BUCKET'
+      - 'EGG'
+      - 'CHORUS_FRUIT'
+      - 'BUCKET'
+      - 'WATER_BUCKET'
+      - 'LAVA_BUCKET'
+      - 'PUFFERFISH_BUCKET'
+      - 'SALMON_BUCKET'
+      - 'COD_BUCKET'
+      - 'TROPICAL_FISH_BUCKET'
+      - 'AXOLOTL_BUCKET'
+      - 'TADPOLE_BUCKET'
+      - 'GOAT_HORN'
+    antiDamageFriendEntityLiving: true
+    blockInteractWhite:
+      - CRAFTING_TABLE
+      - ENCHANTING_TABLE
+      - STONECUTTER
+      - ANVIL
+      - GRINDSTONE
+      - ENDER_CHEST
+      - SMITHING_TABLE
+    antiInteractDisplayFrameAndPaint: true
+    antiInteractArmorStand: true
+    antiBreakBlock: true
+    antiPlaceBlock: true
+    pvp: false
+    antiCampfireInteract: true
+  # 副本等级
+  levels:
+    1:
+      # 生成多少个后结束副本（生成了这么多个并且已经全部击杀）
+      totalMob: 20
+      mobSpawns:
+        # 生成点位  牌子格式为 [mob_xxx]  例如：[mob_zombie]
+        - loc: "zombie"
+          # 怪物检测生成的间隔，副本开启后才开始计时（假如说我想这个怪物10分钟后才出现1个，就可以设置成10分钟的间隔）
+          spawnPeriod: 10
+          # 副本中只能同时处在多少个怪物
+          max: 6
+          # 怪物类型    ZOMBIE 先识别是否是原版实体TYPE，如果不是再识别是否是MM的怪物id
+          mobTypes:
+            - ZOMBIE
+          # 刷怪点与玩家的保障距离
+          locationSpacing: 5
+        - loc: "skeleton"
+          spawnPeriod: 10
+          max: 6
+          mobTypes:
+            - SKELETON
+          locationSpacing: 5
+        - # 生成点位可以多重利用，和上边的区别就是有一种怪物是很慢刷的，有一种怪物是大量刷的，但是刷新点位是同一个地方
+          loc: "skeleton"
+          spawnPeriod: 1
+          max: 20
+          mobTypes:
+            - SKELETON
+          locationSpacing: 5
+    2:
+      totalMob: 20
+      mobSpawns:
+        - loc: "zombie"
+          spawnPeriod: 10
+          max: 6
+          mobTypes:
+            - ZOMBIE
+          locationSpacing: 5
+        - loc: "skeleton"
+          spawnPeriod: 10
+          max: 6
+          mobTypes:
+            - SKELETON
+          locationSpacing: 5
+    3:
+      totalMob: 1
+      mobSpawns:
+        - loc: "boss"
+          spawnPeriod: 10
+          max: 1
+          mobTypes:
+            - BOSS
+          locationSpacing: 10

@@ -4,6 +4,7 @@ import io.github.mainyf.csdungeon.CsDungeon
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
 object PlayerListeners : Listener {
@@ -19,6 +20,13 @@ object PlayerListeners : Listener {
     fun onQuit(event: PlayerQuitEvent) {
         CsDungeon.INSTANCE.dungeonBattles.forEach {
             it.removePlayer(event.player)
+        }
+    }
+
+    @EventHandler
+    fun onMove(event: PlayerMoveEvent) {
+        CsDungeon.INSTANCE.dungeonBattles.forEach {
+            it.onPlayerMove(event.player, event)
         }
     }
 

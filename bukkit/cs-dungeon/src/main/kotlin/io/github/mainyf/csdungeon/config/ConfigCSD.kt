@@ -4,11 +4,12 @@ package io.github.mainyf.csdungeon.config
 
 import io.github.mainyf.csdungeon.CsDungeon
 import io.github.mainyf.newmclib.config.*
+import io.github.mainyf.worldsettings.config.ConfigWS
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.entity.EntityType
-import org.bukkit.util.Vector
+import org.yaml.snakeyaml.Yaml
+import java.io.StringReader
 
 fun CommandSender.sendLang(key: String, vararg data: Any) {
     ConfigCSD.lang.apply {
@@ -77,37 +78,72 @@ object ConfigCSD {
         val dungeonNames = dungeonConfigFile.getKeys(false)
         dungeonNames.forEach { dungeonName ->
             val dungeonSect = dungeonConfigFile.getConfigurationSection(dungeonName)!!
+            val worldName = dungeonSect.getString("worldName")!!
             val structureName = dungeonSect.getString("structureName")!!
             val protectBuild = dungeonSect.getBoolean("protectBuild", true)
-            val mobs = mutableListOf<DungeonMobConfig>()
-            val mobsSect = dungeonSect.getConfigurationSection("mobs")
-            mobsSect?.getKeys(false)?.forEach { mobName ->
-                val mobSect = mobsSect.getConfigurationSection(mobName)!!
-                val total = mobSect.getInt("total")
-                val spawnPeriod = mobSect.getLong("spawnPeriod")
-                val max = mobSect.getInt("max")
-                val mobTypes = mobSect.getStringList("mobTypes").map { MobType(it) }
-                val locs = mobSect.getStringList("locations").map {
-                    val pair = it.split(",")
-                    Vector(pair[0].toDouble(), pair[1].toDouble(), pair[2].toDouble())
+            val boundaryDamage = dungeonSect.getInt("boundaryDamage", 2)
+            val noPlayerEnd = dungeonSect.getBoolean("noPlayerEnd", true)
+            val noFly = dungeonSect.getBoolean("noFly", true)
+            val tipPeriod = dungeonSect.getLong("tipPeriod")
+            val tipActions = ActionParser.parseAction(dungeonSect, "tipActions", false)!!
+
+            val startActions = ActionParser.parseAction(dungeonSect, "startActions", false)!!
+            val startPlays = PlayParser.parsePlay(dungeonSect, "startPlays")!!
+            val endActions = ActionParser.parseAction(dungeonSect, "endActions", false)!!
+            val endPlays = PlayParser.parsePlay(dungeonSect, "endPlays")!!
+
+            val wsConfigSect = dungeonSect.getConfigurationSection("wsConfig")!!
+
+            val wsConfig = ConfigWS.loadSetting(wsConfigSect, ConfigWS.getSetting(worldName))
+
+            val levels = mutableListOf<DungeonLevelConfig>()
+            val levelsSect = dungeonSect.getConfigurationSection("levels")
+            levelsSect?.getKeys(false)?.forEach { levelName ->
+                val levelSect = levelsSect.getConfigurationSection(levelName)!!
+                val totalMob = levelSect.getInt("totalMob")
+                val mobSpawns = mutableListOf<DungeonMobConfig>()
+                val mobSpawnList = levelSect.getList("mobSpawns")!! as List<Map<Any, Any>>
+                mobSpawnList.forEach { map ->
+                    val mobSpawnSect = YamlConfiguration.loadConfiguration(StringReader(Yaml().dump(map)))
+                    val loc = mobSpawnSect.getString("loc")!!
+                    val spawnPeriod = mobSpawnSect.getLong("spawnPeriod")
+                    val max = mobSpawnSect.getInt("max")
+                    val mobTypes = mobSpawnSect.getStringList("mobTypes").map { MobType(it) }
+                    val locationSpacing = mobSpawnSect.getInt("locationSpacing")
+                    mobSpawns.add(
+                        DungeonMobConfig(
+                            loc,
+                            spawnPeriod,
+                            max,
+                            mobTypes,
+                            locationSpacing
+                        )
+                    )
                 }
-                val locationSpacing = mobSect.getInt("locationSpacing")
-                mobs.add(
-                    DungeonMobConfig(
-                        total,
-                        spawnPeriod,
-                        max,
-                        mobTypes,
-                        locs,
-                        locationSpacing
+                levels.add(
+                    DungeonLevelConfig(
+                        levelName.toInt(),
+                        totalMob,
+                        mobSpawns
                     )
                 )
             }
             dungeonConfigMap[dungeonName] = DungeonConfig(
+                worldName,
                 dungeonName,
                 structureName,
                 protectBuild,
-                mobs
+                boundaryDamage,
+                noPlayerEnd,
+                noFly,
+                tipPeriod,
+                tipActions,
+                startActions,
+                startPlays,
+                endActions,
+                endPlays,
+                wsConfig,
+                levels
             )
         }
     }
