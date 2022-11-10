@@ -10,8 +10,9 @@ import org.bukkit.configuration.file.FileConfiguration
 object ConfigIEP {
 
     private lateinit var skinConfig: FileConfiguration
-    private lateinit var enchantConfig: FileConfiguration
     private lateinit var menuConfig: FileConfiguration
+    private lateinit var expandConfig: FileConfiguration
+    private lateinit var luckConfig: FileConfiguration
 
     val itemSkins = mutableMapOf<String, EnchantSkinConfig>()
     val enchants = mutableMapOf<String, ExpandEnchantConfig>()
@@ -25,12 +26,13 @@ object ConfigIEP {
         kotlin.runCatching {
 
             skinConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("skins.yml")
-            enchantConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchant.yml")
             menuConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("menu.yml")
+            expandConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/expand.yml")
+            luckConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/luck.yml")
 
             loadSkinConfig()
-            loadEnchantConfig()
             loadMenuConfig()
+            loadEnchantConfig()
         }.onFailure {
             ItemEnchantPlus.INSTANCE.slF4JLogger.error("加载配置时出现错误", it)
         }
@@ -59,34 +61,6 @@ object ConfigIEP {
         }
     }
 
-    private fun loadEnchantConfig() {
-        enchants.clear()
-        enchantConfig.getKeys(false).forEach { enchantID ->
-            val enchantSect = enchantConfig.getSection(enchantID)
-            val enable = enchantSect.getBoolean("enable")
-            val name = enchantSect.getString("name")!!
-            val description = enchantSect.getStringList("description")
-            val allowBlocks = enchantSect.getStringList("allowBlocks").map { EnchantBlock(it) }
-            val defaultSkin = itemSkins[enchantSect.getString("defaultSkin")]!!
-            val upgradeMaterials = enchantSect.getStringList("upgradeMaterials").map {
-                val pair = it.split("|")
-                EnchantMaterial(
-                    ItemTypeWrapper(pair[0]),
-                    pair[1].toInt()
-                )
-            }
-            enchants[enchantID] = ExpandEnchantConfig(
-                enchantID,
-                enable,
-                name,
-                description,
-                allowBlocks,
-                defaultSkin,
-                upgradeMaterials
-            )
-        }
-    }
-
     private fun loadMenuConfig() {
         val dashboardMenuSect = menuConfig.getSection("dashboardMenu")
         dashboardMenuConfig = DashboardMenuConfig(
@@ -104,4 +78,41 @@ object ConfigIEP {
             enchantListMenuSect.asDefaultSlotConfig("backSlot")
         )
     }
+
+    private fun loadEnchantConfig() {
+        enchants.clear()
+//        enchantConfig.getKeys(false).forEach { enchantID ->
+//            val enchantSect = enchantConfig.getSection(enchantID)
+//            val enable = enchantSect.getBoolean("enable")
+//            val name = enchantSect.getString("name")!!
+//            val description = enchantSect.getStringList("description")
+//            val allowBlocks = enchantSect.getStringList("allowBlocks").map { EnchantBlock(it) }
+//            val defaultSkin = itemSkins[enchantSect.getString("defaultSkin")]!!
+//            val upgradeMaterials = enchantSect.getStringList("upgradeMaterials").map {
+//                val pair = it.split("|")
+//                EnchantMaterial(
+//                    ItemTypeWrapper(pair[0]),
+//                    pair[1].toInt()
+//                )
+//            }
+//            enchants[enchantID] = ExpandEnchantConfig(
+//                enchantID,
+//                enable,
+//                name,
+//                description,
+//                allowBlocks,
+//                defaultSkin,
+//                upgradeMaterials
+//            )
+//        }
+    }
+
+    private fun loadExpandEnchantConfig() {
+
+    }
+
+    private fun loadLuckEnchantConfig() {
+
+    }
+
 }

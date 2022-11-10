@@ -10,10 +10,7 @@ import io.github.mainyf.csdungeon.storage.DungeonStructure
 import io.github.mainyf.csdungeon.storage.StorageCSD
 import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.playerArguments
-import io.github.mainyf.newmclib.exts.errorMsg
-import io.github.mainyf.newmclib.exts.msg
-import io.github.mainyf.newmclib.exts.pluginManager
-import io.github.mainyf.newmclib.exts.successMsg
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.worldsettings.config.ConfigWS
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.apache.logging.log4j.LogManager
@@ -21,6 +18,8 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import kotlin.collections.any
+import kotlin.collections.find
 
 class CsDungeon : JavaPlugin(), Listener {
 
@@ -93,7 +92,7 @@ class CsDungeon : JavaPlugin(), Listener {
                     dungeons.forEach {
                         sender.sendMessage(
                             MiniMessage.miniMessage()
-                                .deserialize("结构名: ${it.structureName}, 位置: <click:run_command:/tppos ${it.coreX} ${it.coreY} ${it.coreZ}><hover:show_text:点击传送>${it.coreX} ${it.coreY} ${it.coreZ}</hover></click>")
+                                .deserialize("${it.createTime.formatYMDHMS()} 结构名: ${it.structureName}, 位置: <click:run_command:/tppos ${it.coreX} ${it.coreY} ${it.coreZ}><hover:show_text:点击传送>${it.coreX} ${it.coreY} ${it.coreZ}</hover></click>")
                         )
                     }
                 }

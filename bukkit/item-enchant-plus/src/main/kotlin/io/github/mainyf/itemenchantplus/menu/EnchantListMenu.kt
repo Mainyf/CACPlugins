@@ -1,11 +1,14 @@
 package io.github.mainyf.itemenchantplus.menu
 
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
+import io.github.mainyf.itemenchantplus.config.ItemEnchant
 import io.github.mainyf.newmclib.config.IaIcon
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
-import io.github.mainyf.newmclib.offline_player_ext.OfflinePlayerData
+import io.github.mainyf.newmclib.utils.Heads
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
+import kotlin.math.ceil
 
 class EnchantListMenu : AbstractMenuHandler() {
 
@@ -13,16 +16,32 @@ class EnchantListMenu : AbstractMenuHandler() {
     private var pageSize = 0
     private var maxPageIndex = 0
 
-    private val friends = mutableListOf<OfflinePlayerData>()
+    private val enchants = mutableListOf<ItemEnchant>()
 
-    private val currentFriends = mutableListOf<OfflinePlayerData>()
+    private val currentEnchants = mutableListOf<ItemEnchant>()
 
     override fun open(player: Player) {
+        this.pageSize = ConfigIEP.enchantListMenuConfig.enchantSlot.slot.size
+        updateEnchants()
+        updateCurrentEnchants()
         setup(ConfigIEP.enchantListMenuConfig.settings)
         val inv = createInv(player)
 
         updateInv(player, inv)
         player.openInventory(inv)
+    }
+
+    private fun updateEnchants() {
+        this.enchants.clear()
+        this.enchants.addAll(ItemEnchant.values())
+        this.maxPageIndex = ceil(
+            enchants.size.toDouble() / pageSize.toDouble()
+        ).toInt()
+    }
+
+    private fun updateCurrentEnchants() {
+        currentEnchants.clear()
+        currentEnchants.addAll(enchants.pagination(pageIndex, pageSize))
     }
 
     override fun updateTitle(player: Player): String {
@@ -38,13 +57,49 @@ class EnchantListMenu : AbstractMenuHandler() {
 
     private fun updateInv(player: Player, inv: Inventory) {
         val elm = ConfigIEP.enchantListMenuConfig
-        inv.setIcon(elm.prevSlot)
-        inv.setIcon(elm.nextSlot)
+        inv.setIcon(elm.prevSlot) {
+            if (pageIndex > 1) {
+                pageIndex--
+                updateCurrentEnchants()
+                updateEnchantSlot(player, inv)
+            }
+        }
+        inv.setIcon(elm.nextSlot) {
+            if (pageIndex < maxPageIndex) {
+                pageIndex++
+                updateCurrentEnchants()
+                updateEnchantSlot(player, inv)
+            }
+        }
 
+        updateEnchantSlot(player, inv)
 
         inv.setIcon(elm.backSlot) {
             DashboardMenu().open(it)
         }
+    }
+
+    private fun updateEnchantSlot(player: Player, inv: Inventory) {
+        val elm = ConfigIEP.enchantListMenuConfig
+        val enchantSlot = elm.enchantSlot.slot
+        inv.setIcon(elm.enchantSlot.slot, AIR_ITEM)
+        currentEnchants.forEachIndexed { index, enchants ->
+            inv.setIcon(enchantSlot[index], elm.enchantSlot.default()!!.toItemStack {
+                withMeta(
+                    {
+                        it?.text()?.tvar("enchantName", "")?.toComp()
+                    },
+                    { lore ->
+                        if (lore.isNullOrEmpty()) return@withMeta lore
+                        lore.mapToString().tvarList("desc", listOf("")).mapToComp()
+                    }
+                )
+            }) {
+                elm.enchantSlot.default()!!.execAction(it)
+
+            }
+        }
+
     }
 
 

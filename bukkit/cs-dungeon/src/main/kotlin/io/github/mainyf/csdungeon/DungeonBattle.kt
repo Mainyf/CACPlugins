@@ -156,6 +156,7 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
 
     fun onPlayerMove(player: Player, event: PlayerMoveEvent) {
         if (!start) return
+        if (!players.contains(player)) return
         val boundaryDamage = dungeonConfig!!.boundaryDamage
         if (boundaryDamage == -1) return
         if (!dungeon.containsDungeonArea(event.to)) {

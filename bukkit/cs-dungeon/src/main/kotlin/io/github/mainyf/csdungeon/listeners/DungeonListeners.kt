@@ -8,16 +8,20 @@ import io.github.mainyf.csdungeon.config.ConfigCSD
 import io.github.mainyf.csdungeon.config.sendLang
 import io.github.mainyf.csdungeon.menu.DungeonMenu
 import io.github.mainyf.csdungeon.storage.StorageCSD
+import io.github.mainyf.newmclib.exts.getShooterPlayer
 import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.text
+import io.github.mainyf.newmclib.exts.uuid
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Sign
 import org.bukkit.entity.ArmorStand
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.entity.CreatureSpawnEvent
+import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
 
 object DungeonListeners : Listener {
@@ -118,19 +122,19 @@ object DungeonListeners : Listener {
         return Location(posA.world, lX, lY, lZ) to Location(posA.world, hX, hY, hZ)
     }
 
-//    @EventHandler
-//    fun onBreak(event: BlockBreakEvent) {
-//        val loc = event.block.location
-//        val dungeon = StorageCSD.findDungeonByLoc(loc)
-//        if (event.player.isOp) return
-//        if (dungeon != null) {
-//            val dungeonConfig = ConfigCSD.dungeonConfigMap.values.find { it.structureName == dungeon.structureName }
-//            if (dungeonConfig?.protectBuild == true) {
-//                event.player.sendLang("noBreakDungeon")
-//                event.isCancelled = true
-//            }
-//        }
-//    }
+    //    @EventHandler
+    //    fun onBreak(event: BlockBreakEvent) {
+    //        val loc = event.block.location
+    //        val dungeon = StorageCSD.findDungeonByLoc(loc)
+    //        if (event.player.isOp) return
+    //        if (dungeon != null) {
+    //            val dungeonConfig = ConfigCSD.dungeonConfigMap.values.find { it.structureName == dungeon.structureName }
+    //            if (dungeonConfig?.protectBuild == true) {
+    //                event.player.sendLang("noBreakDungeon")
+    //                event.isCancelled = true
+    //            }
+    //        }
+    //    }
 
     @EventHandler
     fun onInteractAE(event: PlayerInteractAtEntityEvent) {
@@ -142,6 +146,14 @@ object DungeonListeners : Listener {
             if (furniture != null) {
                 DungeonMenu(dungeon).open(event.player)
             }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onArmorStand(event: EntityDamageByEntityEvent) {
+        val entity = event.entity
+        if (entity is ArmorStand && isCore(entity)) {
+            event.isCancelled = true
         }
     }
 

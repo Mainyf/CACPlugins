@@ -14,7 +14,7 @@ object ConfigTP {
         ToolsPlugin.INSTANCE.reloadConfig()
         val config = ToolsPlugin.INSTANCE.config
         recycleEnderDragonEgg = config.getBoolean("recycleEnderDragonEgg", recycleEnderDragonEgg)
-        recycleEnderDragonEgg = config.getBoolean("saturdayFly", saturdayFly)
+        saturdayFly = config.getBoolean("saturdayFly", saturdayFly)
     }
 
 }

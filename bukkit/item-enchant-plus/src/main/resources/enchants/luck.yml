@@ -1,0 +1,31 @@
+enabled: true
+name: '福临'
+max: 25
+description:
+  - '&r'
+  - '&f&l福临 {stage}'
+  - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
+  - '&r'
+menuLore:
+  - '福临'
+# 支持掉落翻倍的方块
+# 支持 ItemAdders 和原版方块
+# 玩家放置的不起效果
+allowBlocks:
+  - enchant_ore_high
+  - enchant_ore
+  - emerald_ore
+  - diamond_ore
+  - gold_ore
+  - iron_ore
+  - coal_ore
+  - lapis_ore
+  - redstone_ore
+  - nether_gold_ore
+  - nether_quartz_ore
+defaultSkin: "luckDefaultSkinA"
+upgradeMaterials:
+  - "itemskills:eqMaterial1|16,itemskills:eqMaterial2|16,itemskills:eqMaterial3|16,itemskills:eqMaterial4|16,itemskills:eqMaterial5|16"
+  - "itemskills:eqMaterial1|32,itemskills:eqMaterial2|32,itemskills:eqMaterial3|32,itemskills:eqMaterial4|32,itemskills:eqMaterial5|32"
+  - "itemskills:eqMaterial1|64,itemskills:eqMaterial2|64,itemskills:eqMaterial3|64,itemskills:eqMaterial4|64,itemskills:eqMaterial5|64"
+  - "itemskills:eqMaterial1|128,itemskills:eqMaterial2|128,itemskills:eqMaterial3|128,itemskills:eqMaterial4|128,itemskills:eqMaterial5|128"
