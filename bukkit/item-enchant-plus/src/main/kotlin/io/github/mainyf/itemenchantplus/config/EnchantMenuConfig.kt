@@ -17,3 +17,40 @@ class EnchantListMenuConfig(
     val enchantSlot: DefaultSlotConfig,
     val backSlot: DefaultSlotConfig
 )
+
+class GiveEnchantMenuConfig(
+    val settings: MenuSettingsConfig,
+    val materialsSlot: DefaultSlotConfig,
+    val infoSlot: DefaultSlotConfig,
+    val equipSlot: DefaultSlotConfig,
+    val backSlot: DefaultSlotConfig,
+    val finishSlot: DefaultSlotConfig
+)
+
+class EnchantIntensifyMenuConfig(
+    val settings: MenuSettingsConfig,
+    val equipSlot: DefaultSlotConfig,
+    val materialsSlot: DefaultSlotConfig,
+    val backSlot: DefaultSlotConfig,
+    val finishSlot: DefaultSlotConfig
+)
+
+class EnchantUpgradeMenuConfig(
+    val settings: MenuSettingsConfig,
+    val backgroundEquipNoEmpty: String,
+    val materialsSlot: DefaultSlotConfig,
+    val infoSlot: DefaultSlotConfig,
+    val equipSlot: DefaultSlotConfig,
+    val upgradeResultSlot: DefaultSlotConfig,
+    val backSlot: DefaultSlotConfig,
+    val finishSlot: DefaultSlotConfig
+)
+
+class EnchantSkinMenuConfig(
+    val settings: MenuSettingsConfig,
+    val largeSkinSlot: DefaultSlotConfig,
+    val prevSlot: DefaultSlotConfig,
+    val nextSlot: DefaultSlotConfig,
+    val enchantSkinSlot: DefaultSlotConfig,
+    val backSlot: DefaultSlotConfig
+)

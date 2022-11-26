@@ -23,6 +23,8 @@ class DungeonConfig(
     val boundaryDamage: Int,
     val noPlayerEnd: Boolean,
     val noFly: Boolean,
+    val dungeonMaterials: List<DungeonMaterials>,
+    val menuItemInfo: List<MenuItemInfo>,
     val tipPeriod: Long,
     val tipActions: MultiAction,
     val startActions: MultiAction,
@@ -31,6 +33,23 @@ class DungeonConfig(
     val endPlays: MultiPlay,
     val wsConfig: WorldSettingConfig,
     val levels: List<DungeonLevelConfig>
+)
+
+class DungeonMaterials(
+    val item: List<DungeonMaterialItem>,
+    val money: Double,
+    val exp: Int
+)
+
+class DungeonMaterialItem(
+    val iaName: String,
+    val amount: Int,
+    val displayName: String
+)
+
+class MenuItemInfo(
+    val menuName: String,
+    val menuLore: List<String>
 )
 
 class DungeonLevelConfig(

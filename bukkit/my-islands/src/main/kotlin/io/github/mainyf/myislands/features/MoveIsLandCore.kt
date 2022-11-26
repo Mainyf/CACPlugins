@@ -36,6 +36,7 @@ object MoveIsLandCore : Listener {
     private val interactCooldown = Cooldown()
     private val moveingCorePlayer = mutableMapOf<UUID, PlayerIsland>()
     private val playerToPlot = mutableMapOf<UUID, Plot>()
+    private val playerToBlock = mutableMapOf<UUID, () -> Boolean>()
     private val playerTempCoreLoc = mutableMapOf<UUID, Pair<Location, Int>>()
 
     private val playerSetLater20tick = mutableSetOf<UUID>()
@@ -69,43 +70,44 @@ object MoveIsLandCore : Listener {
         return playerSetLater20tick.contains(uuid)
     }
 
-    fun tryStartMoveCore(player: Player, plot: Plot) {
+    fun tryStartMoveCore(player: Player, plot: Plot, block: () -> Boolean) {
         if (playerToPlot.values.any { it == plot }) {
             player.sendLang("alreadyMoveingCore")
             return
         }
 
-//        val plot = MyIslands.plotUtils.getPlotByPLoc(player)
-//        if (hasMoveingCore(player.uniqueId)) {
-//            player.sendLang("alreadyMoveingCore")
-////            player.errorMsg("你正在移动你的核心")
-//            return
-//        }
-//        if (plot == null) {
-//            player.sendLang("playerLocNotPlot")
-////            player.errorMsg("你的脚下没有地皮")
-//            return
-//        }
-//        val owner = plot.owner
-//        if (owner != player.uniqueId) {
-//            player.sendLang("noOwnerMoveCore")
-////            player.errorMsg("你不是脚下地皮的主人")
-//            return
-//        }
+        //        val plot = MyIslands.plotUtils.getPlotByPLoc(player)
+        //        if (hasMoveingCore(player.uniqueId)) {
+        //            player.sendLang("alreadyMoveingCore")
+        ////            player.errorMsg("你正在移动你的核心")
+        //            return
+        //        }
+        //        if (plot == null) {
+        //            player.sendLang("playerLocNotPlot")
+        ////            player.errorMsg("你的脚下没有地皮")
+        //            return
+        //        }
+        //        val owner = plot.owner
+        //        if (owner != player.uniqueId) {
+        //            player.sendLang("noOwnerMoveCore")
+        ////            player.errorMsg("你不是脚下地皮的主人")
+        //            return
+        //        }
         val islandData = IslandsManager.getIslandData(plot.owner!!)
         if (islandData == null) {
             player.sendLang("tryMoveCoreButPlayerNotHaveIsland")
-//            player.errorMsg("意外的错误: 0xMI1")
+            //            player.errorMsg("意外的错误: 0xMI1")
             return
         }
-        startMoveCore(player, islandData, plot)
+        startMoveCore(player, islandData, plot, block)
         player.sendLang("startMoveCore")
-//        player.successMsg("开始移动核心水晶")
+        //        player.successMsg("开始移动核心水晶")
     }
 
-    fun startMoveCore(player: Player, islandData: PlayerIsland, plot: Plot) {
+    fun startMoveCore(player: Player, islandData: PlayerIsland, plot: Plot, block: () -> Boolean) {
         moveingCorePlayer[player.uuid] = islandData
         playerToPlot[player.uuid] = plot
+        playerToBlock[player.uuid] = block
         playerSetLater20tick.add(player.uuid)
     }
 
@@ -138,9 +140,9 @@ object MoveIsLandCore : Listener {
     fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
         if (!moveingCorePlayer.containsKey(player.uniqueId)) return
-//        moveingCorePlayer.remove(player.uuid)
-//        playerToPlot.remove(player.uuid)
-//        playerTempCoreLoc.remove(player.uuid)
+        //        moveingCorePlayer.remove(player.uuid)
+        //        playerToPlot.remove(player.uuid)
+        //        playerTempCoreLoc.remove(player.uuid)
         endMoveCore(player)
         removePlayerLater20Tick(player)
     }
@@ -170,13 +172,16 @@ object MoveIsLandCore : Listener {
             removePlayerLater20Tick(player)
             player.sendLang("endMoveCore")
             event.isCancelled = true
-//            player.successMsg("结束移动核心水晶")
-//            event.isCancelled = true
+            //            player.successMsg("结束移动核心水晶")
+            //            event.isCancelled = true
             return true
         }
         if (!playerTempCoreLoc.containsKey(player.uniqueId)) return false
 
         if (!checkPlayerLoc(player)) {
+            return false
+        }
+        if (playerToBlock.containsKey(player.uuid) && !playerToBlock[player.uuid]!!.invoke()) {
             return false
         }
         event.isCancelled = true
@@ -202,7 +207,7 @@ object MoveIsLandCore : Listener {
         player.teleport(homeLoc)
         player.velocity = Vector(0, 0, 0)
         player.sendLang("moveCoreSuccess")
-//        player.successMsg("设置完成，新的水晶已放置，出生点已刷新")
+        //        player.successMsg("设置完成，新的水晶已放置，出生点已刷新")
         endMoveCore(player)
         MyIslands.INSTANCE.runTaskLaterBR(20L) {
             removePlayerLater20Tick(player)

@@ -32,10 +32,10 @@ class DashboardMenu : AbstractMenuHandler() {
             EnchantListMenu().open(it)
         }
         inv.setIcon(dmc.intensifySlot) {
-
+            EnchantIntensifyMenuMenu().open(it)
         }
         inv.setIcon(dmc.upgradeSlot) {
-
+            EnchantUpgradeMenu().open(it)
         }
     }
 

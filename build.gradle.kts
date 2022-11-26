@@ -101,6 +101,7 @@ subprojects {
                 "item-enchant-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
                     compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
+                    compileOnly(rootProject.files("./plugins/MythicMobs-5.1.4.jar"))
                 }
                 "my-islands" -> {
 //                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
@@ -206,7 +207,7 @@ subprojects {
 //                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
 //                }
                 "item-enchant-plus" -> {
-                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
+                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI", "MythicMobs"))
                 }
                 "my-islands" -> {
                     dd.addAll(listOf("CMI", "PlotSquared", "ItemsAdder", "ProtocolLib", "BungeeSettingsBukkit"))

@@ -1,4 +1,4 @@
-dungeon1:
+ruins_1:
   worldName: zy
   #对应的遗迹ID
   structureName: ruins_1
@@ -10,6 +10,35 @@ dungeon1:
   noPlayerEnd: true
   # 在副本开启后禁止切换成飞行模式
   noFly: false
+  dungeonMaterials:
+    - item:
+        - iaName: "itemadders:dungeon_key"
+          amount: 1
+          displayName: "副本钥匙"
+      money: 100
+      exp: 10
+    - item:
+        - iaName: "itemadders:dungeon_key"
+          amount: 2
+          displayName: "副本钥匙"
+      money: 200
+      exp: 20
+    - item:
+        - iaName: "itemadders:dungeon_key"
+          amount: 3
+          displayName: "副本钥匙"
+      money: 300
+      exp: 30
+  menuItemInfo:
+    - menuName: " &c&l> &3低级副本"
+      menuLore:
+        - " &c&l> &3低级副本"
+    - menuName: " &c&l> &3中级副本"
+      menuLore:
+        - " &c&l> &3中级副本"
+    - menuName: " &c&l> &3高级副本"
+      menuLore:
+        - " &c&l> &3高级副本"
   tipPeriod: 5
   tipActions:
     - "mini: &b目前进度：{kill}/{total}"

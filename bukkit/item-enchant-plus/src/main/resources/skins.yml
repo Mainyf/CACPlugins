@@ -1,120 +1,38 @@
 # 皮肤名
-expandDefaultSkinA:
+pickaxeDefault:
   # 该皮肤是否开启，暂无实现
   enable: true
   # 皮肤对应的附灵类型
-  enchantType: EXPAND
+  enchantType:
+    - EXPAND
+    - LUCK
   # 皮肤的特效
   skinEffect:
-    # 皮肤在该附灵的第一阶段的效果
-    - customModelData: 0 # 皮肤的模型数据
-      effect: # 皮肤的特效触发列表
-        - type: "BREAK_BLOCK" # 破坏方块时触发
-          value: # 触发的特效play
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    # 皮肤在该附灵的第二阶段的效果
+    # 皮肤在第一阶段的效果
+    - customModelData: 10004 # 皮肤的模型数据
+      menuItemName: "menuItemName pickaxeDefault #1"
+      menuItemLore:
+        - "menuItemLore pickaxeDefault"
+        - "menuItemLore pickaxeDefault"
+      effect: []
+    # 皮肤在第二阶段的效果
     - customModelData: 1
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    # 皮肤在该附灵的第三阶段的效果
+      menuItemName: "menuItemName pickaxeDefault #2"
+      menuItemLore:
+        - "menuItemLore pickaxeDefault"
+        - "menuItemLore pickaxeDefault"
+      effect: []
+    # 皮肤在第三阶段的效果
     - customModelData: 2
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    # 皮肤在该附灵的第四阶段的效果
+      menuItemName: "menuItemName pickaxeDefault #3"
+      menuItemLore:
+        - "menuItemLore pickaxeDefault"
+        - "menuItemLore pickaxeDefault"
+      effect: []
+    # 皮肤在第四阶段的效果
     - customModelData: 3
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-expandProSkinA:
-  enable: true
-  enchantType: EXPAND
-  skinEffect:
-    - customModelData: 0
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    - customModelData: 1
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    - customModelData: 2
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    - customModelData: 3
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-luckDefaultSkinA:
-  enable: true
-  enchantType: LUCK
-  skinEffect:
-    - customModelData: 4
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    - customModelData: 5
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    - customModelData: 6
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    - customModelData: 7
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-luckProSkinA:
-  enable: true
-  enchantType: LUCK
-  skinEffect:
-    - customModelData: 4
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    - customModelData: 5
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    - customModelData: 6
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
-    - customModelData: 7
-      effect:
-        - type: "BREAK_BLOCK"
-          value:
-            - 'location: 0,1,0'
-            - 'sound: ENTITY_ARROW_HIT,1,1,1'
+      menuItemName: "menuItemName pickaxeDefault #4"
+      menuItemLore:
+        - "menuItemLore pickaxeDefault"
+        - "menuItemLore pickaxeDefault"
+      effect: []

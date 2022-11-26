@@ -11,6 +11,8 @@ import io.github.mainyf.myislands.storage.IslandVisibility.*
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.hooks.money
+import io.github.mainyf.newmclib.hooks.takeMoney
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.menu.ConfirmMenu
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
@@ -121,10 +123,19 @@ class IslandsSettingsMenu(
                 it.sendLang("noOwnerMoveCore")
                 return@setIcon
             }
-            if (!ConfigMI.tryPayMyIslandCost(it, ConfigMI.myislandCost.moveCore, "moveCore")) {
-                return@setIcon
+
+//            if (!ConfigMI.tryPayMyIslandCost(it, ConfigMI.myislandCost.moveCore, "moveCore")) {
+//                return@setIcon
+//            }
+            MoveIsLandCore.tryStartMoveCore(it, plot) {
+                val money = player.money()
+                if (money < ConfigMI.myislandCost.moveCore) {
+                    player.sendLang("costMoneyLack.moveCore", "{money}", money, "{cost}", ConfigMI.myislandCost.moveCore)
+                    return@tryStartMoveCore false
+                }
+                player.takeMoney(ConfigMI.myislandCost.moveCore)
+                return@tryStartMoveCore true
             }
-            MoveIsLandCore.tryStartMoveCore(it, plot)
             it.closeInventory()
         }
         val visibilitySlot = settingsMenuConfig.visibilitySlot
@@ -223,10 +234,18 @@ class IslandsSettingsMenu(
 //                this.itemMeta = meta
             }) {
                 settingsMenuConfig.helpersSlot["empty"]!!.execAction(it)
-                if (!ConfigMI.tryPayMyIslandCost(player, ConfigMI.myislandCost.addHelper, "addHelper")) {
-                    return@setIcon
+//                if (!ConfigMI.tryPayMyIslandCost(player, ConfigMI.myislandCost.addHelper, "addHelper")) {
+//                    return@setIcon
+//                }
+                IslandsManager.openHelperSelectMenu(it, plot, island, helpers) {
+                    val money = player.money()
+                    if (money < ConfigMI.myislandCost.addHelper) {
+                        player.sendLang("costMoneyLack.addHelper", "{money}", money, "{cost}", ConfigMI.myislandCost.addHelper)
+                        return@openHelperSelectMenu false
+                    }
+                    player.takeMoney(ConfigMI.myislandCost.addHelper)
+                    return@openHelperSelectMenu true
                 }
-                IslandsManager.openHelperSelectMenu(it, plot, island, helpers)
 //                if (plot.owner != it.uuid) {
 //                    it.sendLang("noOwnerOpenHelperSelectMenu")
 //                    return@setIcon

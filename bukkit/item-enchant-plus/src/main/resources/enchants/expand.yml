@@ -10,7 +10,13 @@ description:
   - '&f&l凿石 {stage}'
   - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
   - '&r'
-menuLore:
+allowGiveItem:
+  - netherite_pickaxe
+menuItemInListMenu:
+  - '凿石'
+menuItemInGiveMenu:
+  - '凿石'
+menuItemInUpgradeMenu:
   - '凿石'
 # 允许一二阶段起效果的方块
 # 支持 ItemAdders 和原版方块
@@ -43,9 +49,10 @@ allowBlocks:
   - green_terracotta
   - red_terracotta
   - black_terracotta
-defaultSkin: "expandDefaultSkinA"
+  - deepslate
+defaultSkin: "pickaxeDefault"
 upgradeMaterials:
-  - "itemskills:eqMaterial1|16,itemskills:eqMaterial2|16,itemskills:eqMaterial3|16,itemskills:eqMaterial4|16,itemskills:eqMaterial5|16"
-  - "itemskills:eqMaterial1|32,itemskills:eqMaterial2|32,itemskills:eqMaterial3|32,itemskills:eqMaterial4|32,itemskills:eqMaterial5|32"
-  - "itemskills:eqMaterial1|64,itemskills:eqMaterial2|64,itemskills:eqMaterial3|64,itemskills:eqMaterial4|64,itemskills:eqMaterial5|64"
-  - "itemskills:eqMaterial1|128,itemskills:eqMaterial2|128,itemskills:eqMaterial3|128,itemskills:eqMaterial4|128,itemskills:eqMaterial5|128"
+  - "itemsadder:cobaltite_ingot|1,netherite_ingot|1"
+  - "itemsadder:cobaltite_ingot|1,netherite_ingot|1"
+  - "itemsadder:cobaltite_ingot|1,netherite_ingot|1"
+  - "itemsadder:cobaltite_ingot|1,netherite_ingot|1"

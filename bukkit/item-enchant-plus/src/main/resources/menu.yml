@@ -1,62 +1,200 @@
+# 主菜单
 dashboardMenu:
   # 点击速度限制
   cooldown: 250
   # ia背景图片
   row: 6
-  background: ':offset_-8::view_contact_other:'
+  background: ':offset_-8::view_soul:'
   globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   # 赋予附灵
   giveEnchantSlot:
-    slot: [ 1 ]
+    slot: [ 3,4,5,12,13,14 ]
     default:
-      type: BLACK_STAINED_GLASS_PANE
-      name: "赋予附灵"
-      lore:
-        - ""
+      type: itemsadder:air
+      name: " &c&l> &3赋予附灵"
   # 强化附灵
   intensifySlot:
-    slot: [ 2 ]
+    slot: [ 27,28,29,30,36,37,38,39 ]
     default:
-      type: BLACK_STAINED_GLASS_PANE
-      name: "强化附灵"
-      lore:
-        - ""
+      type: itemsadder:air
+      name: " &c&l> &3强化附灵"
   # 附灵升阶
   upgradeSlot:
-    slot: [ 3 ]
+    slot: [ 32,33,34,35,41,42,43,44 ]
     default:
-      type: BLACK_STAINED_GLASS_PANE
-      name: "附灵升阶"
-      lore:
-        - ""
+      type: itemsadder:air
+      name: " &c&l> &3附灵升阶"
+# 附灵列表
 enchantListMenu:
   # 点击速度限制
   cooldown: 250
   # ia背景图片
-  row: 4
-  background: ':offset_-8::view_contact_other:'
+  row: 6
+  background: ':offset_-8::view_soul_give_list:'
   globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   # 上一页
   prevSlot:
-    slot: [ 1 ]
+    slot: [ 10 ]
     default:
       iaIcons: ''
       type: itemsadder:air
       name: " &c&l> &3上一页"
   # 下一页
   nextSlot:
-    slot: [ 7 ]
+    slot: [ 16 ]
     default:
       iaIcons: ''
       type: itemsadder:air
       name: " &c&l> &3下一页"
   enchantSlot:
-    slot: [ 2,3,4,5,6 ]
+    slot: [ 11,12,13,14,15 ]
     default:
+      type: gui:view_soul_book
       name: " &c&l> &3{enchantName}"
       lore:
         - "{desc}"
   backSlot:
+    slot: [ 49 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3返回"
+# 赋予附灵
+giveEnchantMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  background: ':offset_-8::view_soul_give:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  # 材料
+  materialsSlot:
+    slot: [ 2,3,4,5,6 ]
+    default:
+      name: "{itemName} &7&lx &7&l{count}"
+      lore:
+        - "{lore}"
+  # 附灵书描述
+  infoSlot:
+    slot: [ 7,8 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3{enchantName}"
+      lore:
+        - "{desc}"
+  # 装备
+  equipSlot:
+    slot: [ 22 ]
+  # 返回
+  backSlot:
+    slot: [ 47 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3返回"
+  # 完成
+  finishSlot:
+    slot: [ 49 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3完成"
+# 附灵强化
+enchantIntensifyMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  background: ':offset_-8::view_soul_exp:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  # 装备格子
+  equipSlot:
+    slot: [ 4 ]
+  # 材料
+  materialsSlot:
+    slot: [ 20,21,22,23,24,29,30,31,32,33 ]
+  # 返回
+  backSlot:
+    slot: [ 47 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3返回"
+  # 完成
+  finishSlot:
+    slot: [ 49 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3完成"
+# 附灵进阶
+enchantUpgradeMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  background: ':offset_-8::view_soul_up:'
+  backgroundEquipNoEmpty: ':offset_-8::view_soul_exp:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  # 材料
+  materialsSlot:
+    slot: [ 2,3,4,5,6 ]
+    default:
+      name: " &c&l> &3{itemName} &7&lx {count}"
+      lore:
+        - "{lore}"
+  # 附灵书描述
+  infoSlot:
+    slot: [ 7,8 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3{enchantName}"
+      lore:
+        - "{desc}"
+  # 装备
+  equipSlot:
+    slot: [ 21 ]
+  # 进阶结果
+  upgradeResultSlot:
+    slot: [ 23 ]
+  # 返回
+  backSlot:
+    slot: [ 47 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3返回"
+  # 完成
+  finishSlot:
+    slot: [ 49 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3完成"
+enchantSkinMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  background: ''
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  # 返回
+  largeSkinSlot:
+    slot: [ 1 ]
+  # 上一页
+  prevSlot:
+    slot: [ 2 ]
+    default:
+      iaIcons: ''
+      type: STONE
+      name: " &c&l> &3上一页"
+  # 下一页
+  nextSlot:
+    slot: [ 7 ]
+    default:
+      iaIcons: ''
+      type: STONE
+      name: " &c&l> &3下一页"
+  enchantSkinSlot:
+    slot: [ 2,3,4,5,6 ]
+  # 返回
+  backSlot:
     slot: [ 8 ]
     default:
+      type: STONE
+      actions:
+        - "console: w Mainyf {player}back"
       name: " &c&l> &3返回"

@@ -1,0 +1,35 @@
+giveItemUnqualified:
+  - "mini: &4该物品不符合赋予附灵的装备要求"
+enchantItemPutGiveEnchantMenu:
+  - "mini: &4该物品已经是一个附灵的物品"
+giveItemEmpty:
+  - "mini: &4没有放入附灵物品"
+giveItemEnchantMaterialsDeficiency:
+  - "mini: &4赋予附灵所需的材料不足"
+giveItemEnchantSuccess:
+  - "mini: &6赋予附灵 {enchantName} 成功"
+
+
+
+enchantMaxExp:
+  - "mini: &4该附灵装备经验已满，无法强化"
+enchantMaxLevel:
+  - "mini: &4该附灵装备等级已满，无法强化"
+enchantItemEmptyPutMaterials:
+  - "mini: &4请先放入附灵装备，才可以放入材料"
+enchantMaterialsUnqualified:
+  - "mini: &4该物品不是对应装备所需的附灵强化材料"
+enchantMaterialsNoFreeSlot:
+  - "mini: &4附灵强化材料格子已满"
+enchantIntensifySuccess:
+  - "mini: &6附灵 {enchantName} 强化成功"
+
+
+enchantUpgradeLevelUnqualified:
+  - "mini: &4该附灵装备等级不满，无法进阶"
+enchantMaxStage:
+  - "mini: &4该附灵等阶已满，无法进阶"
+enchantUpgradeMaterialsDeficiency:
+  - "mini: &4附灵进阶所需的材料不足"
+enchantUpgradeSuccess:
+  - "mini: &6附灵 {enchantName} 进阶成功"

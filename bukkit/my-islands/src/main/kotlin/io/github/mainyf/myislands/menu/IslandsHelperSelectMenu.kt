@@ -19,7 +19,8 @@ import kotlin.math.ceil
 class IslandsHelperSelectMenu(
     val island: PlayerIsland,
     val plot: Plot,
-    val players: List<Player>
+    val players: List<Player>,
+    val block: () -> Boolean
 ) : AbstractMenuHandler() {
 
     var pageIndex = 1
@@ -96,6 +97,9 @@ class IslandsHelperSelectMenu(
 
                 ConfirmMenu(
                     { _ ->
+                        if (!block.invoke()) {
+                            return@ConfirmMenu
+                        }
                         IslandsManager.addHelpers(plot, player, island, uuid)
                         it.sendLang("addIslandHelperSuccess", "{player}", pName)
                         p.sendLang("beAddIslandHelperSuccess", "{player}", it.name)
@@ -106,7 +110,8 @@ class IslandsHelperSelectMenu(
                                 it,
                                 plot,
                                 island,
-                                IslandsManager.getIslandHelpers(island.id.value)
+                                IslandsManager.getIslandHelpers(island.id.value),
+                                block
                             )
                         ) {
                             p.closeInventory()

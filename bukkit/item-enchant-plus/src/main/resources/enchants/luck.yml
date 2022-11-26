@@ -1,12 +1,32 @@
-enabled: true
+enable: true
 name: '福临'
 max: 25
+luckPercentage:
+  # 阶段1翻2倍几率
+  stage1-2x: 20.0
+  # 阶段2翻2倍几率
+  stage2-2x: 100.0
+  # 阶段3翻2倍几率
+  stage3-2x: 100.0
+  # 阶段3翻3倍几率
+  stage3-3x: 50.0
 description:
   - '&r'
   - '&f&l福临 {stage}'
   - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
   - '&r'
-menuLore:
+allowGiveItem:
+  - diamond_pickaxe
+  - golden_pickaxe
+  - iron_pickaxe
+  - netherite_pickaxe
+  - stone_pickaxe
+  - wooden_pickaxe
+menuItemInListMenu:
+  - '福临'
+menuItemInGiveMenu:
+  - '福临'
+menuItemInUpgradeMenu:
   - '福临'
 # 支持掉落翻倍的方块
 # 支持 ItemAdders 和原版方块
@@ -23,9 +43,9 @@ allowBlocks:
   - redstone_ore
   - nether_gold_ore
   - nether_quartz_ore
-defaultSkin: "luckDefaultSkinA"
+defaultSkin: "pickaxeDefault"
 upgradeMaterials:
-  - "itemskills:eqMaterial1|16,itemskills:eqMaterial2|16,itemskills:eqMaterial3|16,itemskills:eqMaterial4|16,itemskills:eqMaterial5|16"
-  - "itemskills:eqMaterial1|32,itemskills:eqMaterial2|32,itemskills:eqMaterial3|32,itemskills:eqMaterial4|32,itemskills:eqMaterial5|32"
-  - "itemskills:eqMaterial1|64,itemskills:eqMaterial2|64,itemskills:eqMaterial3|64,itemskills:eqMaterial4|64,itemskills:eqMaterial5|64"
-  - "itemskills:eqMaterial1|128,itemskills:eqMaterial2|128,itemskills:eqMaterial3|128,itemskills:eqMaterial4|128,itemskills:eqMaterial5|128"
+  - "itemenchants:eqMaterial1|16,itemenchants:eqMaterial2|16,itemenchants:eqMaterial3|16,itemenchants:eqMaterial4|16,itemenchants:eqMaterial5|16"
+  - "itemenchants:eqMaterial1|32,itemenchants:eqMaterial2|32,itemenchants:eqMaterial3|32,itemenchants:eqMaterial4|32,itemenchants:eqMaterial5|32"
+  - "itemenchants:eqMaterial1|64,itemenchants:eqMaterial2|64,itemenchants:eqMaterial3|64,itemenchants:eqMaterial4|64,itemenchants:eqMaterial5|64"
+  - "itemenchants:eqMaterial1|128,itemenchants:eqMaterial2|128,itemenchants:eqMaterial3|128,itemenchants:eqMaterial4|128,itemenchants:eqMaterial5|128"

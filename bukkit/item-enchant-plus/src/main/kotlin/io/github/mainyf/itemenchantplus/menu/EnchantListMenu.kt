@@ -1,11 +1,11 @@
 package io.github.mainyf.itemenchantplus.menu
 
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
-import io.github.mainyf.itemenchantplus.config.ItemEnchant
+import io.github.mainyf.itemenchantplus.config.ItemEnchantType
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
-import io.github.mainyf.newmclib.utils.Heads
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import kotlin.math.ceil
@@ -16,9 +16,9 @@ class EnchantListMenu : AbstractMenuHandler() {
     private var pageSize = 0
     private var maxPageIndex = 0
 
-    private val enchants = mutableListOf<ItemEnchant>()
+    private val enchants = mutableListOf<ItemEnchantType>()
 
-    private val currentEnchants = mutableListOf<ItemEnchant>()
+    private val currentEnchants = mutableListOf<ItemEnchantType>()
 
     override fun open(player: Player) {
         this.pageSize = ConfigIEP.enchantListMenuConfig.enchantSlot.slot.size
@@ -33,7 +33,7 @@ class EnchantListMenu : AbstractMenuHandler() {
 
     private fun updateEnchants() {
         this.enchants.clear()
-        this.enchants.addAll(ItemEnchant.values())
+        this.enchants.addAll(ItemEnchantType.values())
         this.maxPageIndex = ceil(
             enchants.size.toDouble() / pageSize.toDouble()
         ).toInt()
@@ -83,20 +83,20 @@ class EnchantListMenu : AbstractMenuHandler() {
         val elm = ConfigIEP.enchantListMenuConfig
         val enchantSlot = elm.enchantSlot.slot
         inv.setIcon(elm.enchantSlot.slot, AIR_ITEM)
-        currentEnchants.forEachIndexed { index, enchants ->
+        currentEnchants.forEachIndexed { index, enchant ->
             inv.setIcon(enchantSlot[index], elm.enchantSlot.default()!!.toItemStack {
                 withMeta(
                     {
-                        it?.text()?.tvar("enchantName", "")?.toComp()
+                        it?.text()?.tvar("enchantName", enchant.displayName())?.toComp()
                     },
                     { lore ->
                         if (lore.isNullOrEmpty()) return@withMeta lore
-                        lore.mapToString().tvarList("desc", listOf("")).mapToComp()
+                        lore.mapToString().tvarList("desc", enchant.menuItemInListMenu()).mapToComp()
                     }
                 )
             }) {
-                elm.enchantSlot.default()!!.execAction(it)
-
+                elm.enchantSlot.default()?.execAction(it)
+                GiveEnchantMenu(enchant).open(it)
             }
         }
 

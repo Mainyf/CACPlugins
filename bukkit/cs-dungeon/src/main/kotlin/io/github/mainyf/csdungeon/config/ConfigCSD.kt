@@ -4,6 +4,7 @@ package io.github.mainyf.csdungeon.config
 
 import io.github.mainyf.csdungeon.CsDungeon
 import io.github.mainyf.newmclib.config.*
+import io.github.mainyf.newmclib.exts.getListAsConfigSection
 import io.github.mainyf.worldsettings.config.ConfigWS
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.FileConfiguration
@@ -84,6 +85,29 @@ object ConfigCSD {
             val boundaryDamage = dungeonSect.getInt("boundaryDamage", 2)
             val noPlayerEnd = dungeonSect.getBoolean("noPlayerEnd", true)
             val noFly = dungeonSect.getBoolean("noFly", true)
+
+            val dungeonMaterials = mutableListOf<DungeonMaterials>()
+
+            dungeonSect.getListAsConfigSection("dungeonMaterials").forEach { dungeonMaterialSect ->
+                val item = dungeonMaterialSect.getListAsConfigSection("item").map { dmItemSect ->
+                    val iaName = dmItemSect.getString("iaName")!!
+                    val amount = dmItemSect.getInt("amount")
+                    val displayName = dmItemSect.getString("displayName")!!
+                    DungeonMaterialItem(iaName, amount, displayName)
+                }
+                val money = dungeonMaterialSect.getDouble("money")
+                val exp = dungeonMaterialSect.getInt("exp")
+                dungeonMaterials.add(DungeonMaterials(item, money, exp))
+            }
+
+            val menuItemInfo = mutableListOf<MenuItemInfo>()
+
+            dungeonSect.getListAsConfigSection("menuItemInfo").forEach { dungeonMaterialSect ->
+                val menuName = dungeonMaterialSect.getString("menuName")!!
+                val menuLore = dungeonMaterialSect.getStringList("menuLore")
+                menuItemInfo.add(MenuItemInfo(menuName, menuLore))
+            }
+
             val tipPeriod = dungeonSect.getLong("tipPeriod")
             val tipActions = ActionParser.parseAction(dungeonSect, "tipActions", false)!!
 
@@ -136,6 +160,8 @@ object ConfigCSD {
                 boundaryDamage,
                 noPlayerEnd,
                 noFly,
+                dungeonMaterials,
+                menuItemInfo,
                 tipPeriod,
                 tipActions,
                 startActions,

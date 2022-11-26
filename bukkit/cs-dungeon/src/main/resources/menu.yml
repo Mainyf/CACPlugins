@@ -9,16 +9,13 @@ dungeonMenu:
     default:
       iaIcons: ''
       type: STONE
-      name: " &c&l> &3低级副本"
   level2Slot:
     slot: [ 1 ]
     default:
       iaIcons: ''
       type: STONE
-      name: " &c&l> &3中级副本"
   level3Slot:
     slot: [ 2 ]
     default:
       iaIcons: ''
       type: STONE
-      name: " &c&l> &3高级副本"

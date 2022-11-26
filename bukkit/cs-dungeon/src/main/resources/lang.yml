@@ -2,3 +2,9 @@ noBreakDungeon:
   - "mini: &4你无法破坏此遗迹"
 outDungeonBorder:
   - "mini: &4你已离开副本，请返回"
+dungeonItemDeficiency:
+  - "mini: &4副本开启所需物品不足,需要 {item}"
+dungeonMoneyDeficiency:
+  - "mini: &4副本开启所需金钱不足,需要 {money}"
+dungeonExpDeficiency:
+  - "mini: &4副本开启所需经验不足,需要 {exp}"

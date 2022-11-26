@@ -1,0 +1,2 @@
+noBindItemOwnerInteract:
+  - "mini: &c你不是该物品的主人，阻止互动与使用"

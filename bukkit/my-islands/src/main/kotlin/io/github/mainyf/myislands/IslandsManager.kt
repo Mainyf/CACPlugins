@@ -433,7 +433,7 @@ object IslandsManager {
         )
     }
 
-    fun openHelperSelectMenu(player: Player, plot: Plot, island: PlayerIsland, helpers: List<UUID?>): Boolean {
+    fun openHelperSelectMenu(player: Player, plot: Plot, island: PlayerIsland, helpers: List<UUID?>, block: () -> Boolean): Boolean {
         if (plot.owner != player.uuid) {
             player.sendLang("noOwnerOpenHelperSelectMenu")
             return false
@@ -445,7 +445,7 @@ object IslandsManager {
             player.sendLang("islandPlayerAbsEmpty")
             return false
         }
-        IslandsHelperSelectMenu(island, plot, players).open(player)
+        IslandsHelperSelectMenu(island, plot, players, block).open(player)
         return true
     }
 
