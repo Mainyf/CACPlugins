@@ -7,6 +7,7 @@ import io.github.mainyf.itemenchantplus.config.EffectTriggerType
 import io.github.mainyf.itemenchantplus.config.ItemEnchantType
 import io.github.mainyf.newmclib.exts.isEmpty
 import io.github.mainyf.newmclib.exts.onlinePlayers
+import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.newmclib.exts.submitTask
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -59,11 +60,11 @@ object ExpandEnchant : Listener {
         val b = event.block
         val loc = player.location
 
-//        val exp = ConfigIEP.getBlockExp(event.block)
-//        if (exp > 0.0) {
-//            EnchantManager.addExpToItem(data, exp)
-//            //            player.msg("你破坏了 ${event.block.type.name} 获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
-//        }
+        //        val exp = ConfigIEP.getBlockExp(event.block)
+        //        if (exp > 0.0) {
+        //            EnchantManager.addExpToItem(data, exp)
+        //            //            player.msg("你破坏了 ${event.block.type.name} 获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
+        //        }
 
         if (hasRecursive(player)) {
             return
@@ -172,20 +173,30 @@ object ExpandEnchant : Listener {
             if (data.stage == 1) {
                 event.isCancelled = true
                 markRecursive(player)
-                bList.first().breakNaturally()
+                playerBreakBlock(player, bList.first())
+//                bList.first().breakNaturally()
             } else if (data.stage >= 3) {
                 markRecursive(player)
                 bList.forEach {
-                    it.breakNaturally()
+                    playerBreakBlock(player, it)
+//                    it.breakNaturally()
                 }
             }
         }
 
-//        EnchantManager.updateItemMeta(item, ItemEnchantType.EXPAND, data)
+        //        EnchantManager.updateItemMeta(item, ItemEnchantType.EXPAND, data)
         EnchantManager.triggerItemSkinEffect(
             player, data, EffectTriggerType.BREAK_BLOCK
         )
         unMarkRecursive(player)
+    }
+
+    private fun playerBreakBlock(player: Player, block: Block) {
+        val event = BlockBreakEvent(block, player)
+        pluginManager().callEvent(event)
+        if (!event.isCancelled) {
+            block.breakNaturally()
+        }
     }
 
     private fun markRecursive(player: Player) {

@@ -50,9 +50,11 @@ enchantListMenu:
     slot: [ 11,12,13,14,15 ]
     default:
       type: gui:view_soul_book
-      name: " &c&l> &3{enchantName}"
+      name: " &c&l> &3&l{enchantName}"
       lore:
+        - ""
         - "{desc}"
+        - ""
   backSlot:
     slot: [ 49 ]
     default:
@@ -78,21 +80,23 @@ giveEnchantMenu:
     slot: [ 7,8 ]
     default:
       type: itemsadder:air
-      name: " &c&l> &3{enchantName}"
+      name: " &c&l> &3&l{enchantName}"
       lore:
+        - ""
         - "{desc}"
+        - ""
   # 装备
   equipSlot:
     slot: [ 22 ]
   # 返回
   backSlot:
-    slot: [ 47 ]
+    slot: [ 49 ]
     default:
       type: itemsadder:air
       name: " &c&l> &3返回"
   # 完成
   finishSlot:
-    slot: [ 49 ]
+    slot: [ 24 ]
     default:
       type: itemsadder:air
       name: " &c&l> &3完成"
@@ -112,13 +116,13 @@ enchantIntensifyMenu:
     slot: [ 20,21,22,23,24,29,30,31,32,33 ]
   # 返回
   backSlot:
-    slot: [ 47 ]
+    slot: [ 49 ]
     default:
       type: itemsadder:air
       name: " &c&l> &3返回"
   # 完成
   finishSlot:
-    slot: [ 49 ]
+    slot: [ 5,6 ]
     default:
       type: itemsadder:air
       name: " &c&l> &3完成"
@@ -128,8 +132,8 @@ enchantUpgradeMenu:
   cooldown: 250
   # ia背景图片
   row: 6
-  background: ':offset_-8::view_soul_up:'
-  backgroundEquipNoEmpty: ':offset_-8::view_soul_exp:'
+  background: ':offset_-8::view_soul_up_0:'
+  backgroundEquipNoEmpty: ':offset_-8::view_soul_up:'
   globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   # 材料
   materialsSlot:
@@ -143,9 +147,11 @@ enchantUpgradeMenu:
     slot: [ 7,8 ]
     default:
       type: itemsadder:air
-      name: " &c&l> &3{enchantName}"
+      name: " &c&l> &3&l{enchantName}"
       lore:
+        - ""
         - "{desc}"
+        - ""
   # 装备
   equipSlot:
     slot: [ 21 ]
@@ -154,13 +160,13 @@ enchantUpgradeMenu:
     slot: [ 23 ]
   # 返回
   backSlot:
-    slot: [ 47 ]
+    slot: [ 49 ]
     default:
       type: itemsadder:air
       name: " &c&l> &3返回"
   # 完成
   finishSlot:
-    slot: [ 49 ]
+    slot: [ 31 ]
     default:
       type: itemsadder:air
       name: " &c&l> &3完成"
@@ -169,32 +175,76 @@ enchantSkinMenu:
   cooldown: 250
   # ia背景图片
   row: 6
-  background: ''
+  background: ':offset_-8::view_soul_skin:'
   globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
-  # 返回
   largeSkinSlot:
-    slot: [ 1 ]
+    slot: [ 13 ]
   # 上一页
   prevSlot:
-    slot: [ 2 ]
+    slot: [ 27,28 ]
     default:
       iaIcons: ''
-      type: STONE
+      type: itemsadder:air
       name: " &c&l> &3上一页"
   # 下一页
   nextSlot:
-    slot: [ 7 ]
+    slot: [ 34,35 ]
     default:
       iaIcons: ''
-      type: STONE
+      type: itemsadder:air
       name: " &c&l> &3下一页"
-  enchantSkinSlot:
-    slot: [ 2,3,4,5,6 ]
+  enchantSkinX1Slot:
+    slot: [ 29 ]
+    default:
+      iaIcons: '0:offset_-138::view_soul_skin_choice:'
+    unSelect:
+      iaIcons: ''
+  enchantSkinX2Slot:
+    slot: [ 30 ]
+    default:
+      iaIcons: '0:offset_-138::view_soul_skin_choice:'
+    unSelect:
+      iaIcons: ''
+  enchantSkinX3Slot:
+    slot: [ 31 ]
+    default:
+      iaIcons: '0:offset_-138::view_soul_skin_choice:'
+    unSelect:
+      iaIcons: ''
+  enchantSkinX4Slot:
+    slot: [ 32 ]
+    default:
+      iaIcons: '0:offset_-138::view_soul_skin_choice:'
+    unSelect:
+      iaIcons: ''
+  enchantSkinX5Slot:
+    slot: [ 33 ]
+    default:
+      iaIcons: '0:offset_-138::view_soul_skin_choice:'
+    unSelect:
+      iaIcons: ''
+  finishSlot:
+    slot: [ 16,17 ]
+    # 未选择
+    default:
+      iaIcons: '1:offset_74::view_soul_skin_no:'
+      type: itemsadder:air
+      name: " &c&l> &3未选择附灵装备"
+    # 选择了但未拥有
+    select:
+      iaIcons: '1:offset_74::view_soul_skin_no:'
+      type: itemsadder:air
+      name: " &c&l> &3可前往 &c绯石商店 &3获得"
+    # 选择了已拥有
+    haveSkin:
+      iaIcons: '1:offset_74::view_soul_skin_yes:'
+      type: itemsadder:air
+      name: " &c&l> &3确认更换"
   # 返回
   backSlot:
-    slot: [ 8 ]
+    slot: [ 49 ]
     default:
-      type: STONE
+      type: itemsadder:air
       actions:
         - "console: w Mainyf {player}back"
       name: " &c&l> &3返回"

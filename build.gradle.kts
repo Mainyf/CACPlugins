@@ -27,6 +27,18 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
 }
 
+val itemsAdderPath = "./plugins/ItemsAdder_3.2.3-r10.jar"
+val cmiPath = "./plugins/CMI9.2.2.0.jar"
+val plotPath = "./plugins/PlotSquared-Bukkit-6.9.3-Premium.jar"
+val mmPath = "./plugins/MythicMobs-5.1.4.jar"
+val miraiMCPath = "./libs/MiraiMC-Bukkit.jar"
+val authmePath = "./libs/AuthMe-5.6.0-beta2.jar"
+val papiPath = "./plugins/PlaceholderAPI-2.11.2.jar"
+val qsPath = "./libs/QuickShop.jar"
+val customStructuresPath = "./plugins/CustomStructures-1.8.0.jar"
+val commandAPIPath = "./plugins/CommandAPI-8.5.1.jar"
+val ppPath = "./plugins/PlayerPoints-3.2.4.jar"
+
 subprojects {
 
     apply {
@@ -82,8 +94,8 @@ subprojects {
             compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
             implementation("io.github.mainyf:newmclib-craftbukkit:1.7.3:")
             compileOnly(rootProject.files("./plugins/ProtocolLib.jar"))
-            compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.2.jar"))
-            compileOnly(rootProject.files("./plugins/CommandAPI-8.5.1.jar"))
+            compileOnly(rootProject.files(papiPath))
+            compileOnly(rootProject.files(commandAPIPath))
             compileOnly(rootProject.files("./libs/Vault.jar"))
 
             when (project.name) {
@@ -96,21 +108,22 @@ subprojects {
                 }
                 "item-skills-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
+                    compileOnly(rootProject.files(itemsAdderPath))
                 }
                 "item-enchant-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
-                    compileOnly(rootProject.files("./plugins/MythicMobs-5.1.4.jar"))
+                    compileOnly(rootProject.project(":bukkit:soul-bind"))
+                    compileOnly(rootProject.files(itemsAdderPath))
+                    compileOnly(rootProject.files(mmPath))
                 }
                 "my-islands" -> {
 //                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
 
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
-                    compileOnly(rootProject.files("./plugins/PlotSquared-Bukkit-6.9.3-Premium.jar"))
+                    compileOnly(rootProject.files(itemsAdderPath))
+                    compileOnly(rootProject.files(plotPath))
 //                    compileOnly(rootProject.files("./libs/PlotSquared-Bukkit-6.6.2-Premium.jar"))
-                    compileOnly(rootProject.files("./plugins/CMI9.2.2.0.jar"))
-                    compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
+                    compileOnly(rootProject.files(cmiPath))
+                    compileOnly(rootProject.files(authmePath))
                     compileOnly(rootProject.files("./libs/datafixerupper-4.1.27.jar"))
                     compileOnly(rootProject.files("./libs/SkinsRestorer.jar"))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
@@ -118,20 +131,20 @@ subprojects {
                 }
                 "login-settings" -> {
                     implementation("io.github.dreamvoid:MiraiMC-Integration:1.7")
-                    implementation(rootProject.files("./libs/MiraiMC-Bukkit.jar"))
+                    implementation(rootProject.files(miraiMCPath))
                     implementation("net.mamoe:mirai-core-jvm:2.11.1")
-                    compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
+                    compileOnly(rootProject.files(authmePath))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
                 "bungee-settings-bukkit" -> {
-                    compileOnly(rootProject.files("./plugins/CMI9.2.2.0.jar"))
+                    compileOnly(rootProject.files(cmiPath))
                 }
                 "player-account" -> {
                     embed("com.aliyun:alibabacloud-dysmsapi20170525:1.0.1")
                 }
                 "player-settings" -> {
 //                    embed("com.alibaba:easyexcel:3.0.5")
-                    compileOnly(rootProject.files("./libs/AuthMe-5.6.0-beta2.jar"))
+                    compileOnly(rootProject.files(authmePath))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
                 "quest-extension" -> {
@@ -140,31 +153,35 @@ subprojects {
                     compileOnly(rootProject.project(":bukkit:custom-economy"))
                 }
                 "command-settings" -> {
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
+                    compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
                 "mcrmb-migration" -> {
 //                    compileOnly(rootProject.files("./plugins/MCRMB-2.0b19-12fe19a.jar"))
-                    compileOnly(rootProject.files("./plugins/PlayerPoints-3.2.4.jar"))
+                    compileOnly(rootProject.files(ppPath))
                 }
                 "mcrmb-tools" -> {
                     compileOnly(rootProject.files("./plugins/MCRMB-2.0b19-12fe19a.jar"))
                 }
                 "shop-manager" -> {
-                    compileOnly(rootProject.files("./libs/QuickShop.jar"))
+                    compileOnly(rootProject.files(qsPath))
                 }
                 "social-system" -> {
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
 //                    compileOnly(rootProject.project(":bukkit:my-islands"))
                 }
                 "custom-economy" -> {
-                    compileOnly(rootProject.files("./plugins/PlaceholderAPI-2.11.2.jar"))
+
                 }
                 "cs-dungeon" -> {
-                    compileOnly(rootProject.files("./plugins/ItemsAdder_3.2.3-r10.jar"))
-                    compileOnly(rootProject.files("./plugins/CustomStructures-1.8.0.jar"))
-                    compileOnly(rootProject.files("./plugins/MythicMobs-5.1.4.jar"))
+                    compileOnly(rootProject.files(itemsAdderPath))
+                    compileOnly(rootProject.files(customStructuresPath))
+                    compileOnly(rootProject.files(mmPath))
                     compileOnly(rootProject.project(":bukkit:world-settings"))
+                }
+
+                "soul-bind" -> {
+                    compileOnly(rootProject.files(itemsAdderPath))
                 }
             }
         }
@@ -207,7 +224,7 @@ subprojects {
 //                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
 //                }
                 "item-enchant-plus" -> {
-                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI", "MythicMobs"))
+                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI", "MythicMobs", "SoulBind"))
                 }
                 "my-islands" -> {
                     dd.addAll(listOf("CMI", "PlotSquared", "ItemsAdder", "ProtocolLib", "BungeeSettingsBukkit"))

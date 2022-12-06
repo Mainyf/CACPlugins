@@ -15,34 +15,53 @@ description:
   - '&f&l福临 {stage}'
   - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
   - '&r'
-allowGiveItem:
-  - diamond_pickaxe
-  - golden_pickaxe
-  - iron_pickaxe
-  - netherite_pickaxe
-  - stone_pickaxe
-  - wooden_pickaxe
+allowGiveItem: [netherite_pickaxe]
 menuItemInListMenu:
-  - '福临'
+  - ' &8【&7镐附灵&8】'
+  - ' &7&m                       &r'
+  - ' &7▪ 凭借增加&f矿产&7掉落的方式'
+  - ' &7▪ 随着阶级的提升增加矿物产出'
+  - ' &7▪ 附着在矿镐上的玉灵会施加&f祝福'
+  - ' &7▪ 在玉灵的帮助下可取&f物华天宝'
 menuItemInGiveMenu:
-  - '福临'
+  - ' &8【&7镐附灵&8】'
+  - ' &7&m                       &r'
+  - ' &7零阶段：无效果'
+  - ' &7一阶段：挖取自然矿物时 20% 概率&f双倍&7掉落矿物'
+  - ' &7二阶段：挖取自然矿物时会&f双倍&7掉落矿物'
+  - ' &7三阶段：挖取自然矿物时会双倍掉落，并且有 50% 概率&f三倍&7掉落'
 menuItemInUpgradeMenu:
-  - '福临'
+  - ' &8【&7镐附灵&8】'
+  - ' &7&m                       &r'
+  - ' &7零阶段：无效果'
+  - ' &7一阶段：挖取自然矿物时 20% 概率&f双倍&7掉落矿物'
+  - ' &7二阶段：挖取自然矿物时会&f双倍&7掉落矿物'
+  - ' &7三阶段：挖取自然矿物时会双倍掉落，并且有 50% 概率&f三倍&7掉落'
 # 支持掉落翻倍的方块
 # 支持 ItemAdders 和原版方块
 # 玩家放置的不起效果
 allowBlocks:
-  - enchant_ore_high
-  - enchant_ore
-  - emerald_ore
-  - diamond_ore
-  - gold_ore
+  - deepslate_iron_ore
   - iron_ore
-  - coal_ore
+  - deepslate_lapis_ore
   - lapis_ore
+  - deepslate_gold_ore
+  - gold_ore
+  - deepslate_diamond_ore
+  - diamond_ore
+  - deepslate_coal_ore
+  - coal_ore
+  - deepslate_emerald_ore
+  - emerald_ore
+  - deepslate_redstone_ore
   - redstone_ore
-  - nether_gold_ore
+  - deepslate_copper_ore
+  - copper_ore
   - nether_quartz_ore
+  - nether_gold_ore
+  - ancient_debris
+  - cobaltite_ore
+  - erythrite_ore
 defaultSkin: "pickaxeDefault"
 upgradeMaterials:
   - "itemenchants:eqMaterial1|16,itemenchants:eqMaterial2|16,itemenchants:eqMaterial3|16,itemenchants:eqMaterial4|16,itemenchants:eqMaterial5|16"

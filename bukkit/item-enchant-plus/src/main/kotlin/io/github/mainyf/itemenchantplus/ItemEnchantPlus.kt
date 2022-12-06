@@ -13,12 +13,15 @@ import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.soulbind.RecallSBManager
 import org.apache.commons.lang3.EnumUtils
 import org.apache.logging.log4j.LogManager
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.Block
+import org.bukkit.entity.Player
 import org.bukkit.event.Listener
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -41,6 +44,16 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
         Bukkit.getServer().pluginManager.registerEvents(ExpandEnchant, this)
         Bukkit.getServer().pluginManager.registerEvents(LuckEnchant, this)
         Bukkit.getServer().pluginManager.registerEvents(this, this)
+        RecallSBManager.addRecallSBItemPredicate(this.name) { itemStack ->
+            EnchantManager.hasEnchantItem(itemStack)
+        }
+        RecallSBManager.addRecallSBItemIDProvider(this.name) { itemStack ->
+            val enchantData = EnchantManager.getItemEnchant(itemStack)
+            enchantData?.itemUID ?: -1L
+        }
+//        RecallSBManager.addRecallSBItemListProvider(this.name) { player ->
+//            player
+//        }
         apiCommand("itemEnchantPlus") {
             withAliases("iep")
             "reload" {

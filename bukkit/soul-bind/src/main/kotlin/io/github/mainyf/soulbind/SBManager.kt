@@ -1,5 +1,6 @@
 package io.github.mainyf.soulbind
 
+import io.github.mainyf.newmclib.exts.equalsByIaNamespaceID
 import io.github.mainyf.newmclib.exts.mapToDeserialize
 import io.github.mainyf.newmclib.exts.tvar
 import io.github.mainyf.newmclib.exts.uuid
@@ -16,6 +17,25 @@ object SBManager {
     val ownerUUIDMostTag = NamespacedKey(SoulBind.INSTANCE, "ownerUUIDMost")
     val ownerUUIDLeastTag = NamespacedKey(SoulBind.INSTANCE, "ownerUUIDLeast")
     val ownerNameTag = NamespacedKey(SoulBind.INSTANCE, "soulBindOwnerName")
+
+    fun hasBindable(itemStack: ItemStack): Boolean {
+        for (iaId in ConfigSB.autoBindIAList) {
+            if (itemStack.equalsByIaNamespaceID(iaId)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun handleItemBind(player: Player, itemStack: ItemStack): ItemStack {
+        for (iaId in ConfigSB.autoBindIAList) {
+            if (itemStack.equalsByIaNamespaceID(iaId)) {
+                bindItem(itemStack, player)
+                break
+            }
+        }
+        return itemStack
+    }
 
     fun bindItem(itemStack: ItemStack, owner: Player) {
         val meta = itemStack.itemMeta
@@ -46,17 +66,19 @@ object SBManager {
 
     fun getBindItemData(itemStack: ItemStack?): BindItemData? {
         val meta = itemStack?.itemMeta ?: return null
-        val dataContainer = meta.persistentDataContainer
+        val dataContainer =
+            meta.persistentDataContainer
         val rootTag = dataContainer.get(soulBindKey, PersistentDataType.TAG_CONTAINER) ?: return null
         val ownerUUIDMost = rootTag.get(ownerUUIDMostTag, PersistentDataType.LONG)!!
         val ownerUUIDLeast = rootTag.get(ownerUUIDLeastTag, PersistentDataType.LONG)!!
         val ownerName = rootTag.get(ownerNameTag, PersistentDataType.STRING)!!
-        return BindItemData(UUID(ownerUUIDMost, ownerUUIDLeast), ownerName)
+        return BindItemData(UUID(ownerUUIDMost, ownerUUIDLeast), ownerName, RecallSBManager.getBindItemRecallCount(itemStack))
     }
 
     data class BindItemData(
         val ownerUUID: UUID,
-        val ownerName: String
+        val ownerName: String,
+        val recallCount: Int
     )
 
 }

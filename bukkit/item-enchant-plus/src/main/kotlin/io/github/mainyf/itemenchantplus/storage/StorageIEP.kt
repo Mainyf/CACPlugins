@@ -60,9 +60,9 @@ object StorageIEP : AbstractStorageManager() {
         }
     }
 
-    fun addExp(itemId: Long, value: Double): ItemEnchantData {
+    fun addExp(itemId: Long, value: Double, enchantType: ItemEnchantType): ItemEnchantData {
         return transaction {
-            val data = getEnchantData(itemId)
+            val data = getEnchantData(itemId, enchantType)
             data.exp += value
             handleSkillLevel(data)
             val maxExp = ConfigIEP.getLevelMaxExp(data.level)
@@ -73,7 +73,7 @@ object StorageIEP : AbstractStorageManager() {
         }
     }
 
-    fun getEnchantData(itemId: Long): ItemEnchantData {
+    fun getEnchantData(itemId: Long, enchantType: ItemEnchantType): ItemEnchantData {
         return transaction {
             var data = ItemEnchantData.findById(itemId)
             if (data == null) {
@@ -81,6 +81,7 @@ object StorageIEP : AbstractStorageManager() {
                     this.stage = 0
                     this.level = 1
                     this.exp = 0.0
+                    this.skinName = enchantType.defaultSkin().name
                 }
             }
             data
@@ -138,10 +139,25 @@ object StorageIEP : AbstractStorageManager() {
     }
 
     fun getAllEnchantSkin(playerUID: UUID, enchantType: ItemEnchantType): List<EnchantSkin> {
+        val defaultSkin = enchantType.defaultSkin()
         val playerOwnSkins =
             getPlayerEnchantSkins(playerUID).filter { it.skinConfig.enchantType.contains(enchantType) }.toMutableList()
+        if (!playerOwnSkins.any {
+                it.skinConfig.name == defaultSkin.name
+            }) {
+            playerOwnSkins.add(
+                EnchantSkin(
+                    defaultSkin,
+                    1,
+                    null,
+                    true
+                )
+            )
+        }
         ConfigIEP.itemSkins.values.forEach { skinConfig ->
-            if (!playerOwnSkins.any { it.skinConfig.name == skinConfig.name } && skinConfig.enchantType.contains(enchantType)) {
+            if (!playerOwnSkins.any { it.skinConfig.name == skinConfig.name } && skinConfig.enchantType.contains(
+                    enchantType
+                )) {
                 playerOwnSkins.add(
                     EnchantSkin(
                         skinConfig,

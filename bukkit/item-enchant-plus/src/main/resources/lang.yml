@@ -33,3 +33,6 @@ enchantUpgradeMaterialsDeficiency:
   - "mini: &4附灵进阶所需的材料不足"
 enchantUpgradeSuccess:
   - "mini: &6附灵 {enchantName} 进阶成功"
+
+enchantSkinSetSuccess:
+  - "mini: &6附灵皮肤切换成功"

@@ -2,9 +2,17 @@ noBreakDungeon:
   - "mini: &4你无法破坏此遗迹"
 outDungeonBorder:
   - "mini: &4你已离开副本，请返回"
+notJoinBegunDungeon:
+  - "mini: &4你无法进入已经开始的副本"
 dungeonItemDeficiency:
   - "mini: &4副本开启所需物品不足,需要 {item}"
 dungeonMoneyDeficiency:
   - "mini: &4副本开启所需金钱不足,需要 {money}"
+dungeonLevelDeficiency:
+  - "mini: &4副本开启所需等级不足,需要 {level}"
 dungeonExpDeficiency:
   - "mini: &4副本开启所需经验不足,需要 {exp}"
+breakDungeonOutside:
+  - "mini: &4你无法在外面破坏遗迹"
+breakDungeonInside:
+  - "mini: &4你无法在里面破坏遗迹"

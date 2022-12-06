@@ -122,19 +122,24 @@ object DungeonListeners : Listener {
         return Location(posA.world, lX, lY, lZ) to Location(posA.world, hX, hY, hZ)
     }
 
-    //    @EventHandler
-    //    fun onBreak(event: BlockBreakEvent) {
-    //        val loc = event.block.location
-    //        val dungeon = StorageCSD.findDungeonByLoc(loc)
-    //        if (event.player.isOp) return
-    //        if (dungeon != null) {
-    //            val dungeonConfig = ConfigCSD.dungeonConfigMap.values.find { it.structureName == dungeon.structureName }
-    //            if (dungeonConfig?.protectBuild == true) {
-    //                event.player.sendLang("noBreakDungeon")
-    //                event.isCancelled = true
-    //            }
-    //        }
-    //    }
+    @EventHandler
+    fun onBreak(event: BlockBreakEvent) {
+        val loc = event.block.location
+        val dungeon = StorageCSD.findDungeonByLoc(loc)
+        val player = event.player
+        if (player.isOp) return
+        if (dungeon != null) {
+            val dungeonConfig = ConfigCSD.dungeonConfigMap.values.find { it.structureName == dungeon.structureName }
+            if (dungeonConfig?.protectBuild == true) {
+                if (dungeon.containsDungeonArea(player.location)) {
+                    player.sendLang("breakDungeonInside")
+                } else {
+                    player.sendLang("breakDungeonOutside")
+                }
+                event.isCancelled = true
+            }
+        }
+    }
 
     @EventHandler
     fun onInteractAE(event: PlayerInteractAtEntityEvent) {

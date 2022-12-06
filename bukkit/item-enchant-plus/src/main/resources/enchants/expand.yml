@@ -10,14 +10,28 @@ description:
   - '&f&l凿石 {stage}'
   - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
   - '&r'
-allowGiveItem:
-  - netherite_pickaxe
+allowGiveItem: [netherite_pickaxe]
 menuItemInListMenu:
-  - '凿石'
+  - ' &8【&7镐附灵&8】'
+  - ' &7&m                       &r'
+  - ' &7▪ 主要凭借增大挖掘&f面积&7的方式'
+  - ' &7▪ 随着阶级的提升增加挖掘的&f效率'
+  - ' &7▪ 附着在矿镐上的岩灵嗜好啃噬岩石'
+  - ' &7▪ 在岩灵的帮助下 &f开山破石 &7易如反掌'
 menuItemInGiveMenu:
-  - '凿石'
+  - ' &8【&7镐附灵&8】'
+  - ' &7&m                       &r'
+  - ' &7零阶段：无效果'
+  - ' &7一阶段：破坏&f非矿物&7方块会优先破坏一圈内&f另一个&7方块'
+  - ' &7二阶段：主手&f手持&7凿石镐时持续获得&f急迫&7效果'
+  - ' &7三阶段：破坏非矿物方块会使&f一圈&7内其他方块一起破坏'
 menuItemInUpgradeMenu:
-  - '凿石'
+  - ' &8【&7镐附灵&8】'
+  - ' &7&m                       &r'
+  - ' &7零阶段：无效果'
+  - ' &7一阶段：破坏&f非矿物&7方块会优先破坏一圈内&f另一个&7方块'
+  - ' &7二阶段：主手&f手持&7凿石镐时持续获得&f急迫&7效果'
+  - ' &7三阶段：破坏非矿物方块会使&f一圈&7内其他方块一起破坏'
 # 允许一二阶段起效果的方块
 # 支持 ItemAdders 和原版方块
 allowBlocks:
@@ -31,7 +45,6 @@ allowBlocks:
   - grass_block
   - dirt
   - coarse_dirt
-  - podzol
   - terracotta
   - white_terracotta
   - orange_terracotta
@@ -50,6 +63,19 @@ allowBlocks:
   - red_terracotta
   - black_terracotta
   - deepslate
+  - tuff
+  - calcite
+  - dripstone_block
+  - gravel
+  - end_stone
+  - netherrack
+  - basalt
+  - blackstone
+  - clay
+  - red_sand
+  - red_sandstone
+  - crimson_nylium
+  - warped_nylium
 defaultSkin: "pickaxeDefault"
 upgradeMaterials:
   - "itemsadder:cobaltite_ingot|1,netherite_ingot|1"

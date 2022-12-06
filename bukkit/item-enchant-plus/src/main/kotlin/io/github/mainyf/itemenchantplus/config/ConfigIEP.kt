@@ -87,11 +87,17 @@ object ConfigIEP {
             val enchantType = skinSect.getStringList("enchantType").map {
                 EnumUtils.getEnum(ItemEnchantType::class.java, it)
             }
+            val menuActions = skinSect.getAction("menuActions")
             //            val enchantType = skinSect.getEnum<ItemEnchantType>("enchantType")!!
             val skinEffectSectList = skinSect.getListAsConfigSection("skinEffect")
             val skinEffect = mutableListOf<SkinEffect>()
             skinEffectSectList.forEach { skinEffectSect ->
                 val customModelData = skinEffectSect.getInt("customModelData")
+
+                val menuCustomModelData = skinEffectSect.getInt("menuLarge.customModelData")
+                val menuName = skinEffectSect.getString("menuLarge.name") ?: ""
+                val menuLore = skinEffectSect.getStringList("menuLarge.lore")
+
                 val menuItemName = skinEffectSect.getString("menuItemName")!!.colored()
                 val menuItemLore = skinEffectSect.getStringList("menuItemLore").map { it.colored() }
                 val effectSectList = skinEffectSect.getListAsConfigSection("effect")
@@ -101,9 +107,17 @@ object ConfigIEP {
                     val plays = effectSect.getPlay("value")
                     effects.add(SkinEffectItem(triggerType, plays))
                 }
-                skinEffect.add(SkinEffect(customModelData, menuItemName, menuItemLore, effects))
+                skinEffect.add(
+                    SkinEffect(
+                        customModelData,
+                        SkinMenuItem(menuCustomModelData, menuName, menuLore),
+                        menuItemName,
+                        menuItemLore,
+                        effects
+                    )
+                )
             }
-            itemSkins[skinName] = EnchantSkinConfig(skinName, enable, enchantType, skinEffect)
+            itemSkins[skinName] = EnchantSkinConfig(skinName, enable, enchantType, menuActions, skinEffect)
         }
     }
 
@@ -161,7 +175,12 @@ object ConfigIEP {
             enchantSkinMenuSect.asDefaultSlotConfig("largeSkinSlot"),
             enchantSkinMenuSect.asDefaultSlotConfig("prevSlot"),
             enchantSkinMenuSect.asDefaultSlotConfig("nextSlot"),
-            enchantSkinMenuSect.asDefaultSlotConfig("enchantSkinSlot"),
+            enchantSkinMenuSect.asDefaultSlotConfig("enchantSkinX1Slot"),
+            enchantSkinMenuSect.asDefaultSlotConfig("enchantSkinX2Slot"),
+            enchantSkinMenuSect.asDefaultSlotConfig("enchantSkinX3Slot"),
+            enchantSkinMenuSect.asDefaultSlotConfig("enchantSkinX4Slot"),
+            enchantSkinMenuSect.asDefaultSlotConfig("enchantSkinX5Slot"),
+            enchantSkinMenuSect.asDefaultSlotConfig("finishSlot"),
             enchantSkinMenuSect.asDefaultSlotConfig("backSlot")
         )
     }

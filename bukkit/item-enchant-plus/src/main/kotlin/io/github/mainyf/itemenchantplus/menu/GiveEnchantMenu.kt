@@ -92,7 +92,7 @@ class GiveEnchantMenu(val enchantType: ItemEnchantType) : AbstractMenuHandler() 
 
     private fun updateMaterials(inv: Inventory) {
         val gem = ConfigIEP.giveEnchantMenuConfig
-        inv.setIcon(gem.equipSlot.slot, itemStack = enchantItem) {
+        inv.setIcon(gem.equipSlot.slot, itemStack = enchantItem.toEquipItemSlot()) {
             if (enchantItem.isEmpty()) return@setIcon
             it.giveItem(enchantItem)
             it.updateInventory()

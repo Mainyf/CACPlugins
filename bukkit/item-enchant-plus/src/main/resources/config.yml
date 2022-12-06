@@ -1,8 +1,6 @@
 # 每两级所需经验增加
 level: '100*(level/2)'
 enchantIntensifyMaterials:
-  - 'itemenchants:eqMaterial1|16'
-  - 'itemenchants:eqMaterial2|16'
-  - 'itemenchants:eqMaterial3|16'
-  - 'itemenchants:eqMaterial4|16'
-  - 'itemenchants:eqMaterial5|16'
+  - "soul:soul_item_exp_1|16"
+  - "soul:soul_item_exp_2|160"
+  - "soul:soul_item_exp_3|480"

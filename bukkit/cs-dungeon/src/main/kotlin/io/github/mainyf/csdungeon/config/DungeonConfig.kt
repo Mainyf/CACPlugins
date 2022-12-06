@@ -38,6 +38,7 @@ class DungeonConfig(
 class DungeonMaterials(
     val item: List<DungeonMaterialItem>,
     val money: Double,
+    val level: Int,
     val exp: Int
 )
 

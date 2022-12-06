@@ -1,2 +1,10 @@
 noBindItemOwnerInteract:
   - "mini: &c你不是该物品的主人，阻止互动与使用"
+itemInvalid:
+  - "mini: &c该物品失效，已被回收"
+itemAbandon:
+  - "mini: &c该物品已被遗弃，已被回收"
+itemAutoBind:
+  - "mini: &c该物品已被自动绑定"
+recallSuccess:
+  - "mini: &6召回成功"

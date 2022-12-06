@@ -96,6 +96,14 @@ class DungeonMenu(val dungeon: DungeonStructure) : AbstractMenuHandler() {
             )
             return
         }
+        if (player.level <= dungeonMaterial.level) {
+            player.sendLang(
+                "dungeonLevelDeficiency",
+                "{level}",
+                dungeonMaterial.level
+            )
+            return
+        }
         dungeonMaterial.item.forEach { dmItem ->
             player.takeItem(dmItem.amount) {
                 it?.equalsByIaNamespaceID(dmItem.iaName) == true
@@ -103,6 +111,9 @@ class DungeonMenu(val dungeon: DungeonStructure) : AbstractMenuHandler() {
         }
         if (dungeonMaterial.money > 0.0) {
             player.takeMoney(dungeonMaterial.money)
+        }
+        if (dungeonMaterial.level > 0) {
+            player.level -= dungeonMaterial.level
         }
         if (dungeonMaterial.exp > 0) {
             player.totalExperience -= dungeonMaterial.exp

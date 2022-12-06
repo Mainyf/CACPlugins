@@ -89,8 +89,7 @@ object PlayerListener : Listener {
     @EventHandler(ignoreCancelled = true)
     fun handlePlayerGameMode(event: PlayerTeleportEvent) {
         val player = event.player
-        val world = event.to.world
-        ignorePermAndGetWorldSettings(player, world) { settings ->
+        ignorePermAndGetWorldSettings(player) { settings ->
             if (player.gameMode != settings.gameMode) {
                 player.gameMode = settings.gameMode
             }

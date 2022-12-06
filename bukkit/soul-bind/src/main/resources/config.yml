@@ -1,2 +1,4 @@
 bindItemLore:
-  "&6绑定物品，主人: {player}"
+  - "&6绑定物品，主人: {player}"
+autoBindIAList:
+  - "itemsadder:token_1"

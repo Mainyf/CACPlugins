@@ -4,6 +4,7 @@ import io.github.mainyf.itemenchantplus.EnchantData
 import io.github.mainyf.itemenchantplus.EnchantManager
 import io.github.mainyf.itemenchantplus.EnchantSkin
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
+import io.github.mainyf.itemenchantplus.config.sendLang
 import io.github.mainyf.itemenchantplus.storage.StorageIEP
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
@@ -27,10 +28,11 @@ class EnchantSkinMenu : AbstractMenuHandler() {
 
     private var currentEnchantItem: ItemStack? = null
     private var enchantData: EnchantData? = null
+    private var currentSkinIndex = 0
     private var currentSkin: EnchantSkin? = null
 
     override fun open(player: Player) {
-        this.pageSize = ConfigIEP.enchantSkinMenuConfig.enchantSkinSlot.slot.size
+        this.pageSize = 5
         setup(ConfigIEP.enchantSkinMenuConfig.settings)
         val inv = createInv(player)
 
@@ -58,7 +60,18 @@ class EnchantSkinMenu : AbstractMenuHandler() {
         icons.addAll(ekm.largeSkinSlot.iaIcon())
         icons.addAll(ekm.prevSlot.iaIcon())
         icons.addAll(ekm.nextSlot.iaIcon())
-        icons.addAll(ekm.enchantSkinSlot.iaIcon())
+        if(!currentEnchantItem.isEmpty()) {
+            listOf(
+                ekm.enchantSkinX1Slot,
+                ekm.enchantSkinX2Slot,
+                ekm.enchantSkinX3Slot,
+                ekm.enchantSkinX4Slot,
+                ekm.enchantSkinX5Slot
+            ).forEachIndexed { index, defaultSlotConfig ->
+                icons.addAll(defaultSlotConfig.iaIcon(if (currentSkinIndex == index) "default" else "unSelect"))
+            }
+        }
+        icons.addAll(ekm.finishSlot.iaIcon(if (currentEnchantItem == null) "default" else if (currentSkin!!.hasOwn) "haveSkin" else "select"))
 
         return applyTitle(player, icons)
     }
@@ -87,23 +100,54 @@ class EnchantSkinMenu : AbstractMenuHandler() {
 
     private fun updateEnchantSkinSlot(player: Player, inv: Inventory) {
         val ekm = ConfigIEP.enchantSkinMenuConfig
-        val enchantSkinSlot = ekm.enchantSkinSlot.slot
-        inv.setIcon(enchantSkinSlot, AIR_ITEM)
+        val enchantSkinSlots = listOf(
+            ekm.enchantSkinX1Slot,
+            ekm.enchantSkinX2Slot,
+            ekm.enchantSkinX3Slot,
+            ekm.enchantSkinX4Slot,
+            ekm.enchantSkinX5Slot
+        )
+        val enchantSkinSlot = enchantSkinSlots.map { it.slot }.flatten()
+        inv.unSetIcon(enchantSkinSlot)
         inv.unSetIcon(ekm.largeSkinSlot.slot)
+        inv.unSetIcon(ekm.finishSlot.slot)
+
+        kotlin.run {
+            val itemKey =
+                if (currentEnchantItem == null) "default" else if (currentSkin!!.hasOwn) "haveSkin" else "select"
+            inv.setIcon(ekm.finishSlot, itemKey) {
+                val currentItem = currentEnchantItem ?: return@setIcon
+                val skin = currentSkin ?: return@setIcon
+                val data = enchantData ?: return@setIcon
+                if (skin.hasOwn) {
+                    StorageIEP.setItemSkin(data.itemUID, skin.skinConfig)
+                    EnchantManager.updateItemMeta(currentItem)
+                    it.sendLang("enchantSkinSetSuccess")
+                } else {
+                    skin.skinConfig.menuActions?.execute(it)
+                }
+            }
+        }
+
         if (currentEnchantItem.isEmpty()) return
-        inv.setIcon(ekm.largeSkinSlot.slot, itemStack = currentEnchantItem!!.clone().apply {
+        inv.setIcon(ekm.largeSkinSlot.slot, itemStack = currentEnchantItem!!.toEquipItemSlot().apply {
             val skinEffect = currentSkin!!.skinConfig.skinEffect[currentSkin!!.stage - 1]
             val meta = itemMeta
-            meta.setCustomModelData(skinEffect.customModelData)
+            meta.setCustomModelData(skinEffect.menuLarge.customModelData)
             itemMeta = meta
-            setDisplayName {
-                skinEffect.menuItemName.deserialize()
-            }
-            lore(skinEffect.menuItemLore.mapToDeserialize())
+            withMeta(
+                displayName = skinEffect.menuLarge.name.deserialize(),
+                lore = skinEffect.menuLarge.lore.mapToDeserialize()
+            )
+//            setDisplayName {
+//                skinEffect.menuItemName.deserialize()
+//            }
+//            lore(skinEffect.menuItemLore.mapToDeserialize())
         })
+
         currentEnchantSkins.forEachIndexed { index, enchantSkin ->
             val skinEffect = enchantSkin.skinConfig.skinEffect[enchantSkin.stage - 1]
-            inv.setIcon(enchantSkinSlot[index], currentEnchantItem!!.clone().apply {
+            inv.setIcon(enchantSkinSlots[index], itemStack = currentEnchantItem!!.toEquipItemSlot().apply {
                 val meta = itemMeta
                 meta.setCustomModelData(skinEffect.customModelData)
                 itemMeta = meta
@@ -112,8 +156,13 @@ class EnchantSkinMenu : AbstractMenuHandler() {
                 }
                 lore(skinEffect.menuItemLore.mapToDeserialize())
             }) {
-                ekm.enchantSkinSlot.default()?.execAction(it)
+                if (currentSkinIndex == index) {
+                    enchantSkinSlots[index].default()?.execAction(it)
+                } else {
+                    enchantSkinSlots[index]["unSelect"]?.execAction(it)
+                }
                 currentSkin = enchantSkin
+                currentSkinIndex = index
                 updateEnchantSkins(player)
                 updateCurrentEnchantSkins()
                 updateEnchantSkinSlot(player, inv)
@@ -134,6 +183,9 @@ class EnchantSkinMenu : AbstractMenuHandler() {
 
         enchantData = data
         currentSkin = data.enchantSkin
+        updateEnchantSkins(player)
+        updateCurrentEnchantSkins()
+        currentSkinIndex = currentEnchantSkins.indexOfFirst { it.skinConfig.name == currentSkin!!.skinConfig.name }
         if (currentEnchantItem.isEmpty()) {
             currentEnchantItem = itemStack
             pInv.setItem(slot, null)
@@ -141,9 +193,8 @@ class EnchantSkinMenu : AbstractMenuHandler() {
             pInv.setItem(slot, currentEnchantItem)
             currentEnchantItem = itemStack
         }
-        updateEnchantSkins(player)
-        updateCurrentEnchantSkins()
         updateEnchantSkinSlot(player, inv)
+        updateTitle(player)
     }
 
     override fun onClose(player: Player, inv: Inventory, event: InventoryCloseEvent) {

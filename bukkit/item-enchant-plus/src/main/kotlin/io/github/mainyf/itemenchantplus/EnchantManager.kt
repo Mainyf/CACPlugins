@@ -116,13 +116,13 @@ object EnchantManager {
         }
         val ownerUID = dataContainer.get(ownerUIDDataKey, PersistentDataType.STRING)?.asUUID() ?: return null
         val ownerName = dataContainer.get(ownerNameDataKey, PersistentDataType.STRING) ?: return null
-        val data = StorageIEP.getEnchantData(itemUID)
+        val data = StorageIEP.getEnchantData(itemUID, enchantType)
         val enchantSkin = StorageIEP.getPlayerCurrentEnchantSkin(ownerUID, data.skinName) ?: return null
         return EnchantData(enchantType, itemUID, ownerUID, ownerName, data.stage, data.level, data.exp, enchantSkin)
     }
 
     fun addExpToItem(data: EnchantData, value: Double): EnchantData {
-        val d = StorageIEP.addExp(data.itemUID, value)
+        val d = StorageIEP.addExp(data.itemUID, value, data.enchantType)
         data.stage = d.stage
         data.level = d.level
         data.exp = d.exp
@@ -138,6 +138,10 @@ object EnchantManager {
 
         rs -= data.exp
         return rs
+    }
+
+    fun updateItemMeta(item: ItemStack) {
+        updateItemMeta(item, getItemEnchant(item)!!)
     }
 
     fun updateItemMeta(item: ItemStack, data: EnchantData) {

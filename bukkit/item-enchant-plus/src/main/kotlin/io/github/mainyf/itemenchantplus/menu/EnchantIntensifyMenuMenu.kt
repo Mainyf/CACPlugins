@@ -125,7 +125,7 @@ class EnchantIntensifyMenuMenu : AbstractMenuHandler() {
 
     private fun updateEquip(inv: Inventory) {
         val eim = ConfigIEP.enchantIntensifyMenuConfig
-        inv.setIcon(eim.equipSlot.slot, itemStack = enchantItem) { player ->
+        inv.setIcon(eim.equipSlot.slot, itemStack = enchantItem.toEquipItemSlot()) { player ->
             if (enchantItem.isEmpty()) return@setIcon
             putBack(player, inv)
         }

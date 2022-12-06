@@ -1,8 +1,10 @@
 package io.github.mainyf.socialsystem
 
 import io.github.mainyf.newmclib.command.APICommand
+import io.github.mainyf.newmclib.command.offlinePlayerArguments
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
+import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.successMsg
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.socialsystem.config.ConfigManager
@@ -11,6 +13,7 @@ import io.github.mainyf.socialsystem.menu.SocialMainMenu
 import io.github.mainyf.socialsystem.module.FriendHandler
 import io.github.mainyf.socialsystem.module.FriendInvites
 import io.github.mainyf.socialsystem.module.FriendTPRequests
+import io.github.mainyf.socialsystem.module.SocialManager
 import org.bukkit.entity.Player
 
 object CommandHandler : APICommand("social") {
@@ -27,6 +30,14 @@ object CommandHandler : APICommand("social") {
             executePlayer {
                 val target = sender
                 SocialCardMenu(target.asOfflineData()).open(target)
+            }
+        }
+        "qqnum" {
+            withArguments(offlinePlayerArguments("玩家名"))
+            executeOP {
+                val player = offlinePlayer()
+                val qqNum = SocialManager.getPlayerQQNum(player.uuid)
+                sender.msg("玩家 ${player.name}: $qqNum")
             }
         }
         "menu" {

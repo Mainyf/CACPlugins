@@ -24,7 +24,7 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
     val dungeonLevelConfig get() = dungeonConfig!!.levels.find { it.level == level }
     val dungeonMobSpawnLoc by lazy { StorageCSD.getDungeonMobSpawnLoc(dungeon) }
     val players = mutableSetOf<Player>()
-    val moveCD = Cooldown()
+    val moveMsgCD = Cooldown()
     val mobList = mutableListOf<MobWrapper>()
 
     fun hasInBattle(player: Player): Boolean {
@@ -156,12 +156,20 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
 
     fun onPlayerMove(player: Player, event: PlayerMoveEvent) {
         if (!start) return
-        if (!players.contains(player)) return
+        if (!players.contains(player)) {
+            if (dungeon.containsDungeonArea(event.to)) {
+                moveMsgCD.invoke(player.uuid, 500, {
+                    player.sendLang("notJoinBegunDungeon")
+                }, {})
+                event.isCancelled = true
+            }
+            return
+        }
         val boundaryDamage = dungeonConfig!!.boundaryDamage
         if (boundaryDamage == -1) return
         if (!dungeon.containsDungeonArea(event.to)) {
             event.isCancelled = true
-            moveCD.invoke(player.uuid, 500, {
+            moveMsgCD.invoke(player.uuid, 500, {
                 if (boundaryDamage == 0) return@invoke
                 player.health =
                     (player.health - boundaryDamage).clamp(

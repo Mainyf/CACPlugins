@@ -14,6 +14,7 @@ import io.github.mainyf.worldsettings.listeners.BlockListener
 import io.github.mainyf.worldsettings.listeners.EntityListener
 import io.github.mainyf.worldsettings.listeners.PlayerListener
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Entity
@@ -126,16 +127,25 @@ class WorldSettings : BasePlugin() {
 
 }
 
-fun ignorePermAndGetWorldSettings(entity: Entity?, world: World? = entity?.world, block: (WorldSettingConfig) -> Unit) {
+fun ignorePermAndGetWorldSettings(
+    entity: Entity?,
+    location: Location? = entity?.location,
+    block: (WorldSettingConfig) -> Unit
+) {
     if (entity?.hasPermission(ConfigWS.ignorePermission) == true) return
-    val settings =
-        (if (entity == null) ConfigWS.getSetting(world) else ConfigWS.getSetting(entity.location)) ?: return
+//    val settings =
+//        (if (entity == null) ConfigWS.getSetting(world) else ConfigWS.getSetting(location!!)) ?: return
+    val settings = getWorldSetting(location!!) ?: return
     //    val settings = ConfigManager.getSetting(world) ?: return
     block.invoke(settings)
 }
 
-fun getWorldSettings(player: Player, world: World = player.world, block: (WorldSettingConfig) -> Unit) {
-    val settings = ConfigWS.getSetting(player.location) ?: return
+fun getWorldSetting(location: Location): WorldSettingConfig? {
+    return ConfigWS.getSetting(location)
+}
+
+fun getWorldSettings(player: Player, block: (WorldSettingConfig) -> Unit) {
+    val settings = getWorldSetting(player.location) ?: return
     //    val settings = ConfigManager.getSetting(world) ?: return
     block.invoke(settings)
 }

@@ -51,6 +51,11 @@ class EnchantSkinMenuConfig(
     val largeSkinSlot: DefaultSlotConfig,
     val prevSlot: DefaultSlotConfig,
     val nextSlot: DefaultSlotConfig,
-    val enchantSkinSlot: DefaultSlotConfig,
+    val enchantSkinX1Slot: DefaultSlotConfig,
+    val enchantSkinX2Slot: DefaultSlotConfig,
+    val enchantSkinX3Slot: DefaultSlotConfig,
+    val enchantSkinX4Slot: DefaultSlotConfig,
+    val enchantSkinX5Slot: DefaultSlotConfig,
+    val finishSlot: DefaultSlotConfig,
     val backSlot: DefaultSlotConfig
 )

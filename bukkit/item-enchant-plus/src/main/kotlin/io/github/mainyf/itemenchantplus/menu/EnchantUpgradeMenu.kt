@@ -96,7 +96,7 @@ class EnchantUpgradeMenu : AbstractMenuHandler() {
 
     private fun updateMaterials(inv: Inventory) {
         val gum = ConfigIEP.enchantUpgradeMenuConfig
-        inv.setIcon(gum.equipSlot.slot, itemStack = enchantItem) {
+        inv.setIcon(gum.equipSlot.slot, itemStack = enchantItem.toEquipItemSlot()) {
             if (enchantItem.isEmpty()) return@setIcon
             it.giveItem(enchantItem)
             it.updateInventory()

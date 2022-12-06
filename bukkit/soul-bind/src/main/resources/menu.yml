@@ -1,0 +1,62 @@
+recallItemMenu:
+  # 点击速度限制
+  cooldown: 250
+  # ia背景图片
+  row: 6
+  background: ''
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  recallItemSlot:
+    slot: [ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ]
+    default:
+      name: "{itemName}"
+      lore:
+        - "{desc}"
+        - "&6点击召回"
+  prevSlot:
+    slot: [ 16 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3上一页"
+  nextSlot:
+    slot: [ 18 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3下一页"
+  infoSlot:
+    slot: [ 17 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3信息"
+      lore:
+        - "&l点击上方菜单物品即可召回"
+  backSlot:
+    slot: [ 19 ]
+    default:
+      type: itemsadder:air
+      actions:
+        - "console: trmenu open main {player}"
+      name: " &c&l> &3返回"
+abandonConfirmMenu:
+  # 点击速度限制
+  cooldown: 250
+  row: 3
+  background: ':offset_-8::view_confirm:'
+  globalActions: "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+  itemSlot:
+    slot: [ 10 ]
+  # 确认
+  confirmSlot:
+    slot: [ 11 ]
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: "&a确认操作"
+      lore: []
+  # 返回
+  backSlot:
+    slot: [ 15 ]
+    default:
+      iaIcons: ''
+      type: itemsadder:air
+      name: "&7取消操作"
+      lore: []
