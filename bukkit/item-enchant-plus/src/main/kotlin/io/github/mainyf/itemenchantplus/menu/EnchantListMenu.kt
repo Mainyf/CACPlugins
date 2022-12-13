@@ -87,11 +87,11 @@ class EnchantListMenu : AbstractMenuHandler() {
             inv.setIcon(enchantSlot[index], elm.enchantSlot.default()!!.toItemStack {
                 withMeta(
                     {
-                        it?.text()?.tvar("enchantName", enchant.displayName())?.toComp()
+                        it?.serialize()?.tvar("enchantName", enchant.displayName())?.deserialize()
                     },
                     { lore ->
                         if (lore.isNullOrEmpty()) return@withMeta lore
-                        lore.mapToString().tvarList("desc", enchant.menuItemInListMenu()).mapToComp()
+                        lore.mapToSerialize().tvarList("desc", enchant.menuItemInListMenu()).mapToDeserialize()
                     }
                 )
             }) {

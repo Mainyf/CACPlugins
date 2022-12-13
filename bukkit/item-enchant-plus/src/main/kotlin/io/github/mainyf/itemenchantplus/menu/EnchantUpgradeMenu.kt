@@ -133,7 +133,7 @@ class EnchantUpgradeMenu : AbstractMenuHandler() {
                 inv.setIcon(mSlot[index], gum.materialsSlot.default()!!.toItemStack(materialItem.clone()) {
                     withMeta(
                         {
-                            it?.tvar("itemName", materialDName, "count", enchantMaterial.amount.toString().toComp())
+                            it?.tvar("itemName", materialDName, "count", enchantMaterial.amount.toString().deserialize())
                         },
                         { lore ->
                             if (lore.isNullOrEmpty()) return@withMeta lore

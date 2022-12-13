@@ -2,12 +2,10 @@ package io.github.mainyf.shopmanager.listener
 
 import io.github.mainyf.newmclib.exts.asPlayer
 import io.github.mainyf.newmclib.exts.uuid
-import io.github.mainyf.newmclib.hooks.money
 import io.github.mainyf.shopmanager.ShopManager
 import io.github.mainyf.shopmanager.config.ConfigManager
 import io.github.mainyf.shopmanager.config.sendLang
 import io.github.mainyf.shopmanager.storage.StorageManager
-import net.kyori.adventure.text.Component
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.maxgamer.quickshop.api.event.ShopClickEvent

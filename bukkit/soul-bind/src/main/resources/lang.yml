@@ -8,3 +8,9 @@ itemAutoBind:
   - "mini: &c该物品已被自动绑定"
 recallSuccess:
   - "mini: &6召回成功"
+recallCostDeficiency:
+  - "mini: &6召回所需金钱不足, 需要: {money}"
+abandonCostDeficiency:
+  - "mini: &6召回所需金钱不足, 需要: {money}"
+bindItemNotAllowedCreateShop:
+  - "mini: &6绑定的物品不允许上架商店"

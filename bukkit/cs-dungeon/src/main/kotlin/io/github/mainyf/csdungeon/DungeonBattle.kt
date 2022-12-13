@@ -10,6 +10,7 @@ import org.bukkit.Location
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.scheduler.BukkitRunnable
 import kotlin.collections.find
 
@@ -156,7 +157,7 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
 
     fun onPlayerMove(player: Player, event: PlayerMoveEvent) {
         if (!start) return
-        if (!players.contains(player)) {
+        if (!players.contains(player) && !player.isOp) {
             if (dungeon.containsDungeonArea(event.to)) {
                 moveMsgCD.invoke(player.uuid, 500, {
                     player.sendLang("notJoinBegunDungeon")
@@ -178,6 +179,19 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
                     )
                 player.sendLang("outDungeonBorder")
             }, {})
+        }
+    }
+
+    fun onPlayerTeleport(player: Player, event: PlayerTeleportEvent) {
+        if (!start) return
+        if (!players.contains(player) && !player.isOp) {
+            if (dungeon.containsDungeonArea(event.to)) {
+                moveMsgCD.invoke(player.uuid, 500, {
+                    player.sendLang("notJoinBegunDungeon")
+                }, {})
+                event.isCancelled = true
+            }
+            return
         }
     }
 

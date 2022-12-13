@@ -7,6 +7,7 @@ data class EnchantSkinConfig(
     val name: String,
     val enable: Boolean,
     val enchantType: List<ItemEnchantType>,
+    val priority: Int,
     val menuActions: MultiAction?,
     val skinEffect: List<SkinEffect>
 )

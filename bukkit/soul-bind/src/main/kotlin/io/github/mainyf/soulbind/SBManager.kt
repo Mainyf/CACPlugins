@@ -30,22 +30,21 @@ object SBManager {
     fun handleItemBind(player: Player, itemStack: ItemStack): ItemStack {
         for (iaId in ConfigSB.autoBindIAList) {
             if (itemStack.equalsByIaNamespaceID(iaId)) {
-                bindItem(itemStack, player)
+                bindItem(itemStack, player.uuid, player.name)
                 break
             }
         }
         return itemStack
     }
 
-    fun bindItem(itemStack: ItemStack, owner: Player) {
+    fun bindItem(itemStack: ItemStack, ownerUUID: UUID, ownerName: String) {
         val meta = itemStack.itemMeta
         val dataContainer = meta.persistentDataContainer
         val root = dataContainer.adapterContext.newPersistentDataContainer()
-        val uuid = owner.uuid
-        root.set(ownerUUIDMostTag, PersistentDataType.LONG, uuid.mostSignificantBits)
-        root.set(ownerUUIDLeastTag, PersistentDataType.LONG, uuid.leastSignificantBits)
+        root.set(ownerUUIDMostTag, PersistentDataType.LONG, ownerUUID.mostSignificantBits)
+        root.set(ownerUUIDLeastTag, PersistentDataType.LONG, ownerUUID.leastSignificantBits)
 
-        root.set(ownerNameTag, PersistentDataType.STRING, owner.name)
+        root.set(ownerNameTag, PersistentDataType.STRING, ownerName)
 
         dataContainer.set(
             soulBindKey,
@@ -53,7 +52,7 @@ object SBManager {
             root
         )
         val lore = meta.lore() ?: mutableListOf()
-        lore.addAll(ConfigSB.bindItemLore.map { it.tvar("player", owner.name) }.mapToDeserialize())
+        lore.addAll(ConfigSB.bindItemLore.map { it.tvar("player", ownerName) }.mapToDeserialize())
         meta.lore(lore)
         itemStack.itemMeta = meta
     }

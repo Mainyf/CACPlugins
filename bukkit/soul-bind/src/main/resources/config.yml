@@ -1,4 +1,19 @@
 bindItemLore:
-  - "&6绑定物品，主人: {player}"
+  - "&8已认主: {player}"
 autoBindIAList:
-  - "itemsadder:token_1"
+  - "soul:soul_item_1"
+  - "soul:soul_item_2"
+  - "soul:soul_item_3"
+  - "soul:soul_item_4"
+  - "soul:soul_item_5"
+  - "soul:soul_item_6"
+  - "soul:soul_item_7"
+  - "soul:soul_item_8"
+  - "soul:soul_item_9"
+  - "soul:soul_item_10"
+  - "soul:soul_item_11"
+  - "soul:soul_item_12"
+# 召回费用
+recallCost: 1
+# 遗弃费用
+abandonCost: 1

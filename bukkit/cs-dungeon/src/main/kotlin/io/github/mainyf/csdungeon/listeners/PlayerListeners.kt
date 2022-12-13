@@ -6,6 +6,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerTeleportEvent
 
 object PlayerListeners : Listener {
 
@@ -27,6 +28,13 @@ object PlayerListeners : Listener {
     fun onMove(event: PlayerMoveEvent) {
         CsDungeon.INSTANCE.dungeonBattles.forEach {
             it.onPlayerMove(event.player, event)
+        }
+    }
+
+    @EventHandler
+    fun onTeleport(event: PlayerTeleportEvent) {
+        CsDungeon.INSTANCE.dungeonBattles.forEach {
+            it.onPlayerTeleport(event.player, event)
         }
     }
 

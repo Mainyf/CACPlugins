@@ -80,21 +80,20 @@ object RecallSBManager {
         val itemID = getItemID(itemStack) ?: return itemStack
         for ((_, predicate) in recallSBItemPredicates) {
             if (predicate.invoke(itemStack)) {
-                bindItem(itemStack, player, itemID)
+                bindItem(itemStack, player.uuid, player.name, itemID)
             }
         }
         return itemStack
     }
 
-    fun bindItem(itemStack: ItemStack, owner: Player, itemId: UUID) {
+    fun bindItem(itemStack: ItemStack, ownerUUID: UUID, ownerName: String, itemId: UUID) {
         val meta = itemStack.itemMeta
         val dataContainer = meta.persistentDataContainer
         val root = dataContainer.adapterContext.newPersistentDataContainer()
-        val uuid = owner.uuid
-        root.set(SBManager.ownerUUIDMostTag, PersistentDataType.LONG, uuid.mostSignificantBits)
-        root.set(SBManager.ownerUUIDLeastTag, PersistentDataType.LONG, uuid.leastSignificantBits)
+        root.set(SBManager.ownerUUIDMostTag, PersistentDataType.LONG, ownerUUID.mostSignificantBits)
+        root.set(SBManager.ownerUUIDLeastTag, PersistentDataType.LONG, ownerUUID.leastSignificantBits)
 
-        root.set(SBManager.ownerNameTag, PersistentDataType.STRING, owner.name)
+        root.set(SBManager.ownerNameTag, PersistentDataType.STRING, ownerName)
         root.set(recallCountKey, PersistentDataType.INTEGER, 0)
 
         dataContainer.set(
@@ -103,10 +102,10 @@ object RecallSBManager {
             root
         )
         val lore = meta.lore() ?: mutableListOf()
-        lore.addAll(ConfigSB.bindItemLore.map { it.tvar("player", owner.name) }.mapToDeserialize())
+        lore.addAll(ConfigSB.bindItemLore.map { it.tvar("player", ownerName) }.mapToDeserialize())
         meta.lore(lore)
         itemStack.itemMeta = meta
-        StorageSB.updateRecallCount(owner.uuid, itemId, itemStack)
+        StorageSB.updateRecallCount(ownerUUID, itemId, itemStack)
     }
 
     fun tryUpdateRecallCount(itemStack: ItemStack) {
@@ -119,12 +118,12 @@ object RecallSBManager {
         }
     }
 
-    fun addRecallCount(itemStack: ItemStack) {
+    fun setRecallCount(itemStack: ItemStack, count: Int) {
         val meta = itemStack.itemMeta
         val dataContainer = meta.persistentDataContainer
         val root = dataContainer.get(SBManager.soulBindKey, PersistentDataType.TAG_CONTAINER) ?: return
-        val recallCount = root.get(recallCountKey, PersistentDataType.INTEGER) ?: return
-        root.set(recallCountKey, PersistentDataType.INTEGER, recallCount + 1)
+//        val recallCount = root.get(recallCountKey, PersistentDataType.INTEGER) ?: return
+        root.set(recallCountKey, PersistentDataType.INTEGER, count)
         dataContainer.set(
             SBManager.soulBindKey,
             PersistentDataType.TAG_CONTAINER,

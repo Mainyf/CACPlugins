@@ -43,7 +43,9 @@ class EnchantSkinMenu : AbstractMenuHandler() {
     private fun updateEnchantSkins(player: Player) {
         if (enchantData == null) return
         this.enchantSkins.clear()
-        this.enchantSkins.addAll(StorageIEP.getAllEnchantSkin(player.uuid, enchantData!!.enchantType))
+        this.enchantSkins.addAll(StorageIEP.getAllEnchantSkin(player.uuid, enchantData!!.enchantType).sortedBy {
+            it.skinConfig.priority
+        })
         this.maxPageIndex = ceil(
             enchantSkins.size.toDouble() / pageSize.toDouble()
         ).toInt()
@@ -60,7 +62,7 @@ class EnchantSkinMenu : AbstractMenuHandler() {
         icons.addAll(ekm.largeSkinSlot.iaIcon())
         icons.addAll(ekm.prevSlot.iaIcon())
         icons.addAll(ekm.nextSlot.iaIcon())
-        if(!currentEnchantItem.isEmpty()) {
+        if (!currentEnchantItem.isEmpty()) {
             listOf(
                 ekm.enchantSkinX1Slot,
                 ekm.enchantSkinX2Slot,
@@ -133,22 +135,28 @@ class EnchantSkinMenu : AbstractMenuHandler() {
         inv.setIcon(ekm.largeSkinSlot.slot, itemStack = currentEnchantItem!!.toEquipItemSlot().apply {
             val skinEffect = currentSkin!!.skinConfig.skinEffect[currentSkin!!.stage - 1]
             val meta = itemMeta
+            meta.enchants.forEach {
+                meta.removeEnchant(it.key)
+            }
             meta.setCustomModelData(skinEffect.menuLarge.customModelData)
             itemMeta = meta
             withMeta(
                 displayName = skinEffect.menuLarge.name.deserialize(),
                 lore = skinEffect.menuLarge.lore.mapToDeserialize()
             )
-//            setDisplayName {
-//                skinEffect.menuItemName.deserialize()
-//            }
-//            lore(skinEffect.menuItemLore.mapToDeserialize())
+            //            setDisplayName {
+            //                skinEffect.menuItemName.deserialize()
+            //            }
+            //            lore(skinEffect.menuItemLore.mapToDeserialize())
         })
 
         currentEnchantSkins.forEachIndexed { index, enchantSkin ->
             val skinEffect = enchantSkin.skinConfig.skinEffect[enchantSkin.stage - 1]
             inv.setIcon(enchantSkinSlots[index], itemStack = currentEnchantItem!!.toEquipItemSlot().apply {
                 val meta = itemMeta
+                meta.enchants.forEach {
+                    meta.removeEnchant(it.key)
+                }
                 meta.setCustomModelData(skinEffect.customModelData)
                 itemMeta = meta
                 setDisplayName {

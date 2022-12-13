@@ -9,10 +9,9 @@ import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.utils.ItemTypeWrapper
 import org.apache.commons.lang3.EnumUtils
 import org.bukkit.Material
-import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.FileConfiguration
-import org.bukkit.entity.Entity
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ItemStack
 
 fun CommandSender.sendLang(key: String, vararg data: Any) {
@@ -25,10 +24,10 @@ object ConfigIEP {
 
     private lateinit var langConfig: FileConfiguration
     private lateinit var mainConfig: FileConfiguration
-    private lateinit var skinConfig: FileConfiguration
     private lateinit var menuConfig: FileConfiguration
     private lateinit var expandConfig: FileConfiguration
     private lateinit var luckConfig: FileConfiguration
+    private lateinit var lanrenConfig: FileConfiguration
 
     private lateinit var levelExpression: String
     val enchantIntensifyMaterials = mutableMapOf<ItemTypeWrapper, Double>()
@@ -38,6 +37,7 @@ object ConfigIEP {
 
     lateinit var expandEnchantConfig: ExpandEnchantConfig
     lateinit var luckEnchantConfig: LuckEnchantConfig
+    lateinit var lanrenEnchantConfig: LanRenEnchantConfig
 
     //    val expandEnchant get() = enchants["expand"]!!
 
@@ -54,10 +54,14 @@ object ConfigIEP {
 
             langConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("lang.yml")
             mainConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("config.yml")
-            skinConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("skins.yml")
+            if (!ItemEnchantPlus.INSTANCE.dataFolder.resolve("skins").exists()) {
+                ItemEnchantPlus.INSTANCE.saveResourceToFileAsConfiguration("skins/skins.yml")
+                ItemEnchantPlus.INSTANCE.saveResourceToFileAsConfiguration("skins/skins2.yml")
+            }
             menuConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("menu.yml")
             expandConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/expand.yml")
             luckConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/luck.yml")
+            lanrenConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/lan_ren.yml")
 
             lang = BaseLang()
             lang.load(langConfig)
@@ -81,43 +85,49 @@ object ConfigIEP {
 
     private fun loadSkinConfig() {
         itemSkins.clear()
-        skinConfig.getKeys(false).forEach { skinName ->
-            val skinSect = skinConfig.getSection(skinName)
-            val enable = skinSect.getBoolean("enable")
-            val enchantType = skinSect.getStringList("enchantType").map {
-                EnumUtils.getEnum(ItemEnchantType::class.java, it)
-            }
-            val menuActions = skinSect.getAction("menuActions")
-            //            val enchantType = skinSect.getEnum<ItemEnchantType>("enchantType")!!
-            val skinEffectSectList = skinSect.getListAsConfigSection("skinEffect")
-            val skinEffect = mutableListOf<SkinEffect>()
-            skinEffectSectList.forEach { skinEffectSect ->
-                val customModelData = skinEffectSect.getInt("customModelData")
-
-                val menuCustomModelData = skinEffectSect.getInt("menuLarge.customModelData")
-                val menuName = skinEffectSect.getString("menuLarge.name") ?: ""
-                val menuLore = skinEffectSect.getStringList("menuLarge.lore")
-
-                val menuItemName = skinEffectSect.getString("menuItemName")!!.colored()
-                val menuItemLore = skinEffectSect.getStringList("menuItemLore").map { it.colored() }
-                val effectSectList = skinEffectSect.getListAsConfigSection("effect")
-                val effects = mutableListOf<SkinEffectItem>()
-                effectSectList.forEach { effectSect ->
-                    val triggerType = effectSect.getEnum<EffectTriggerType>("type")!!
-                    val plays = effectSect.getPlay("value")
-                    effects.add(SkinEffectItem(triggerType, plays))
+        val skinsDir = ItemEnchantPlus.INSTANCE.dataFolder.resolve("skins")
+        skinsDir.listFiles()?.forEach { skinFile ->
+            val skinConfig = YamlConfiguration.loadConfiguration(skinFile)
+            skinConfig.getKeys(false).forEach { skinName ->
+                val skinSect = skinConfig.getSection(skinName)
+                val enable = skinSect.getBoolean("enable")
+                val enchantType = skinSect.getStringList("enchantType").map {
+                    EnumUtils.getEnum(ItemEnchantType::class.java, it)
                 }
-                skinEffect.add(
-                    SkinEffect(
-                        customModelData,
-                        SkinMenuItem(menuCustomModelData, menuName, menuLore),
-                        menuItemName,
-                        menuItemLore,
-                        effects
+                val priority = skinSect.getInt("priority", 0)
+                val menuActions = skinSect.getAction("menuActions")
+                //            val enchantType = skinSect.getEnum<ItemEnchantType>("enchantType")!!
+                val skinEffectSectList = skinSect.getListAsConfigSection("skinEffect")
+                val skinEffect = mutableListOf<SkinEffect>()
+                skinEffectSectList.forEach { skinEffectSect ->
+                    val customModelData = skinEffectSect.getInt("customModelData")
+
+                    val menuCustomModelData = skinEffectSect.getInt("menuLarge.customModelData")
+                    val menuName = skinEffectSect.getString("menuLarge.name") ?: ""
+                    val menuLore = skinEffectSect.getStringList("menuLarge.lore")
+
+                    val menuItemName = skinEffectSect.getString("menuItemName")!!.colored()
+                    val menuItemLore = skinEffectSect.getStringList("menuItemLore").map { it.colored() }
+                    val effectSectList = skinEffectSect.getListAsConfigSection("effect")
+                    val effects = mutableListOf<SkinEffectItem>()
+                    effectSectList.forEach { effectSect ->
+                        val triggerType = effectSect.getEnum<EffectTriggerType>("type")!!
+                        val plays = effectSect.getPlay("value")
+                        effects.add(SkinEffectItem(triggerType, plays))
+                    }
+                    skinEffect.add(
+                        SkinEffect(
+                            customModelData,
+                            SkinMenuItem(menuCustomModelData, menuName, menuLore),
+                            menuItemName,
+                            menuItemLore,
+                            effects
+                        )
                     )
-                )
+                }
+                itemSkins[skinName] =
+                    EnchantSkinConfig(skinName, enable, enchantType, priority, menuActions, skinEffect)
             }
-            itemSkins[skinName] = EnchantSkinConfig(skinName, enable, enchantType, menuActions, skinEffect)
         }
     }
 
@@ -189,30 +199,7 @@ object ConfigIEP {
         enchants.clear()
         loadExpandEnchantConfig()
         loadLuckEnchantConfig()
-        //        enchantConfig.getKeys(false).forEach { enchantID ->
-        //            val enchantSect = enchantConfig.getSection(enchantID)
-        //            val enable = enchantSect.getBoolean("enable")
-        //            val name = enchantSect.getString("name")!!
-        //            val description = enchantSect.getStringList("description")
-        //            val allowBlocks = enchantSect.getStringList("allowBlocks").map { EnchantBlock(it) }
-        //            val defaultSkin = itemSkins[enchantSect.getString("defaultSkin")]!!
-        //            val upgradeMaterials = enchantSect.getStringList("upgradeMaterials").map {
-        //                val pair = it.split("|")
-        //                EnchantMaterial(
-        //                    ItemTypeWrapper(pair[0]),
-        //                    pair[1].toInt()
-        //                )
-        //            }
-        //            enchants[enchantID] = ExpandEnchantConfig(
-        //                enchantID,
-        //                enable,
-        //                name,
-        //                description,
-        //                allowBlocks,
-        //                defaultSkin,
-        //                upgradeMaterials
-        //            )
-        //        }
+        loadLanRenEnchantConfig()
     }
 
     private fun loadExpandEnchantConfig() {
@@ -272,6 +259,30 @@ object ConfigIEP {
             }
         )
         enchants[ItemEnchantType.LUCK] = luckEnchantConfig
+    }
+
+    private fun loadLanRenEnchantConfig() {
+        lanrenEnchantConfig = LanRenEnchantConfig(
+            lanrenConfig.getBoolean("enable"),
+            lanrenConfig.getString("name")!!,
+            lanrenConfig.getStringList("description"),
+            lanrenConfig.getStringList("allowGiveItem").map { Material.valueOf(it.uppercase()) },
+            lanrenConfig.getStringList("menuItemInListMenu"),
+            lanrenConfig.getStringList("menuItemInGiveMenu"),
+            lanrenConfig.getStringList("menuItemInUpgradeMenu"),
+            itemSkins[lanrenConfig.getString("defaultSkin")]!!,
+            lanrenConfig.getStringList("upgradeMaterials").map {
+                val pair = it.split(",")
+                pair.map { it2 ->
+                    val pair2 = it2.split("|")
+                    EnchantMaterial(
+                        ItemTypeWrapper(pair2[0]),
+                        pair2[1].toInt()
+                    )
+                }
+            }
+        )
+        enchants[ItemEnchantType.LAN_REN] = lanrenEnchantConfig
     }
 
     fun getMaterialExp(itemStack: ItemStack): Double {

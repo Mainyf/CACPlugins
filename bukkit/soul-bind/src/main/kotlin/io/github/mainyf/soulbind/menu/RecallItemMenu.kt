@@ -1,11 +1,10 @@
 package io.github.mainyf.soulbind.menu
 
 import io.github.mainyf.newmclib.config.IaIcon
-import io.github.mainyf.newmclib.defaultConfirmMenuConfig
 import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.hooks.money
+import io.github.mainyf.newmclib.hooks.takeMoney
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
-import io.github.mainyf.newmclib.menu.ConfirmMenu
-import io.github.mainyf.newmclib.utils.Cooldown
 import io.github.mainyf.soulbind.RecallSBManager
 import io.github.mainyf.soulbind.config.ConfigSB
 import io.github.mainyf.soulbind.config.sendLang
@@ -108,9 +107,14 @@ class RecallItemMenu : AbstractMenuHandler() {
                 )
             }, leftClickBlock = {
                 rim.recallItemSlot.default()?.execAction(it)
-                StorageSB.addRecallCount(itemID)
+                if (player.money() < ConfigSB.recallCost) {
+                    player.sendLang("recallCostDeficiency", "{money}", ConfigSB.recallCost)
+                    return@setIcon
+                }
+                player.takeMoney(ConfigSB.recallCost.toDouble())
+                val newCount = StorageSB.addRecallCount(itemID)
                 val giveToPlayerItemStack = itemStack.clone()
-                RecallSBManager.addRecallCount(giveToPlayerItemStack)
+                RecallSBManager.setRecallCount(giveToPlayerItemStack, newCount)
                 RecallSBManager.tryUpdateRecallCount(giveToPlayerItemStack)
                 val itemIndex = items.indexOfFirst { (id, _) ->
                     id == itemID
@@ -132,6 +136,11 @@ class RecallItemMenu : AbstractMenuHandler() {
                 AbandonConfirmMenu(
                     itemStack,
                     { p ->
+                        if (player.money() < ConfigSB.abandonCost) {
+                            player.sendLang("abandonCostDeficiency", "{money}", ConfigSB.abandonCost)
+                            return@AbandonConfirmMenu
+                        }
+                        player.takeMoney(ConfigSB.abandonCost.toDouble())
                         RecallSBManager.markItemAbandon(itemStack)
                         player.inventory.forEachIndexed { index, itemStack ->
                             if (RecallSBManager.hasInvalidSBItem(itemStack)) {

@@ -24,6 +24,8 @@ object ConfigSB {
     val autoBindIAList = mutableListOf<String>()
     val bindItemLore = mutableListOf<String>()
 
+    var recallCost = 1
+    var abandonCost = 1
     lateinit var recallItemMenuConfig: RecallItemMenuConfig
     lateinit var abandonConfirmMenu: AbandonConfirmMenu
 
@@ -72,6 +74,9 @@ object ConfigSB {
 
         autoBindIAList.clear()
         autoBindIAList.addAll(mainConfig.getStringList("autoBindIAList"))
+
+        recallCost = mainConfig.getInt("recallCost")
+        abandonCost = mainConfig.getInt("abandonCost")
     }
 
 }

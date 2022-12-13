@@ -9,7 +9,8 @@ import org.bukkit.NamespacedKey
 enum class ItemEnchantType(val namespacedKey: NamespacedKey) {
 
     EXPAND(NamespacedKey(ItemEnchantPlus.INSTANCE, "expand")),
-    LUCK(NamespacedKey(ItemEnchantPlus.INSTANCE, "luck"));
+    LUCK(NamespacedKey(ItemEnchantPlus.INSTANCE, "luck")),
+    LAN_REN(NamespacedKey(ItemEnchantPlus.INSTANCE, "lan_ren"));
 
     companion object {
 

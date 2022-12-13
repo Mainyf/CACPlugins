@@ -1,13 +1,12 @@
 package io.github.mainyf.soulbind
 
 import io.github.mainyf.newmclib.command.apiCommand
+import io.github.mainyf.newmclib.command.offlinePlayerArguments
 import io.github.mainyf.newmclib.command.playerArguments
-import io.github.mainyf.newmclib.exts.giveItem
-import io.github.mainyf.newmclib.exts.msg
-import io.github.mainyf.newmclib.exts.pluginManager
-import io.github.mainyf.newmclib.exts.successMsg
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.soulbind.config.ConfigSB
 import io.github.mainyf.soulbind.listeners.PlayerListeners
+import io.github.mainyf.soulbind.listeners.QsListeners
 import io.github.mainyf.soulbind.menu.RecallItemMenu
 import io.github.mainyf.soulbind.storage.StorageSB
 import org.apache.logging.log4j.LogManager
@@ -34,6 +33,7 @@ class SoulBind : JavaPlugin() {
         ConfigSB.load()
         StorageSB.init()
         pluginManager().registerEvents(PlayerListeners, this)
+        pluginManager().registerEvents(QsListeners, this)
         apiCommand("soulbind") {
             withAliases("soulb", "sb")
             "reload" {
@@ -49,20 +49,20 @@ class SoulBind : JavaPlugin() {
                 executeOP {
                     val player = player()
                     val itemStack = player.inventory.itemInMainHand
-                    SBManager.bindItem(itemStack, player)
+                    SBManager.bindItem(itemStack, player.uuid, player.name)
                     sender.msg("绑定成功")
                 }
             }
             "bind-player" {
                 withArguments(
                     playerArguments("玩家A"),
-                    playerArguments("玩家B")
+                    offlinePlayerArguments("玩家B")
                 )
                 executeOP {
                     val playerA = player()
-                    val playerB = player()
+                    val playerB = offlinePlayer()
                     val itemStack = playerA.inventory.itemInMainHand
-                    SBManager.bindItem(itemStack, playerB)
+                    SBManager.bindItem(itemStack, playerB.uuid, playerB.name)
                     sender.msg("绑定成功")
                 }
             }
@@ -74,7 +74,7 @@ class SoulBind : JavaPlugin() {
                     val player = player()
                     val itemStack = player.inventory.itemInMainHand
                     val itemData = SBManager.getBindItemData(itemStack)
-                    if(itemData == null) {
+                    if (itemData == null) {
                         sender.msg("这不是一个魂绑物品")
                         return@executeOP
                     }
@@ -112,7 +112,7 @@ class SoulBind : JavaPlugin() {
 fun ItemStack.toBase64(): String {
     val outputStream = ByteArrayOutputStream()
     BukkitObjectOutputStream(outputStream).use { it.writeObject(this) }
-    return  Base64.getEncoder().encodeToString(outputStream.toByteArray())
+    return Base64.getEncoder().encodeToString(outputStream.toByteArray())
 }
 
 fun String.toItemStack(): ItemStack {

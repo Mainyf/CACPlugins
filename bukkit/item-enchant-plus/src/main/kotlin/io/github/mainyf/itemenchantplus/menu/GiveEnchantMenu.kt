@@ -7,6 +7,7 @@ import io.github.mainyf.itemenchantplus.config.sendLang
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
+import io.github.mainyf.soulbind.RecallSBManager
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
@@ -83,6 +84,12 @@ class GiveEnchantMenu(val enchantType: ItemEnchantType) : AbstractMenuHandler() 
         EnchantManager.initItemEnchant(player, enchantType, enchantItem)
         val data = EnchantManager.getItemEnchant(enchantItem)!!
         EnchantManager.updateItemMeta(enchantItem, data)
+
+        RecallSBManager.bindItem(enchantItem, player.uuid, player.name, RecallSBManager.getItemID(enchantItem)!!)
+//        if(!player.isOp) {
+//            RecallSBManager.bindItem(enchantItem, player.uuid, player.name, RecallSBManager.getItemID(enchantItem)!!)
+//        }
+
         player.giveItem(enchantItem)
         player.updateInventory()
         enchantItem = AIR_ITEM
@@ -109,11 +116,12 @@ class GiveEnchantMenu(val enchantType: ItemEnchantType) : AbstractMenuHandler() 
                 inv.setIcon(mSlot[index], gem.materialsSlot.default()!!.toItemStack(materialItem.clone()) {
                     withMeta(
                         {
-                            it?.tvar("itemName", materialDName, "count", enchantMaterial.amount.toString().toComp())
+                            it?.tvar("itemName", materialDName, "count", enchantMaterial.amount.toString().deserialize())
                         },
                         { lore ->
                             if (lore.isNullOrEmpty()) return@withMeta lore
-                            lore.mapToSerialize().tvarList("lore", materialLore.map { it.serialize() }).mapToDeserialize()
+                            lore.mapToSerialize().tvarList("lore", materialLore.map { it.serialize() })
+                                .mapToDeserialize()
                         }
                     )
                 })

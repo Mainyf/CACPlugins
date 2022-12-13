@@ -30,6 +30,8 @@ object EnchantManager {
 
     private val stageText = arrayOf("", "I", "II", "III")
 
+    private val enchantLoreSpliter = "§i§t§c§h§a§n§t"
+
     fun initItemEnchant(
         player: Player,
         enchantType: ItemEnchantType,
@@ -117,7 +119,8 @@ object EnchantManager {
         val ownerUID = dataContainer.get(ownerUIDDataKey, PersistentDataType.STRING)?.asUUID() ?: return null
         val ownerName = dataContainer.get(ownerNameDataKey, PersistentDataType.STRING) ?: return null
         val data = StorageIEP.getEnchantData(itemUID, enchantType)
-        val enchantSkin = StorageIEP.getPlayerCurrentEnchantSkin(ownerUID, data.skinName) ?: return null
+        val enchantSkin =
+            StorageIEP.getPlayerCurrentEnchantSkin(ownerUID, data.skinName) ?: EnchantSkin(enchantType.defaultSkin(), 1)
         return EnchantData(enchantType, itemUID, ownerUID, ownerName, data.stage, data.level, data.exp, enchantSkin)
     }
 
@@ -146,12 +149,16 @@ object EnchantManager {
 
     fun updateItemMeta(item: ItemStack, data: EnchantData) {
         val meta = item.itemMeta ?: return
-        meta.displayName(
-            Component.text(
-                data.enchantType.displayName().tvar("stage", stageText[data.stage]).tvar("level", data.level.toString())
+        if (!meta.hasDisplayName()) {
+            meta.displayName(
+                data.enchantType
+                    .displayName()
+                    .tvar("stage", stageText[data.stage])
+                    .tvar("level", data.level.toString())
+                    .deserialize()
             )
-        )
-        meta.lore(data.enchantType.description().map { line ->
+        }
+        val lore = data.enchantType.description().map { line ->
             val progressList = "■■■■■■■■■■".toCharArray().map { it.toString() }.toMutableList()
             val curProgress =
                 (BigDecimal(data.exp / data.maxExp).setScale(1, RoundingMode.FLOOR).toDouble() * 10).toInt()
@@ -162,26 +169,37 @@ object EnchantManager {
             if (curProgress < 9) {
                 progressList.add(curProgress + if (curProgress >= 1) 3 else 2, "&7")
             }
-            //            val curProgress = round((data.exp / data.maxExp) * 10.0).toInt()
-            //            if (curProgress <= 0.0) {
-            //                progressList.add(0, "&7")
-            //            } else {
-            //                progressList.add(0, "&3")
-            //                if(curProgress + 1 < progressList.size) {
-            //                    progressList.add(curProgress + 1, "&b")
-            //                }
-            //                if(curProgress + 3 < progressList.size) {
-            //                    progressList.add(curProgress + 3, "&7")
-            //                }
-            //            }
             line
                 .tvar("stage", stageText[data.stage])
                 .tvar("level", data.level.toString())
                 .tvar("exp_progress", progressList.joinToString(""))
-                .toComp()
-        })
-        val skin = data.enchantType.defaultSkin()
-        val skinEffect = skin.skinEffect[data.stage]
+                .deserialize()
+        } as List<Component>
+        if (!meta.hasLore()) {
+            meta.lore(lore.toMutableList().apply {
+                add(0, enchantLoreSpliter.deserialize())
+                add(enchantLoreSpliter.deserialize())
+            })
+        } else {
+            val metaLore = meta.lore()!!
+            val loreIndexFirst = metaLore.indexOfFirst { it.serialize() == enchantLoreSpliter }
+            val loreIndexLast = metaLore.indexOfLast { it.serialize() == enchantLoreSpliter }
+            if (loreIndexFirst == -1 || loreIndexLast == -1 || loreIndexFirst == loreIndexLast) {
+                meta.lore(lore.toMutableList().apply {
+                    add(0, enchantLoreSpliter.deserialize())
+                    add(enchantLoreSpliter.deserialize())
+                })
+            } else {
+                val topLore = metaLore.subList(0, loreIndexFirst + 1)
+                val bottomLore = metaLore.subList(loreIndexLast, metaLore.size)
+                meta.lore(lore.toMutableList().apply {
+                    addAll(0, topLore)
+                    addAll(bottomLore)
+                })
+            }
+        }
+        val skin = data.enchantSkin.skinConfig
+        val skinEffect = skin.skinEffect[data.enchantSkin.stage - 1]
         meta.setCustomModelData(skinEffect.customModelData)
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
         item.itemMeta = meta

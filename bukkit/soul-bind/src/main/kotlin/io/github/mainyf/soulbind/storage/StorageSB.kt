@@ -46,12 +46,13 @@ object StorageSB : AbstractStorageManager() {
         }
     }
 
-    fun addRecallCount(itemId: UUID, count: Int = 1) {
-        transaction {
+    fun addRecallCount(itemId: UUID, count: Int = 1): Int {
+        return transaction {
             val data = SoulBindItemData.findById(itemId)
             if (data != null) {
                 data.recallCount += count
-            }
+                data.recallCount
+            } else -1
         }
     }
 

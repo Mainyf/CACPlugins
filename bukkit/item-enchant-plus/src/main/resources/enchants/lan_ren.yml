@@ -1,0 +1,23 @@
+enable: true
+name: '岚刃'
+description:
+  - '&r'
+  - '&f&l岚刃 {stage}'
+  - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
+  - '&r'
+allowGiveItem: [diamond_sword]
+menuItemInListMenu:
+  - ' &8【&7剑附灵&8】'
+  - ' &7&m                       &r'
+menuItemInGiveMenu:
+  - ' &8【&7剑附灵&8】'
+  - ' &7&m                       &r'
+menuItemInUpgradeMenu:
+  - ' &8【&7剑附灵&8】'
+  - ' &7&m                       &r'
+defaultSkin: "swordDefault"
+upgradeMaterials:
+  - "itemenchants:eqMaterial1|16,itemenchants:eqMaterial2|16,itemenchants:eqMaterial3|16,itemenchants:eqMaterial4|16,itemenchants:eqMaterial5|16"
+  - "itemenchants:eqMaterial1|32,itemenchants:eqMaterial2|32,itemenchants:eqMaterial3|32,itemenchants:eqMaterial4|32,itemenchants:eqMaterial5|32"
+  - "itemenchants:eqMaterial1|64,itemenchants:eqMaterial2|64,itemenchants:eqMaterial3|64,itemenchants:eqMaterial4|64,itemenchants:eqMaterial5|64"
+  - "itemenchants:eqMaterial1|128,itemenchants:eqMaterial2|128,itemenchants:eqMaterial3|128,itemenchants:eqMaterial4|128,itemenchants:eqMaterial5|128"

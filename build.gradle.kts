@@ -38,6 +38,7 @@ val qsPath = "./libs/QuickShop.jar"
 val customStructuresPath = "./plugins/CustomStructures-1.8.0.jar"
 val commandAPIPath = "./plugins/CommandAPI-8.5.1.jar"
 val ppPath = "./plugins/PlayerPoints-3.2.4.jar"
+val modelEngine = "./plugins/Model-Engine-Demo-R3.1.0.jar"
 
 subprojects {
 
@@ -115,6 +116,7 @@ subprojects {
                     compileOnly(rootProject.project(":bukkit:soul-bind"))
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(mmPath))
+                    compileOnly(rootProject.files(modelEngine))
                 }
                 "my-islands" -> {
 //                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
@@ -182,6 +184,7 @@ subprojects {
 
                 "soul-bind" -> {
                     compileOnly(rootProject.files(itemsAdderPath))
+                    compileOnly(rootProject.files(qsPath))
                 }
             }
         }
@@ -224,7 +227,7 @@ subprojects {
 //                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
 //                }
                 "item-enchant-plus" -> {
-                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI", "MythicMobs", "SoulBind"))
+                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI", "MythicMobs", "SoulBind", "ModelEngine"))
                 }
                 "my-islands" -> {
                     dd.addAll(listOf("CMI", "PlotSquared", "ItemsAdder", "ProtocolLib", "BungeeSettingsBukkit"))
@@ -270,6 +273,9 @@ subprojects {
                 }
                 "tools-plugin" -> {
 //                    dd.addAll(listOf("PlaceholderAPI"))
+                }
+                "soul-bind" -> {
+                    dd.addAll(listOf("QuickShop"))
                 }
 //                "linkQQ" -> {
 //                    dd.addAll(listOf("MiraiMC", "AuthMe"))

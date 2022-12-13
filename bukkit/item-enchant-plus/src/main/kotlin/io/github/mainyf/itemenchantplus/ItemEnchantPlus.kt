@@ -1,10 +1,12 @@
 package io.github.mainyf.itemenchantplus
 
+import com.ticxo.modelengine.api.ModelEngineAPI
 import dev.jorel.commandapi.arguments.DoubleArgument
 import dev.jorel.commandapi.arguments.IntegerArgument
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
 import io.github.mainyf.itemenchantplus.config.ItemEnchantType
 import io.github.mainyf.itemenchantplus.enchants.ExpandEnchant
+import io.github.mainyf.itemenchantplus.enchants.LanRenEnchant
 import io.github.mainyf.itemenchantplus.enchants.LuckEnchant
 import io.github.mainyf.itemenchantplus.menu.DashboardMenu
 import io.github.mainyf.itemenchantplus.menu.EnchantSkinMenu
@@ -17,12 +19,9 @@ import io.github.mainyf.soulbind.RecallSBManager
 import org.apache.commons.lang3.EnumUtils
 import org.apache.logging.log4j.LogManager
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.block.Block
-import org.bukkit.entity.Player
+import org.bukkit.entity.Entity
 import org.bukkit.event.Listener
-import org.bukkit.inventory.ItemFlag
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
 class ItemEnchantPlus : JavaPlugin(), Listener {
@@ -43,6 +42,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
         LuckEnchant.init()
         Bukkit.getServer().pluginManager.registerEvents(ExpandEnchant, this)
         Bukkit.getServer().pluginManager.registerEvents(LuckEnchant, this)
+        Bukkit.getServer().pluginManager.registerEvents(LanRenEnchant, this)
         Bukkit.getServer().pluginManager.registerEvents(this, this)
         RecallSBManager.addRecallSBItemPredicate(this.name) { itemStack ->
             EnchantManager.hasEnchantItem(itemStack)
@@ -51,15 +51,35 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
             val enchantData = EnchantManager.getItemEnchant(itemStack)
             enchantData?.itemUID ?: -1L
         }
-//        RecallSBManager.addRecallSBItemListProvider(this.name) { player ->
-//            player
-//        }
+        //        RecallSBManager.addRecallSBItemListProvider(this.name) { player ->
+        //            player
+        //        }
         apiCommand("itemEnchantPlus") {
             withAliases("iep")
             "reload" {
                 executeOP {
                     ConfigIEP.init()
                     sender.successMsg("[ItemEnchantPlus] 重载成功")
+                }
+            }
+            "rangeKill" {
+                withArguments(playerArguments("玩家"), DoubleArgument("范围"))
+                executeOP {
+                    val player = player()
+                    val range = double()
+                    val entities = player.getNearbyEntities(range, range, range)
+                    entities.forEach {
+                        player.msg(it.type.toString())
+                        val entity = ModelEngineAPI.getModeledEntity(it.uuid)
+                        if (entity != null) {
+                            kotlin.runCatching {
+                                entity.destroy()
+                            }.onFailure { e ->
+                                e.printStackTrace()
+                            }
+                            (entity.base.original as? Entity)?.remove()
+                        }
+                    }
                 }
             }
             "menu" {
@@ -73,6 +93,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                 withArguments(playerArguments("玩家"))
                 executeOP {
                     val player = player()
+
                     EnchantSkinMenu().open(player)
                 }
             }
@@ -151,24 +172,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                 withArguments(playerArguments("玩家"))
                 executeOP {
                     val player = player()
-                    val item = player.inventory.itemInMainHand
-                    if (item.isEmpty()) return@executeOP
-                    val lore = item.itemMeta.lore()!!
-                    val cItem = ItemStack(Material.DIAMOND_SWORD)
-                    val meta = cItem.itemMeta
-                    meta.lore(listOf("{desc}").mapToComp())
-                    cItem.itemMeta = meta
-                    player.giveItem(cItem)
-
-                    val cItem2 = cItem.clone()
-
-                    cItem2.withMeta(loreBlock = loreBlock@{ cLore ->
-                        if (cLore == null) return@loreBlock cLore
-                        cLore.mapToString().tvarComponentList("desc", lore).mapToComp()
-                    })
-                    //                    cItem2.lore(lore)
-
-                    player.giveItem(cItem2)
+                    LanRenEnchant.launchBullet(player)
                 }
             }
             "giveEnchant" {
@@ -221,6 +225,19 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                     StorageIEP.addEnchantSkinToPlayer(player.uuid, skinConfig)
                 }
             }
+            "removeSkin" {
+                withArguments(playerArguments("玩家"), stringArguments("皮肤名"))
+                executeOP {
+                    val player = player()
+                    val skinName = text()
+                    val skinConfig = ConfigIEP.getSkinByName(skinName)
+                    if (skinConfig == null) {
+                        sender.errorMsg("对玩家 ${player.name} 的删除皮肤操作失败，原因：没有叫${skinName}的皮肤，请检查配置文件skins.yml")
+                        return@executeOP
+                    }
+                    StorageIEP.removeEnchantSkinToPlayer(player.uuid, skinConfig)
+                }
+            }
             "addSkinTemp" {
                 withArguments(
                     playerArguments("玩家"),
@@ -239,6 +256,38 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                         return@executeOP
                     }
                     StorageIEP.addEnchantSkinTemporaryToPlayer(player.uuid, skinConfig, stage, hour)
+                }
+            }
+            "removeSkinTemp" {
+                withArguments(
+                    playerArguments("玩家"),
+                    stringArguments("皮肤名")
+                )
+                executeOP {
+                    val player = player()
+                    val skinName = text()
+                    val skinConfig = ConfigIEP.getSkinByName(skinName)
+                    if (skinConfig == null) {
+                        sender.errorMsg("对玩家 ${player.name} 的删除临时皮肤操作失败，原因：没有叫${skinName}的皮肤，请检查配置文件skins.yml")
+                        return@executeOP
+                    }
+                    StorageIEP.removeEnchantSkinTemporaryToPlayer(player.uuid, skinConfig)
+                }
+            }
+            "skinList" {
+                withArguments(
+                    playerArguments("玩家")
+                )
+                executeOP {
+                    val player = player()
+                    val list = StorageIEP.getPlayerEnchantSkins(player.uuid)
+                    if (list.isEmpty()) {
+                        sender.msg("该玩家没有皮肤")
+                        return@executeOP
+                    }
+                    list.forEach {
+                        sender.msg("皮肤名: ${it.skinConfig.name}, 阶级: ${it.stage}, 过期时间: ${it.expiredTime?.formatYMDHM() ?: "永久"}")
+                    }
                 }
             }
         }
