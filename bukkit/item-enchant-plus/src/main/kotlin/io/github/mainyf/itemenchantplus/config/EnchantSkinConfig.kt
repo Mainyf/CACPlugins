@@ -2,6 +2,7 @@ package io.github.mainyf.itemenchantplus.config
 
 import io.github.mainyf.newmclib.config.action.MultiAction
 import io.github.mainyf.newmclib.config.play.MultiPlay
+import org.bukkit.configuration.ConfigurationSection
 
 data class EnchantSkinConfig(
     val name: String,
@@ -9,7 +10,20 @@ data class EnchantSkinConfig(
     val enchantType: List<ItemEnchantType>,
     val priority: Int,
     val menuActions: MultiAction?,
-    val skinEffect: List<SkinEffect>
+    val skinEffect: List<SkinEffect>,
+    val data: EnchantSkinData?
+)
+
+interface EnchantSkinData
+
+@Suppress("UNCHECKED_CAST")
+class LanRenEnchantSkinData(
+    val comboModelDatas: List<LanRenModelData>
+) : EnchantSkinData
+
+class LanRenModelData(
+    val modelName: String,
+    val play: MultiPlay?
 )
 
 data class SkinEffect(

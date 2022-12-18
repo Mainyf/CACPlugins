@@ -38,7 +38,7 @@ val qsPath = "./libs/QuickShop.jar"
 val customStructuresPath = "./plugins/CustomStructures-1.8.0.jar"
 val commandAPIPath = "./plugins/CommandAPI-8.5.1.jar"
 val ppPath = "./plugins/PlayerPoints-3.2.4.jar"
-val modelEngine = "./plugins/Model-Engine-Demo-R3.1.0.jar"
+val modelEngine = "./plugins/Model-Engine-R3.1.2.jar"
 
 subprojects {
 
@@ -186,6 +186,11 @@ subprojects {
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(qsPath))
                 }
+
+                "tools-plugin" -> {
+                    compileOnly(rootProject.files(itemsAdderPath))
+                    compileOnly(rootProject.project(":bukkit:custom-economy"))
+                }
             }
         }
     }
@@ -272,7 +277,7 @@ subprojects {
                     dd.addAll(listOf("CustomStructures", "ItemsAdder", "MythicMobs", "WorldSettings"))
                 }
                 "tools-plugin" -> {
-//                    dd.addAll(listOf("PlaceholderAPI"))
+                    dd.addAll(listOf("ItemsAdder", "CustomEconomy"))
                 }
                 "soul-bind" -> {
                     dd.addAll(listOf("QuickShop"))

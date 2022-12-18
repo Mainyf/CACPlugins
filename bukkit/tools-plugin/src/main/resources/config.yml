@@ -1,2 +1,13 @@
 recycleEnderDragonEgg: true
 saturdayFly: true
+iaRecipe:
+  coinName: "token_1"
+  recipeCost:
+    # 辉钻石锭
+    "itemsadder:cobaltite_block_0": 10
+    # 钴华石锭
+    "zzzfake_itemsadder:cobaltite_block_0": 10
+  iaRecipeCostLack:
+    - "mini: &c&l！&4合成 {itemName} 失败，需要 {cost}，当前拥有: {money}"
+  iaRecipeSuccess:
+    - "mini: &c&l！&4合成 {itemName} 成功，消耗金钱 {cost}，当前拥有: {money}"

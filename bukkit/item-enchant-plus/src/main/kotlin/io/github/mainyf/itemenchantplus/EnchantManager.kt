@@ -3,10 +3,13 @@ package io.github.mainyf.itemenchantplus
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
 import io.github.mainyf.itemenchantplus.config.EffectTriggerType
 import io.github.mainyf.itemenchantplus.config.ItemEnchantType
+import io.github.mainyf.itemenchantplus.config.LanRenEnchantConfig
 import io.github.mainyf.itemenchantplus.storage.StorageIEP
 import io.github.mainyf.newmclib.exts.*
 import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
+import org.bukkit.attribute.Attribute
+import org.bukkit.attribute.AttributeModifier
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
@@ -65,6 +68,7 @@ object EnchantManager {
             PersistentDataType.STRING,
             enchantType.name.lowercase()
         )
+
         item.itemMeta = meta
     }
 
@@ -202,6 +206,22 @@ object EnchantManager {
         val skinEffect = skin.skinEffect[data.enchantSkin.stage - 1]
         meta.setCustomModelData(skinEffect.customModelData)
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+
+        if (data.enchantType == ItemEnchantType.LAN_REN && data.stage > 0) {
+            val config = data.enchantType.enchantConfig() as LanRenEnchantConfig
+            val modifier = AttributeModifier(
+                "IEP_ADD".asUUIDFromByte(),
+                "IEP_ADD",
+                config.combo1_2.baseDamage[data.stage - 1],
+                AttributeModifier.Operation.ADD_NUMBER
+            )
+            meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, modifier)
+            meta.addAttributeModifier(
+                Attribute.GENERIC_ATTACK_DAMAGE,
+                modifier
+            )
+        }
+
         item.itemMeta = meta
     }
 

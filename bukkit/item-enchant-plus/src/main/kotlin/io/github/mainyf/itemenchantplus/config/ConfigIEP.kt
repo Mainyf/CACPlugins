@@ -10,9 +10,12 @@ import io.github.mainyf.newmclib.utils.ItemTypeWrapper
 import org.apache.commons.lang3.EnumUtils
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ItemStack
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 
 fun CommandSender.sendLang(key: String, vararg data: Any) {
     ConfigIEP.lang.apply {
@@ -55,8 +58,8 @@ object ConfigIEP {
             langConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("lang.yml")
             mainConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("config.yml")
             if (!ItemEnchantPlus.INSTANCE.dataFolder.resolve("skins").exists()) {
-                ItemEnchantPlus.INSTANCE.saveResourceToFileAsConfiguration("skins/skins.yml")
-                ItemEnchantPlus.INSTANCE.saveResourceToFileAsConfiguration("skins/skins2.yml")
+                ItemEnchantPlus.INSTANCE.saveResourceToFileAsConfiguration("skins/pickaxe_skin.yml")
+                ItemEnchantPlus.INSTANCE.saveResourceToFileAsConfiguration("skins/sword_skin.yml")
             }
             menuConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("menu.yml")
             expandConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/expand.yml")
@@ -125,8 +128,21 @@ object ConfigIEP {
                         )
                     )
                 }
+                val dataSect = skinSect.getConfigurationSection("data")
+                val lanrenSkinSect = dataSect?.getConfigurationSection("lanren")
+                var data: EnchantSkinData? = null
+                if (lanrenSkinSect != null) {
+                    data = LanRenEnchantSkinData(
+                        (1 .. 4).toList().map {
+                            LanRenModelData(
+                                lanrenSkinSect.getString("${it}x.modelName")!!,
+                                lanrenSkinSect.getPlay("${it}x.play")!!
+                            )
+                        }
+                    )
+                }
                 itemSkins[skinName] =
-                    EnchantSkinConfig(skinName, enable, enchantType, priority, menuActions, skinEffect)
+                    EnchantSkinConfig(skinName, enable, enchantType, priority, menuActions, skinEffect, data)
             }
         }
     }
@@ -280,9 +296,67 @@ object ConfigIEP {
                         pair2[1].toInt()
                     )
                 }
+            },
+            lanrenConfig.getLong("skills.comboAttenuation", 40L),
+            lanrenConfig.getSection("skills.combo1_2").let { combo1_2Sect ->
+                LanRenCombo1_2Config(
+                    combo1_2Sect.getString("distance")!!.split(",").map { it.toDouble() },
+                    combo1_2Sect.getModelSizeConfig("size"),
+                    combo1_2Sect.getString("baseDamage")!!.split(",").map { it.toDouble() },
+                    combo1_2Sect.getString("throughDamage")!!.split(",").map { it.toDouble() },
+                    combo1_2Sect.getString("pveDamage")!!.split(",").map { it.toDouble() },
+                    combo1_2Sect.getStringList("hitTargetShooterBuff").map { it.parserToPotionEffect() }
+                )
+            },
+            lanrenConfig.getSection("skills.combo3").let { combo3Sect ->
+                LanRenCombo3Config(
+                    combo3Sect.getInt("count"),
+                    combo3Sect.getDouble("distance"),
+                    combo3Sect.getModelSizeConfig("size"),
+                    combo3Sect.getString("throughDamage")!!.split(",").map { it.toDouble() },
+                    combo3Sect.getPotionEffect("hitTargetBuff")
+                )
+            },
+            lanrenConfig.getSection("skills.combo4").let { combo4Sect ->
+                LanRenCombo4Config(
+                    combo4Sect.getDouble("distance"),
+                    combo4Sect.getModelSizeConfig("size"),
+                    combo4Sect.getDouble("throughDamage")
+                )
             }
         )
         enchants[ItemEnchantType.LAN_REN] = lanrenEnchantConfig
+    }
+
+    private fun ConfigurationSection.getPotionEffect(key: String): PotionEffect? {
+        val rawData = getString(key)!!
+        return rawData.parserToPotionEffect()
+    }
+
+    private fun String.parserToPotionEffect(): PotionEffect? {
+        val pair = this.split(",")
+        val type = PotionEffectType.getByName(pair[0]) ?: return null
+        val time = pair[1].toInt()
+        val level = pair.getOrNull(2)?.toInt() ?: 0
+        val ambient = pair.getOrNull(3)?.toBoolean() ?: true
+        val particles = pair.getOrNull(4)?.toBoolean() ?: true
+        val icon = pair.getOrNull(5)?.toBoolean() ?: true
+        return PotionEffect(
+            type,
+            time,
+            level,
+            ambient,
+            particles,
+            icon
+        )
+    }
+
+    private fun ConfigurationSection.getModelSizeConfig(key: String = "size"): ModelSizeConfig {
+        val pair = getString(key)!!.split(",")
+        return ModelSizeConfig(
+            pair[0].toDouble(),
+            pair[1].toDouble()
+        )
     }
 
     fun getMaterialExp(itemStack: ItemStack): Double {

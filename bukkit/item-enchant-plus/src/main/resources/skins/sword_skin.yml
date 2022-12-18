@@ -1,0 +1,78 @@
+swordDefault:
+  # 该皮肤是否开启，暂无实现
+  enable: true
+  # 皮肤对应的附灵类型
+  enchantType:
+    - LAN_REN
+  priority: 0
+  # 皮肤的特效
+  menuActions:
+    - "mini: &c这里是 swordDefault 皮肤的提示信息"
+  # 皮肤的特效
+  skinEffect:
+    - customModelData: 10002
+      menuLarge:
+        customModelData: 10003
+        name: ""
+        lore: [ ]
+      menuItemName: "&9&l寒锋断钢"
+      menuItemLore:
+        - ''
+        - '&8【&7精良&8】'
+        - ' &7&m                       &r'
+        - ' &7▪ 出自锻造名门段氏之手'
+        - ' &7▪ 锋从磨砺出 寒锋骇人'
+        - ' &7▪ 特材锻造令其契合于游灵'
+        - ' &7▪ 通灵利剑是附灵师的青睐之器'
+        - ''
+      effect: [ ]
+    - customModelData: 10002
+      menuLarge:
+        customModelData: 10003
+        name: ""
+        lore: [ ]
+      menuItemName: "&9&l寒锋断钢"
+      menuItemLore:
+        - ''
+        - '&8【&7精良&8】'
+        - ' &7&m                       &r'
+        - ' &7▪ 出自锻造名门段氏之手'
+        - ' &7▪ 锋从磨砺出 寒锋骇人'
+        - ' &7▪ 特材锻造令其契合于游灵'
+        - ' &7▪ 通灵利剑是附灵师的青睐之器'
+        - ''
+      effect: [ ]
+    - customModelData: 10002
+      menuLarge:
+        customModelData: 10003
+        name: ""
+        lore: [ ]
+      menuItemName: "&9&l寒锋断钢"
+      menuItemLore:
+        - ''
+        - '&8【&7精良&8】'
+        - ' &7&m                       &r'
+        - ' &7▪ 出自锻造名门段氏之手'
+        - ' &7▪ 锋从磨砺出 寒锋骇人'
+        - ' &7▪ 特材锻造令其契合于游灵'
+        - ' &7▪ 通灵利剑是附灵师的青睐之器'
+        - ''
+      effect: [ ]
+  data:
+    lanren:
+      1x:
+        modelName: "soul_skill_sword_1"
+        play:
+          - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      2x:
+        modelName: "soul_skill_sword_1"
+        play:
+          - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      3x:
+        modelName: "soul_skill_sword_1"
+        play:
+          - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+      4x:
+        modelName: "soul_skill_sword_1"
+        play:
+          - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"

@@ -172,7 +172,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                 withArguments(playerArguments("玩家"))
                 executeOP {
                     val player = player()
-                    LanRenEnchant.launchBullet(player)
+//                    LanRenEnchant.launchBullet(player)
                 }
             }
             "giveEnchant" {
@@ -297,6 +297,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
         onlinePlayers().forEach {
             it.closeInventory()
         }
+        LanRenEnchant.clean()
     }
 
     //    @EventHandler
