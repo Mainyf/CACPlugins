@@ -7,7 +7,9 @@ import org.bukkit.potion.PotionEffect
 class ExpandEnchantConfig(
     val enable: Boolean,
     val name: String,
+    val plusName: String,
     val description: List<String>,
+    val plusDescription: List<String>,
     val allowGiveItem: List<Material>,
     val menuItemInListMenu: List<String>,
     val menuItemInGiveMenu: List<String>,
@@ -20,7 +22,9 @@ class ExpandEnchantConfig(
 class LuckEnchantConfig(
     val enable: Boolean,
     val name: String,
+    val plusName: String,
     val description: List<String>,
+    val plusDescription: List<String>,
     val allowGiveItem: List<Material>,
     val menuItemInListMenu: List<String>,
     val menuItemInGiveMenu: List<String>,
@@ -35,13 +39,20 @@ class LuckEnchantConfig(
 class LanRenEnchantConfig(
     val enable: Boolean,
     val name: String,
+    val plusName: String,
     val description: List<String>,
+    val plusDescription: List<String>,
     val allowGiveItem: List<Material>,
     val menuItemInListMenu: List<String>,
     val menuItemInGiveMenu: List<String>,
     val menuItemInUpgradeMenu: List<String>,
     val defaultSkin: EnchantSkinConfig,
     val upgradeMaterials: List<List<EnchantMaterial>>,
+    val attackSpeedModifier: Double,
+    val plusAttackSpeedModifier: Double,
+    val debug: Boolean,
+    val cheatBypassMove: Long,
+    val cheatBypassHitBox: Long,
     val comboAttenuation: Long,
     val combo1_2: LanRenCombo1_2Config,
     val combo3: LanRenCombo3Config,
@@ -49,6 +60,7 @@ class LanRenEnchantConfig(
 )
 
 class LanRenCombo1_2Config(
+    val itemDurabilityLoss: Int,
     val distance: List<Double>,
     val size: ModelSizeConfig,
     val baseDamage: List<Double>,
@@ -58,14 +70,17 @@ class LanRenCombo1_2Config(
 )
 
 class LanRenCombo3Config(
+    val itemDurabilityLoss: Int,
     val count: Int,
     val distance: Double,
+    val speed: Long,
     val size: ModelSizeConfig,
     val throughDamage: List<Double>,
     val hitTargetBuff: PotionEffect?
 )
 
 class LanRenCombo4Config(
+    val itemDurabilityLoss: Int,
     val distance: Double,
     val size: ModelSizeConfig,
     val throughDamage: Double

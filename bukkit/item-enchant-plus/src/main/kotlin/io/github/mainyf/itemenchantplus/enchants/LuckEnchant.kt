@@ -7,11 +7,13 @@ import io.github.mainyf.itemenchantplus.config.ItemEnchantType
 import io.github.mainyf.itemenchantplus.getKey
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.random.Percentage
+import io.github.mainyf.soulbind.SBManager
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
+import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
@@ -38,46 +40,73 @@ object LuckEnchant : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun onBreak(event: BlockBreakEvent) {
+        handleSkill(event.player, event.block, event)
+    }
+
+    private fun handleSkill(player: Player, block: Block, event: Cancellable) {
         if (!ConfigIEP.luckEnchantConfig.enable) return
-        val item = event.player.inventory.itemInMainHand
+        val item = player.inventory.itemInMainHand
         if (item.isEmpty()) return
+        val bindData = SBManager.getBindItemData(item)
+        if (!player.isOp && bindData != null && bindData.ownerUUID != player.uuid) {
+            return
+        }
+        EnchantManager.updateItemMeta(item)
         val data = EnchantManager.getItemEnchant(ItemEnchantType.LUCK, item) ?: return
-        val player = event.player
 
         //        val exp = ConfigIEP.getBlockExp(event.block)
         //        if (exp > 0.0) {
         //            EnchantManager.addExpToItem(data, exp)
         //        }
-        if (blockKey.contains(event.block.getKey())) {
-            blockKey.remove(event.block.getKey())
+        if (blockKey.contains(block.getKey())) {
+            blockKey.remove(block.getKey())
             return
         }
 
         if (hasRecursive(player)) {
             return
         }
+        val luckPercentage = ConfigIEP.luckEnchantConfig.luckPercentage
         when (data.stage) {
             1 -> {
-                if (Percentage.hasHit(ConfigIEP.luckEnchantConfig.luckPercentage.stage1_2x)) {
-                    breakBlock[event.block.getKey()] = BlockData(event.block.type, event.block.isLiquid, 2)
+                if (Percentage.hasHit(luckPercentage.stage1_2x)) {
+                    breakBlock[block.getKey()] = BlockData(block.type, block.isLiquid, 2)
                 }
             }
 
             2 -> {
-                if (Percentage.hasHit(ConfigIEP.luckEnchantConfig.luckPercentage.stage2_2x)) {
-                    breakBlock[event.block.getKey()] = BlockData(event.block.type, event.block.isLiquid, 2)
+                if (Percentage.hasHit(luckPercentage.stage2_2x)) {
+                    breakBlock[block.getKey()] = BlockData(block.type, block.isLiquid, 2)
                 }
             }
 
             3 -> {
-                if (Percentage.hasHit(ConfigIEP.luckEnchantConfig.luckPercentage.stage3_2x)) {
-                    breakBlock[event.block.getKey()] =
+                if (Percentage.hasHit(luckPercentage.stage3_2x)) {
+                    breakBlock[block.getKey()] =
                         BlockData(
-                            event.block.type,
-                            event.block.isLiquid,
-                            if (Percentage.hasHit(ConfigIEP.luckEnchantConfig.luckPercentage.stage3_3x)) 2 else 3
+                            block.type,
+                            block.isLiquid,
+                            if (Percentage.hasHit(luckPercentage.stage3_3x)) 3 else 2
                         )
                 }
+            }
+        }
+
+        if(EnchantManager.hasExtraData(ItemEnchantType.LUCK, item, ItemEnchantType.LUCK.plusExtraDataName())) {
+            markRecursive(player)
+            getNearBlocks(block.location).forEach {
+                breakBlock[it.getKey()] = BlockData(
+                    it.type, it.isLiquid, when (data.stage) {
+                        1 -> if (Percentage.hasHit(luckPercentage.stage1_2x)) 2 else 1
+                        2 -> if (Percentage.hasHit(luckPercentage.stage2_2x)) 2 else 1
+                        3 -> if (Percentage.hasHit(luckPercentage.stage3_2x)) {
+                            if (Percentage.hasHit(luckPercentage.stage3_3x)) 3 else 2
+                        } else 1
+
+                        else -> 1
+                    }
+                )
+                player.breakBlock(it)
             }
         }
         //        EnchantManager.updateItemMeta(item, data)

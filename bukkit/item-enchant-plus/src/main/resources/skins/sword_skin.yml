@@ -8,6 +8,8 @@ swordDefault:
   # 皮肤的特效
   menuActions:
     - "mini: &c这里是 swordDefault 皮肤的提示信息"
+  # 菜单背景
+  menuBackground: "0:offset_-138::xxxx:"
   # 皮肤的特效
   skinEffect:
     - customModelData: 10002

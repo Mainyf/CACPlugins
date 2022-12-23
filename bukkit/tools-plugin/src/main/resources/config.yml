@@ -1,6 +1,7 @@
 recycleEnderDragonEgg: true
 saturdayFly: true
 iaRecipe:
+  debug: true
   coinName: "token_1"
   recipeCost:
     # 辉钻石锭

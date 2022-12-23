@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.select
 import org.joda.time.DateTime
 import java.util.*
 
-internal object StorageManager : AbstractStorageManager() {
+internal object StorageLS : AbstractStorageManager() {
 
     override fun init() {
         super.init()

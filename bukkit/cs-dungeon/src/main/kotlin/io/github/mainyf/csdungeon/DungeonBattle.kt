@@ -166,19 +166,21 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
             }
             return
         }
-        val boundaryDamage = dungeonConfig!!.boundaryDamage
-        if (boundaryDamage == -1) return
-        if (!dungeon.containsDungeonArea(event.to)) {
-            event.isCancelled = true
-            moveMsgCD.invoke(player.uuid, 500, {
-                if (boundaryDamage == 0) return@invoke
-                player.health =
-                    (player.health - boundaryDamage).clamp(
-                        0.0,
-                        player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
-                    )
-                player.sendLang("outDungeonBorder")
-            }, {})
+        if(players.contains(player)) {
+            val boundaryDamage = dungeonConfig!!.boundaryDamage
+            if (boundaryDamage == -1) return
+            if (!dungeon.containsDungeonArea(event.to)) {
+                event.isCancelled = true
+                moveMsgCD.invoke(player.uuid, 500, {
+                    if (boundaryDamage == 0) return@invoke
+                    player.health =
+                        (player.health - boundaryDamage).clamp(
+                            0.0,
+                            player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+                        )
+                    player.sendLang("outDungeonBorder")
+                }, {})
+            }
         }
     }
 

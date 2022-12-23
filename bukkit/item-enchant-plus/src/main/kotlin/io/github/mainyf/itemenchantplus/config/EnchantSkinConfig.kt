@@ -1,5 +1,6 @@
 package io.github.mainyf.itemenchantplus.config
 
+import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.config.action.MultiAction
 import io.github.mainyf.newmclib.config.play.MultiPlay
 import org.bukkit.configuration.ConfigurationSection
@@ -10,6 +11,7 @@ data class EnchantSkinConfig(
     val enchantType: List<ItemEnchantType>,
     val priority: Int,
     val menuActions: MultiAction?,
+    val menuBackground: IaIcon,
     val skinEffect: List<SkinEffect>,
     val data: EnchantSkinData?
 )

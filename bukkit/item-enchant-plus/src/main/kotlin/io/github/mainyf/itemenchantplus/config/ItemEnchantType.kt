@@ -20,6 +20,10 @@ enum class ItemEnchantType(val namespacedKey: NamespacedKey) {
 
     }
 
+    fun plusExtraDataName(): String {
+        return "${namespacedKey.key}Plus"
+    }
+
     fun enchantConfig(): Any {
         return ConfigIEP.enchants[this]!!
     }
@@ -32,8 +36,16 @@ enum class ItemEnchantType(val namespacedKey: NamespacedKey) {
         return enchantConfig().toReflect().get("name")
     }
 
+    fun plusDisplayName(): String {
+        return enchantConfig().toReflect().get("plusName")
+    }
+
     fun description(): List<String> {
         return enchantConfig().toReflect().get("description")
+    }
+
+    fun plusDescription(): List<String> {
+        return enchantConfig().toReflect().get("plusDescription")
     }
 
     fun menuItemInListMenu(): List<String> {

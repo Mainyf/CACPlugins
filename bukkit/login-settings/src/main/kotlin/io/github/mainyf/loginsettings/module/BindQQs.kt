@@ -1,8 +1,8 @@
 package io.github.mainyf.loginsettings.module
 
 import io.github.mainyf.loginsettings.LoginSettings
-import io.github.mainyf.loginsettings.config.ConfigManager
-import io.github.mainyf.loginsettings.storage.StorageManager
+import io.github.mainyf.loginsettings.config.ConfigLS
+import io.github.mainyf.loginsettings.storage.StorageLS
 import io.github.mainyf.newmclib.exts.*
 import io.papermc.paper.event.player.AsyncChatEvent
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -30,7 +30,7 @@ object BindQQs : Listener {
     }
 
     fun hasLinkQQ(uuid: UUID): Boolean {
-        return StorageManager.hasLinkQQ(uuid)
+        return StorageLS.hasLinkQQ(uuid)
     }
 
     fun startLinkQQ(player: Player, hasLogin: Boolean, event: Event? = null, block: () -> Unit) {
@@ -55,11 +55,11 @@ object BindQQs : Listener {
     }
 
     private fun bindAction(player: Player) {
-        ConfigManager.bindStageConfig.actions?.execute(player)
+        ConfigLS.bindStageConfig.actions?.execute(player)
     }
 
     private fun codeAction(player: Player, code: QQCode) {
-        ConfigManager.codeStageConfig.actions?.execute(
+        ConfigLS.codeStageConfig.actions?.execute(
             player,
             "{player}", player.name,
             "{code}", code.code
@@ -74,8 +74,8 @@ object BindQQs : Listener {
         when {
             bindPlayers.contains(player) -> {
                 event.isCancelled = true
-                val formatError = ConfigManager.bindStageConfig.formatError
-                if (!ConfigManager.bindStageConfig.qqRegex.matches(text)) {
+                val formatError = ConfigLS.bindStageConfig.formatError
+                if (!ConfigLS.bindStageConfig.qqRegex.matches(text)) {
                     formatError?.execute(player)
                     return
                 }
@@ -84,14 +84,14 @@ object BindQQs : Listener {
                     formatError?.execute(player)
                     return
                 }
-                if (StorageManager.hasLinkAccount(qqNum)) {
-                    ConfigManager.bindStageConfig.qqAlreadyBind?.execute(player)
+                if (StorageLS.hasLinkAccount(qqNum)) {
+                    ConfigLS.bindStageConfig.qqAlreadyBind?.execute(player)
                     return
                 }
                 bindPlayers.remove(player)
                 val code = QQCode(RandomStringUtils.randomNumeric(4), qqNum)
                 codePlayers[player] = code
-                ConfigManager.bindStageConfig.nextStage?.execute(player)
+                ConfigLS.bindStageConfig.nextStage?.execute(player)
                 codeAction(player, code)
             }
         }
@@ -123,8 +123,8 @@ object BindQQs : Listener {
     @OptIn(DelicateCoroutinesApi::class)
     @EventHandler
     fun onGroupMessage(event: MiraiGroupMessageEvent) {
-        if (event.botID != ConfigManager.qqBot) return
-        if (!ConfigManager.qqGroup.contains(event.groupID)) return
+        if (event.botID != ConfigLS.qqBot) return
+        if (!ConfigLS.qqGroup.contains(event.groupID)) return
         val targetID = event.senderID
         val message = event.message
         synchronized(this) {
@@ -134,7 +134,7 @@ object BindQQs : Listener {
                 }
                 if (p != null) {
                     trySendCodePlayers.add(p.uuid)
-                    ConfigManager.codeStageConfig.veritySuccess?.let { veritySuccessMsg ->
+                    ConfigLS.codeStageConfig.veritySuccess?.let { veritySuccessMsg ->
                         val msg = veritySuccessMsg.tvar("player", p.name)
 //                        val mEvent = event.toReflect().get<GroupMessageEvent>("event")
 //
@@ -149,11 +149,11 @@ object BindQQs : Listener {
                     kotlin.runCatching {
                         val pair = linkQQPlayers.remove(p)!!
                         if (pair.first) {
-                            ConfigManager.codeStageConfig.loginFinish?.execute(p)
+                            ConfigLS.codeStageConfig.loginFinish?.execute(p)
                         } else {
-                            ConfigManager.codeStageConfig.registerFinish?.execute(p)
+                            ConfigLS.codeStageConfig.registerFinish?.execute(p)
                         }
-                        StorageManager.addLinkQQ(p.uuid, targetID)
+                        StorageLS.addLinkQQ(p.uuid, targetID)
                         codePlayers.remove(p)
                         pair.third.invoke()
                     }.onFailure {

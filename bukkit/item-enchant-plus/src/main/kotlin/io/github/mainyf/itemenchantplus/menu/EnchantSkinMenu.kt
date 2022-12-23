@@ -59,7 +59,11 @@ class EnchantSkinMenu : AbstractMenuHandler() {
     override fun updateTitle(player: Player): String {
         val ekm = ConfigIEP.enchantSkinMenuConfig
         val icons = mutableListOf<IaIcon>()
-        icons.addAll(ekm.largeSkinSlot.iaIcon())
+        if (currentSkin != null) {
+            icons.add(currentSkin!!.skinConfig.menuBackground)
+        } else {
+            icons.addAll(ekm.largeSkinSlot.iaIcon())
+        }
         icons.addAll(ekm.prevSlot.iaIcon())
         icons.addAll(ekm.nextSlot.iaIcon())
         if (!currentEnchantItem.isEmpty()) {

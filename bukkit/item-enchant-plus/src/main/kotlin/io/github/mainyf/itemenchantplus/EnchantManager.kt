@@ -95,6 +95,37 @@ object EnchantManager {
         item.itemMeta = meta
     }
 
+    fun setExtraDataToItem(enchantType: ItemEnchantType, item: ItemStack, name: String) {
+        val meta = item.itemMeta ?: return
+        val rootTag = meta.persistentDataContainer
+        val dataContainer = rootTag.get(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER) ?: return
+
+        dataContainer.set(NamespacedKey(ItemEnchantPlus.INSTANCE, name), PersistentDataType.INTEGER, 1)
+
+        rootTag.set(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER, dataContainer)
+        rootTag.set(itemEnchantNameDataKey, PersistentDataType.STRING, enchantType.name.lowercase())
+        item.itemMeta = meta
+    }
+
+    fun removeExtraDataToItem(enchantType: ItemEnchantType, item: ItemStack, name: String) {
+        val meta = item.itemMeta ?: return
+        val rootTag = meta.persistentDataContainer
+        val dataContainer = rootTag.get(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER) ?: return
+
+        dataContainer.set(NamespacedKey(ItemEnchantPlus.INSTANCE, name), PersistentDataType.INTEGER, 0)
+
+        rootTag.set(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER, dataContainer)
+        rootTag.set(itemEnchantNameDataKey, PersistentDataType.STRING, enchantType.name.lowercase())
+        item.itemMeta = meta
+    }
+
+    fun hasExtraData(enchantType: ItemEnchantType, item: ItemStack, name: String): Boolean {
+        val meta = item.itemMeta ?: return false
+        val rootTag = meta.persistentDataContainer
+        val dataContainer = rootTag.get(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER) ?: return false
+        return dataContainer.get(NamespacedKey(ItemEnchantPlus.INSTANCE, name), PersistentDataType.INTEGER) == 1
+    }
+
     fun hasEnchantItem(itemStack: ItemStack?): Boolean {
         if (itemStack.isEmpty()) return false
         val meta = itemStack!!.itemMeta ?: return false
@@ -148,21 +179,44 @@ object EnchantManager {
     }
 
     fun updateItemMeta(item: ItemStack) {
-        updateItemMeta(item, getItemEnchant(item)!!)
+        val enchantData = getItemEnchant(item)
+        if (enchantData != null) {
+            updateItemMeta(item, enchantData)
+        }
     }
 
     fun updateItemMeta(item: ItemStack, data: EnchantData) {
         val meta = item.itemMeta ?: return
+        val hasExtra = hasExtraData(
+            data.enchantType,
+            item,
+            data.enchantType.plusExtraDataName()
+        )
         if (!meta.hasDisplayName()) {
+            //            val itemName = data.enchantType
+            //                .let { if (hasExtra) it.plusDisplayName() else it.displayName() }
+            val itemName = data.enchantSkin.skinConfig.skinEffect[0].menuItemName
             meta.displayName(
-                data.enchantType
-                    .displayName()
+                itemName
                     .tvar("stage", stageText[data.stage])
                     .tvar("level", data.level.toString())
                     .deserialize()
             )
+        } else {
+            val displayName = meta.displayName()!!.serialize()
+            if (ConfigIEP.itemSkins.values.any {
+                    displayName == it.skinEffect[0].menuItemName
+                }) {
+                val itemName = data.enchantSkin.skinConfig.skinEffect[0].menuItemName
+                meta.displayName(
+                    itemName
+                        .tvar("stage", stageText[data.stage])
+                        .tvar("level", data.level.toString())
+                        .deserialize()
+                )
+            }
         }
-        val lore = data.enchantType.description().map { line ->
+        val lore = data.enchantType.let { if (hasExtra) it.plusDescription() else it.description() }.map { line ->
             val progressList = "■■■■■■■■■■".toCharArray().map { it.toString() }.toMutableList()
             val curProgress =
                 (BigDecimal(data.exp / data.maxExp).setScale(1, RoundingMode.FLOOR).toDouble() * 10).toInt()
@@ -209,16 +263,34 @@ object EnchantManager {
 
         if (data.enchantType == ItemEnchantType.LAN_REN && data.stage > 0) {
             val config = data.enchantType.enchantConfig() as LanRenEnchantConfig
-            val modifier = AttributeModifier(
-                "IEP_ADD".asUUIDFromByte(),
-                "IEP_ADD",
+            val attackDamageModifier = AttributeModifier(
+                "IEP_ADD_ad".asUUIDFromByte(),
+                "IEP_ADD_ad",
                 config.combo1_2.baseDamage[data.stage - 1],
                 AttributeModifier.Operation.ADD_NUMBER
             )
-            meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, modifier)
+            val attackSpeedModifier = AttributeModifier(
+                "IEP_ADD_as".asUUIDFromByte(),
+                "IEP_ADD_as",
+                if (hasExtraData(
+                        data.enchantType,
+                        item,
+                        data.enchantType.plusExtraDataName()
+                    )
+                ) {
+                    config.plusAttackSpeedModifier
+                } else config.attackSpeedModifier,
+                AttributeModifier.Operation.ADD_NUMBER
+            )
+            meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, attackDamageModifier)
+            meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, attackSpeedModifier)
             meta.addAttributeModifier(
                 Attribute.GENERIC_ATTACK_DAMAGE,
-                modifier
+                attackDamageModifier
+            )
+            meta.addAttributeModifier(
+                Attribute.GENERIC_ATTACK_SPEED,
+                attackSpeedModifier
             )
         }
 

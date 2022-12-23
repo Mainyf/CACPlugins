@@ -4,6 +4,7 @@ import com.udojava.evalex.Expression
 import io.github.mainyf.itemenchantplus.ItemEnchantPlus
 import io.github.mainyf.newmclib.config.BaseLang
 import io.github.mainyf.newmclib.config.asDefaultSlotConfig
+import io.github.mainyf.newmclib.config.asIaIcon
 import io.github.mainyf.newmclib.config.asMenuSettingsConfig
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.utils.ItemTypeWrapper
@@ -99,6 +100,7 @@ object ConfigIEP {
                 }
                 val priority = skinSect.getInt("priority", 0)
                 val menuActions = skinSect.getAction("menuActions")
+                val menuBackground = skinSect.getString("menuBackground", "")!!
                 //            val enchantType = skinSect.getEnum<ItemEnchantType>("enchantType")!!
                 val skinEffectSectList = skinSect.getListAsConfigSection("skinEffect")
                 val skinEffect = mutableListOf<SkinEffect>()
@@ -142,7 +144,16 @@ object ConfigIEP {
                     )
                 }
                 itemSkins[skinName] =
-                    EnchantSkinConfig(skinName, enable, enchantType, priority, menuActions, skinEffect, data)
+                    EnchantSkinConfig(
+                        skinName,
+                        enable,
+                        enchantType,
+                        priority,
+                        menuActions,
+                        menuBackground.asIaIcon(),
+                        skinEffect,
+                        data
+                    )
             }
         }
     }
@@ -222,7 +233,9 @@ object ConfigIEP {
         expandEnchantConfig = ExpandEnchantConfig(
             expandConfig.getBoolean("enable"),
             expandConfig.getString("name")!!,
+            expandConfig.getString("plusName")!!,
             expandConfig.getStringList("description"),
+            expandConfig.getStringList("plusDescription"),
             expandConfig.getStringList("allowGiveItem").map { Material.valueOf(it.uppercase()) },
             expandConfig.getStringList("menuItemInListMenu"),
             expandConfig.getStringList("menuItemInGiveMenu"),
@@ -247,7 +260,9 @@ object ConfigIEP {
         luckEnchantConfig = LuckEnchantConfig(
             luckConfig.getBoolean("enable"),
             luckConfig.getString("name")!!,
+            luckConfig.getString("plusName")!!,
             luckConfig.getStringList("description"),
+            luckConfig.getStringList("plusDescription"),
             luckConfig.getStringList("allowGiveItem").map { Material.valueOf(it.uppercase()) },
             luckConfig.getStringList("menuItemInListMenu"),
             luckConfig.getStringList("menuItemInGiveMenu"),
@@ -281,7 +296,9 @@ object ConfigIEP {
         lanrenEnchantConfig = LanRenEnchantConfig(
             lanrenConfig.getBoolean("enable"),
             lanrenConfig.getString("name")!!,
+            lanrenConfig.getString("plusName")!!,
             lanrenConfig.getStringList("description"),
+            lanrenConfig.getStringList("plusDescription"),
             lanrenConfig.getStringList("allowGiveItem").map { Material.valueOf(it.uppercase()) },
             lanrenConfig.getStringList("menuItemInListMenu"),
             lanrenConfig.getStringList("menuItemInGiveMenu"),
@@ -297,9 +314,15 @@ object ConfigIEP {
                     )
                 }
             },
+            lanrenConfig.getDouble("attackSpeedModifier", -2.4),
+            lanrenConfig.getDouble("plusAttackSpeedModifier", -1.0),
+            lanrenConfig.getBoolean("debug"),
+            lanrenConfig.getLong("cheatBypass.move", 40L),
+            lanrenConfig.getLong("cheatBypass.hitBox", 40L),
             lanrenConfig.getLong("skills.comboAttenuation", 40L),
             lanrenConfig.getSection("skills.combo1_2").let { combo1_2Sect ->
                 LanRenCombo1_2Config(
+                    combo1_2Sect.getInt("itemDurabilityLoss"),
                     combo1_2Sect.getString("distance")!!.split(",").map { it.toDouble() },
                     combo1_2Sect.getModelSizeConfig("size"),
                     combo1_2Sect.getString("baseDamage")!!.split(",").map { it.toDouble() },
@@ -310,8 +333,10 @@ object ConfigIEP {
             },
             lanrenConfig.getSection("skills.combo3").let { combo3Sect ->
                 LanRenCombo3Config(
+                    combo3Sect.getInt("itemDurabilityLoss"),
                     combo3Sect.getInt("count"),
                     combo3Sect.getDouble("distance"),
+                    combo3Sect.getLong("speed", 5L),
                     combo3Sect.getModelSizeConfig("size"),
                     combo3Sect.getString("throughDamage")!!.split(",").map { it.toDouble() },
                     combo3Sect.getPotionEffect("hitTargetBuff")
@@ -319,6 +344,7 @@ object ConfigIEP {
             },
             lanrenConfig.getSection("skills.combo4").let { combo4Sect ->
                 LanRenCombo4Config(
+                    combo4Sect.getInt("itemDurabilityLoss"),
                     combo4Sect.getDouble("distance"),
                     combo4Sect.getModelSizeConfig("size"),
                     combo4Sect.getDouble("throughDamage")

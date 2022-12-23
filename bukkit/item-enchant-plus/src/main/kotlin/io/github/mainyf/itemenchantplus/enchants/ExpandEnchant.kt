@@ -5,14 +5,13 @@ import io.github.mainyf.itemenchantplus.ItemEnchantPlus
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
 import io.github.mainyf.itemenchantplus.config.EffectTriggerType
 import io.github.mainyf.itemenchantplus.config.ItemEnchantType
-import io.github.mainyf.newmclib.exts.isEmpty
-import io.github.mainyf.newmclib.exts.onlinePlayers
-import io.github.mainyf.newmclib.exts.pluginManager
-import io.github.mainyf.newmclib.exts.submitTask
+import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.soulbind.SBManager
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
+import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -20,6 +19,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.*
+import kotlin.collections.any
 
 object ExpandEnchant : Listener {
 
@@ -50,21 +50,22 @@ object ExpandEnchant : Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     fun onBreak(event: BlockBreakEvent) {
+        handleSkill(event.player, event.block, event)
+    }
+
+    private fun handleSkill(player: Player, block: Block, event: Cancellable) {
         if (!ConfigIEP.expandEnchantConfig.enable) return
-        val item = event.player.inventory.itemInMainHand
+        val item = player.inventory.itemInMainHand
         if (item.isEmpty()) return
+        val bindData = SBManager.getBindItemData(item)
+        if (!player.isOp && bindData != null && bindData.ownerUUID != player.uuid) {
+            return
+        }
+        EnchantManager.updateItemMeta(item)
         val data = EnchantManager.getItemEnchant(ItemEnchantType.EXPAND, item) ?: return
-        val player = event.player
 
         val world = player.world
-        val b = event.block
         val loc = player.location
-
-        //        val exp = ConfigIEP.getBlockExp(event.block)
-        //        if (exp > 0.0) {
-        //            EnchantManager.addExpToItem(data, exp)
-        //            //            player.msg("你破坏了 ${event.block.type.name} 获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
-        //        }
 
         if (hasRecursive(player)) {
             return
@@ -72,25 +73,25 @@ object ExpandEnchant : Listener {
         var clockwiseBlockList = mutableListOf<Block>()
         val facing = player.facing
         //        player.msg(facing.toString())
-        val hasBottom = loc.blockY > b.y
-        val hasTop = loc.blockY + 1 < b.y
-        val hasFront = loc.blockX < b.x
-        val hasBack = loc.blockX > b.x
-        val hasLeft = loc.blockZ > b.z
-        val hasRight = loc.blockZ < b.z
+        val hasBottom = loc.blockY > block.y
+        val hasTop = loc.blockY + 1 < block.y
+        val hasFront = loc.blockX < block.x
+        val hasBack = loc.blockX > block.x
+        val hasLeft = loc.blockZ > block.z
+        val hasRight = loc.blockZ < block.z
         when {
             hasBottom || hasTop -> {
                 val eastList = mutableListOf(
-                    world.getBlockAt(b.x + 1, b.y, b.z - 1),
-                    world.getBlockAt(b.x + 1, b.y, b.z),
-                    world.getBlockAt(b.x + 1, b.y, b.z + 1),
+                    world.getBlockAt(block.x + 1, block.y, block.z - 1),
+                    world.getBlockAt(block.x + 1, block.y, block.z),
+                    world.getBlockAt(block.x + 1, block.y, block.z + 1),
 
-                    world.getBlockAt(b.x, b.y, b.z + 1),
-                    world.getBlockAt(b.x - 1, b.y, b.z + 1),
+                    world.getBlockAt(block.x, block.y, block.z + 1),
+                    world.getBlockAt(block.x - 1, block.y, block.z + 1),
 
-                    world.getBlockAt(b.x - 1, b.y, b.z),
-                    world.getBlockAt(b.x - 1, b.y, b.z - 1),
-                    world.getBlockAt(b.x, b.y, b.z - 1)
+                    world.getBlockAt(block.x - 1, block.y, block.z),
+                    world.getBlockAt(block.x - 1, block.y, block.z - 1),
+                    world.getBlockAt(block.x, block.y, block.z - 1)
                 )
                 if (hasBottom) {
                     val index = arrayOf(
@@ -122,16 +123,16 @@ object ExpandEnchant : Listener {
 
             (facing == BlockFace.EAST || facing == BlockFace.WEST) && (hasFront || hasBack) -> {
                 val eastList = mutableListOf(
-                    world.getBlockAt(b.x, b.y + 1, b.z - 1),
-                    world.getBlockAt(b.x, b.y + 1, b.z),
-                    world.getBlockAt(b.x, b.y + 1, b.z + 1),
+                    world.getBlockAt(block.x, block.y + 1, block.z - 1),
+                    world.getBlockAt(block.x, block.y + 1, block.z),
+                    world.getBlockAt(block.x, block.y + 1, block.z + 1),
 
-                    world.getBlockAt(b.x, b.y, b.z + 1),
-                    world.getBlockAt(b.x, b.y - 1, b.z + 1),
+                    world.getBlockAt(block.x, block.y, block.z + 1),
+                    world.getBlockAt(block.x, block.y - 1, block.z + 1),
 
-                    world.getBlockAt(b.x, b.y - 1, b.z),
-                    world.getBlockAt(b.x, b.y - 1, b.z - 1),
-                    world.getBlockAt(b.x, b.y, b.z - 1)
+                    world.getBlockAt(block.x, block.y - 1, block.z),
+                    world.getBlockAt(block.x, block.y - 1, block.z - 1),
+                    world.getBlockAt(block.x, block.y, block.z - 1)
                 )
                 if (facing == BlockFace.WEST) {
                     eastList.reverse()
@@ -146,16 +147,16 @@ object ExpandEnchant : Listener {
 
             (facing == BlockFace.NORTH || facing == BlockFace.SOUTH) && hasLeft || hasRight -> {
                 val northList = mutableListOf(
-                    world.getBlockAt(b.x - 1, b.y + 1, b.z),
-                    world.getBlockAt(b.x, b.y + 1, b.z),
-                    world.getBlockAt(b.x + 1, b.y + 1, b.z),
+                    world.getBlockAt(block.x - 1, block.y + 1, block.z),
+                    world.getBlockAt(block.x, block.y + 1, block.z),
+                    world.getBlockAt(block.x + 1, block.y + 1, block.z),
 
-                    world.getBlockAt(b.x + 1, b.y, b.z),
-                    world.getBlockAt(b.x + 1, b.y - 1, b.z),
+                    world.getBlockAt(block.x + 1, block.y, block.z),
+                    world.getBlockAt(block.x + 1, block.y - 1, block.z),
 
-                    world.getBlockAt(b.x, b.y - 1, b.z),
-                    world.getBlockAt(b.x - 1, b.y - 1, b.z),
-                    world.getBlockAt(b.x - 1, b.y, b.z)
+                    world.getBlockAt(block.x, block.y - 1, block.z),
+                    world.getBlockAt(block.x - 1, block.y - 1, block.z),
+                    world.getBlockAt(block.x - 1, block.y, block.z)
                 )
                 if (facing == BlockFace.SOUTH) {
                     northList.reverse()
@@ -174,12 +175,12 @@ object ExpandEnchant : Listener {
                 event.isCancelled = true
                 markRecursive(player)
                 playerBreakBlock(player, bList.first())
-//                bList.first().breakNaturally()
+                //                bList.first().breakNaturally()
             } else if (data.stage >= 3) {
                 markRecursive(player)
                 bList.forEach {
                     playerBreakBlock(player, it)
-//                    it.breakNaturally()
+                    //                    it.breakNaturally()
                 }
             }
         }

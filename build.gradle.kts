@@ -39,6 +39,8 @@ val customStructuresPath = "./plugins/CustomStructures-1.8.0.jar"
 val commandAPIPath = "./plugins/CommandAPI-8.5.1.jar"
 val ppPath = "./plugins/PlayerPoints-3.2.4.jar"
 val modelEngine = "./plugins/Model-Engine-R3.1.2.jar"
+val lpPath = "./plugins/LuckPerms-Bukkit-5.4.30.jar"
+val matrixPath = "./plugins/Matrix_6.8.14.jar"
 
 subprojects {
 
@@ -91,7 +93,7 @@ subprojects {
             implementation("org.jetbrains.kotlin:kotlin-stdlib")
             implementation("io.netty:netty-all:4.1.68.Final")
             implementation(rootProject.files("./bukkit-rebel-plugin.jar"))
-//            compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
+            //            compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
             compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
             implementation("io.github.mainyf:newmclib-craftbukkit:1.7.3:")
             compileOnly(rootProject.files("./plugins/ProtocolLib.jar"))
@@ -100,30 +102,43 @@ subprojects {
             compileOnly(rootProject.files("./libs/Vault.jar"))
 
             when (project.name) {
+                "celebration" -> {
+                    compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
+                }
+
                 "plugin-loader" -> {
-                    implementation(rootProject.fileTree(mapOf(
-                        "dir" to "./server/bukkit/libraries",
-                        "include" to "**/*.jar"
-                    )))
+                    implementation(
+                        rootProject.fileTree(
+                            mapOf(
+                                "dir" to "./server/bukkit/libraries",
+                                "include" to "**/*.jar"
+                            )
+                        )
+                    )
                     embed("net.bytebuddy:byte-buddy:1.11.22")
                 }
+
                 "item-skills-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
                     compileOnly(rootProject.files(itemsAdderPath))
                 }
+
                 "item-enchant-plus" -> {
                     embed("com.udojava:EvalEx:2.7")
                     compileOnly(rootProject.project(":bukkit:soul-bind"))
+                    compileOnly(rootProject.project(":bukkit:world-settings"))
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(mmPath))
                     compileOnly(rootProject.files(modelEngine))
+                    compileOnly(rootProject.files(matrixPath))
                 }
+
                 "my-islands" -> {
-//                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
+                    //                    compileOnly("net.skinsrestorer:skinsrestorer-api:14.1.10")
 
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(plotPath))
-//                    compileOnly(rootProject.files("./libs/PlotSquared-Bukkit-6.6.2-Premium.jar"))
+                    //                    compileOnly(rootProject.files("./libs/PlotSquared-Bukkit-6.6.2-Premium.jar"))
                     compileOnly(rootProject.files(cmiPath))
                     compileOnly(rootProject.files(authmePath))
                     compileOnly(rootProject.files("./libs/datafixerupper-4.1.27.jar"))
@@ -131,6 +146,7 @@ subprojects {
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                     compileOnly(rootProject.project(":bukkit:social-system"))
                 }
+
                 "login-settings" -> {
                     implementation("io.github.dreamvoid:MiraiMC-Integration:1.7")
                     implementation(rootProject.files(miraiMCPath))
@@ -138,43 +154,54 @@ subprojects {
                     compileOnly(rootProject.files(authmePath))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
+
                 "bungee-settings-bukkit" -> {
                     compileOnly(rootProject.files(cmiPath))
                 }
+
                 "player-account" -> {
                     embed("com.aliyun:alibabacloud-dysmsapi20170525:1.0.1")
                 }
+
                 "player-settings" -> {
-//                    embed("com.alibaba:easyexcel:3.0.5")
+                    //                    embed("com.alibaba:easyexcel:3.0.5")
                     compileOnly(rootProject.files(authmePath))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
+
                 "quest-extension" -> {
                     implementation(rootProject.files("./plugins/GCore.jar"))
                     implementation(rootProject.files("./plugins/QuestCreator.jar"))
                     compileOnly(rootProject.project(":bukkit:custom-economy"))
                 }
+
                 "command-settings" -> {
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                 }
+
                 "mcrmb-migration" -> {
-//                    compileOnly(rootProject.files("./plugins/MCRMB-2.0b19-12fe19a.jar"))
+                    //                    compileOnly(rootProject.files("./plugins/MCRMB-2.0b19-12fe19a.jar"))
                     compileOnly(rootProject.files(ppPath))
                 }
+
                 "mcrmb-tools" -> {
                     compileOnly(rootProject.files("./plugins/MCRMB-2.0b19-12fe19a.jar"))
                 }
+
                 "shop-manager" -> {
                     compileOnly(rootProject.files(qsPath))
                 }
+
                 "social-system" -> {
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
-//                    compileOnly(rootProject.project(":bukkit:my-islands"))
+                    //                    compileOnly(rootProject.project(":bukkit:my-islands"))
                 }
+
                 "custom-economy" -> {
 
                 }
+
                 "cs-dungeon" -> {
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(customStructuresPath))
@@ -189,7 +216,10 @@ subprojects {
 
                 "tools-plugin" -> {
                     compileOnly(rootProject.files(itemsAdderPath))
+                    compileOnly(rootProject.files(lpPath))
+                    compileOnly(rootProject.files("./libs/luckperms-bukkit-implement.jar"))
                     compileOnly(rootProject.project(":bukkit:custom-economy"))
+                    compileOnly(rootProject.project(":bukkit:social-system"))
                 }
             }
         }
@@ -197,22 +227,22 @@ subprojects {
 
     tasks.jar {
         if (project.name == "player-account") {
-//            from(provider {
-//                val fatJarDir = project.projectDir.resolve("build/tmp/lib")
-//                fatJarDir.listFiles()?.forEach { file ->
-//                    file.delete()
-//                }
-//                embed.toList().forEach {
-//                    val libFile = fatJarDir.resolve(it.name)
-//                    it.copyTo(libFile, true)
-//                }
-//                fatJarDir
-//            })
+            //            from(provider {
+            //                val fatJarDir = project.projectDir.resolve("build/tmp/lib")
+            //                fatJarDir.listFiles()?.forEach { file ->
+            //                    file.delete()
+            //                }
+            //                embed.toList().forEach {
+            //                    val libFile = fatJarDir.resolve(it.name)
+            //                    it.copyTo(libFile, true)
+            //                }
+            //                fatJarDir
+            //            })
             from(embed)
         } else {
             from(embed.map(::zipTree))
         }
-//        from(embed.map(::zipTree))
+        //        from(embed.map(::zipTree))
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
@@ -228,63 +258,90 @@ subprojects {
             val dd = mutableListOf<String>()
             val sd = mutableListOf<String>()
             when (project.name) {
-//                "item-skills-plus" -> {
-//                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI"))
-//                }
-                "item-enchant-plus" -> {
-                    dd.addAll(listOf("ProtocolLib", "ItemsAdder", "PlaceholderAPI", "MythicMobs", "SoulBind", "ModelEngine"))
+                "celebration" -> {
+                    sd.addAll(listOf("BungeeSettingsBukkit"))
                 }
+
+                "item-enchant-plus" -> {
+                    dd.addAll(
+                        listOf(
+                            "ProtocolLib",
+                            "ItemsAdder",
+                            "PlaceholderAPI",
+                            "MythicMobs",
+                            "SoulBind",
+                            "ModelEngine",
+                            "WorldSettings",
+                            "Matrix"
+                        )
+                    )
+                }
+
                 "my-islands" -> {
                     dd.addAll(listOf("CMI", "PlotSquared", "ItemsAdder", "ProtocolLib", "BungeeSettingsBukkit"))
                     sd.addAll(listOf("AuthMe", "SocialSystem"))
                 }
+
                 "world-settings" -> {
                     dd.addAll(listOf("ProtocolLib"))
                 }
+
                 "bungee-settings-bukkit" -> {
                     dd.addAll(listOf("CMI", "PlaceholderAPI"))
                 }
+
                 "player-settings" -> {
                     sd.addAll(listOf("AuthMe", "BungeeSettingsBukkit"))
                 }
+
                 "quest-extension" -> {
                     dd.addAll(listOf("QuestCreator", "CustomEconomy"))
                 }
+
                 "command-settings" -> {
                     dd.addAll(listOf("ItemsAdder"))
                     sd.addAll(listOf("BungeeSettingsBukkit"))
                 }
+
                 "mcrmb-migration" -> {
                     dd.addAll(listOf("PlayerPoints"))
                 }
+
                 "mcrmb-tools" -> {
                     dd.addAll(listOf("Mcrmb"))
                 }
+
                 "login-settings" -> {
                     dd.addAll(listOf("AuthMe", "MiraiMC", "BungeeSettingsBukkit"))
                 }
+
                 "shop-manager" -> {
                     dd.addAll(listOf("QuickShop", "Vault"))
                 }
+
                 "social-system" -> {
                     dd.addAll(listOf("PlaceholderAPI", "BungeeSettingsBukkit"))
-//                    sd.addAll(listOf("MyIslands"))
+                    //                    sd.addAll(listOf("MyIslands"))
                 }
+
                 "custom-economy" -> {
                     dd.addAll(listOf("PlaceholderAPI"))
                 }
+
                 "cs-dungeon" -> {
                     dd.addAll(listOf("CustomStructures", "ItemsAdder", "MythicMobs", "WorldSettings"))
                 }
+
                 "tools-plugin" -> {
-                    dd.addAll(listOf("ItemsAdder", "CustomEconomy"))
+                    dd.addAll(listOf("ItemsAdder", "CustomEconomy", "LuckPerms", "SocialSystem"))
                 }
+
                 "soul-bind" -> {
                     dd.addAll(listOf("QuickShop"))
                 }
-//                "linkQQ" -> {
-//                    dd.addAll(listOf("MiraiMC", "AuthMe"))
-//                }
+                //                "linkQQ" -> {
+                //                    dd.addAll(listOf("MiraiMC", "AuthMe"))
+                //                }
             }
             if (project.name != "plugin-loader") {
                 dd.add("NewMCLib")
@@ -351,7 +408,7 @@ class $pluginName : JavaPlugin() {
             mainClass.set("io.papermc.paperclip.Paperclip")
             val jvmArgsText =
                 "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
-//            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
+            //            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
             jvmArgs = jvmArgsText.split(" ").toMutableList().apply {
                 add("-Drebel.plugins=${rootProject.file("./bukkit-rebel-plugin.jar").absolutePath}")
                 add("-Drebel.bukkit=true")
@@ -371,7 +428,7 @@ class $pluginName : JavaPlugin() {
             mainClass.set("io.papermc.paperclip.Paperclip")
             val jvmArgsText =
                 "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
-//            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
+            //            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
             jvmArgs = jvmArgsText.split(" ").toMutableList().apply {
                 add("-Drebel.plugins=${rootProject.file("./bukkit-rebel-plugin.jar").absolutePath}")
                 add("-Drebel.bukkit=true")
@@ -391,7 +448,7 @@ class $pluginName : JavaPlugin() {
             mainClass.set("io.papermc.paperclip.Paperclip")
             val jvmArgsText =
                 "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
-//            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
+            //            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
             jvmArgs = jvmArgsText.split(" ")
             args = listOf("nogui")
             workingDir = rootProject.file("./server/test")

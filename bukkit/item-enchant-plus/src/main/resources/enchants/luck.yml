@@ -1,5 +1,16 @@
 enable: true
 name: '福临'
+plusName: '福临 plus'
+description:
+  - '&r'
+  - '&f&l福临 {stage}'
+  - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
+  - '&r'
+plusDescription:
+  - '&r'
+  - '&f&l福临 {stage} plus'
+  - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
+  - '&r'
 max: 25
 luckPercentage:
   # 阶段1翻2倍几率
@@ -10,11 +21,6 @@ luckPercentage:
   stage3-2x: 100.0
   # 阶段3翻3倍几率
   stage3-3x: 50.0
-description:
-  - '&r'
-  - '&f&l福临 {stage}'
-  - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
-  - '&r'
 allowGiveItem: [netherite_pickaxe]
 menuItemInListMenu:
   - ' &8【&7镐附灵&8】'

@@ -207,7 +207,7 @@ object StorageIEP : AbstractStorageManager() {
     fun addEnchantSkinToPlayer(playerUID: UUID, skinConfig: EnchantSkinConfig) {
         transaction {
             val enchantSkinData =
-                EnchantSkinData.find { (EnchantSkinDatas.playerUID eq playerUID) eq (EnchantSkinDatas.skinName eq skinConfig.name) }
+                EnchantSkinData.find { (EnchantSkinDatas.playerUID eq playerUID) and (EnchantSkinDatas.skinName eq skinConfig.name) }
                     .firstOrNull()
             if (enchantSkinData == null) {
                 EnchantSkinData.new(EnchantSkinData.count()) {
@@ -224,7 +224,7 @@ object StorageIEP : AbstractStorageManager() {
     fun removeEnchantSkinToPlayer(playerUID: UUID, skinConfig: EnchantSkinConfig) {
         transaction {
             val enchantSkinData =
-                EnchantSkinData.find { (EnchantSkinDatas.playerUID eq playerUID) eq (EnchantSkinDatas.skinName eq skinConfig.name) }
+                EnchantSkinData.find { (EnchantSkinDatas.playerUID eq playerUID) and (EnchantSkinDatas.skinName eq skinConfig.name) }
                     .firstOrNull()
             enchantSkinData?.delete()
         }
@@ -233,7 +233,7 @@ object StorageIEP : AbstractStorageManager() {
     fun addEnchantSkinTemporaryToPlayer(playerUID: UUID, skinConfig: EnchantSkinConfig, stage: Int, hour: Int) {
         transaction {
             val enchantSkinData =
-                EnchantSkinTemporaryData.find { (EnchantSkinTemporaryDatas.playerUID eq playerUID) eq (EnchantSkinTemporaryDatas.skinName eq skinConfig.name) }
+                EnchantSkinTemporaryData.find { (EnchantSkinTemporaryDatas.playerUID eq playerUID) and (EnchantSkinTemporaryDatas.skinName eq skinConfig.name) }
                     .firstOrNull()
             if (enchantSkinData == null) {
                 EnchantSkinTemporaryData.new(EnchantSkinTemporaryData.count()) {
@@ -266,7 +266,7 @@ object StorageIEP : AbstractStorageManager() {
 
     fun removeEnchantSkinTemporaryToPlayer(playerUID: UUID, skinConfig: EnchantSkinConfig) {
         transaction {
-            EnchantSkinTemporaryData.find { (EnchantSkinTemporaryDatas.playerUID eq playerUID) eq (EnchantSkinTemporaryDatas.skinName eq skinConfig.name) }
+            EnchantSkinTemporaryData.find { (EnchantSkinTemporaryDatas.playerUID eq playerUID) and (EnchantSkinTemporaryDatas.skinName eq skinConfig.name) }
                 .firstOrNull()?.delete()
         }
     }

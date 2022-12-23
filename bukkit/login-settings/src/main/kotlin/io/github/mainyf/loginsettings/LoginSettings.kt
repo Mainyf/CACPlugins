@@ -9,12 +9,12 @@ import fr.xephi.authme.service.BukkitService
 import fr.xephi.authme.service.CommonService
 import fr.xephi.authme.service.ValidationService
 import io.github.mainyf.bungeesettingsbukkit.CrossServerManager
-import io.github.mainyf.loginsettings.config.ConfigManager
+import io.github.mainyf.loginsettings.config.ConfigLS
 import io.github.mainyf.loginsettings.module.AuthmeListeners
 import io.github.mainyf.loginsettings.module.BindQQs
 import io.github.mainyf.loginsettings.module.PlayerAuths
 import io.github.mainyf.loginsettings.module.ResetPasswords
-import io.github.mainyf.loginsettings.storage.StorageManager
+import io.github.mainyf.loginsettings.storage.StorageLS
 import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.LogFile
 import io.github.mainyf.newmclib.exts.asPlugin
@@ -54,7 +54,7 @@ class LoginSettings : BasePlugin() {
         this.log = LogFile(dataFolder.resolve("qq.log"))
         val authMe = "AuthMe".asPlugin() as AuthMe
 
-        StorageManager.init()
+        StorageLS.init()
         authMeInject = authMe.toReflect().get("injector")
 
         asyncChangePassword = tryGetAuthMeService(AsyncChangePassword::class.java, "无法检测到AuthMe插件的密码验证器，插件工作已停止")
@@ -64,7 +64,7 @@ class LoginSettings : BasePlugin() {
         database = tryGetAuthMeService(DataSource::class.java, "无法检测到AuthMe插件的数据储存模块，插件工作已停止")
         bukkitService = tryGetAuthMeService(BukkitService::class.java, "无法检测到AuthMe插件的Bukkit模块，插件工作已停止")
 
-        ConfigManager.load()
+        ConfigLS.load()
         CommandHandler.register()
         PlayerAuths.init()
         PlayerAuths.runTaskTimer(this, 10, 10)
@@ -75,19 +75,19 @@ class LoginSettings : BasePlugin() {
         ResetPasswords.init()
         pluginManager().registerEvents(AuthmeListeners, this)
         submitTask(period = 5L) {
-//            LOGGER.info("初始化机器人: ${ConfigManager.qqBot}")
-            val bot = MiraiBot.getBot(ConfigManager.qqBot)
+            if(!ConfigLS.qqEnable) return@submitTask
+            val bot = MiraiBot.getBot(ConfigLS.qqBot)
             if(bot.friendList.isEmpty()) {
                 return@submitTask
             }
             this.cancel()
             submitTask(period = 30 * 60 * 1000L) submitTask2@{
-                if (!ConfigManager.monitorEnable) return@submitTask2
-                LOGGER.info("开始获取已登录的机器人: ${ConfigManager.qqBot}")
-                val qqBot = MiraiBot.getBot(ConfigManager.qqBot)
+                if (!ConfigLS.monitorEnable) return@submitTask2
+                LOGGER.info("开始获取已登录的机器人: ${ConfigLS.qqBot}")
+                val qqBot = MiraiBot.getBot(ConfigLS.qqBot)
                 LOGGER.info("获取成功")
                 LOGGER.info("好友列表: ${qqBot.friendList.joinToString(", ")}")
-                ConfigManager.monitorQQList.forEach {
+                ConfigLS.monitorQQList.forEach {
                     kotlin.runCatching {
                         LOGGER.info("正在给服务器管理员: $it 发送消息")
                         val friend = qqBot.getFriend(it)
@@ -100,7 +100,7 @@ class LoginSettings : BasePlugin() {
                         it.printStackTrace()
                     }
                 }
-                ConfigManager.monitorQQGroupList.forEach {
+                ConfigLS.monitorQQGroupList.forEach {
                     kotlin.runCatching {
                         LOGGER.info("正在给群组: $it 发送消息")
                         val group = qqBot.getGroup(it)

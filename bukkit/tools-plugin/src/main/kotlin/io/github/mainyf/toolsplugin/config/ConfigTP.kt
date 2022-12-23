@@ -11,6 +11,7 @@ object ConfigTP {
 
     var recycleEnderDragonEgg = false
     var saturdayFly = false
+    var iaRecipeDebug = true
     var iaRecipeCostCoinName: String = "token_1"
     val iaRecipeCost = mutableMapOf<String, Double>()
     var iaRecipeCostLack: MultiAction? = null
@@ -22,6 +23,8 @@ object ConfigTP {
         val config = ToolsPlugin.INSTANCE.config
         recycleEnderDragonEgg = config.getBoolean("recycleEnderDragonEgg", recycleEnderDragonEgg)
         saturdayFly = config.getBoolean("saturdayFly", saturdayFly)
+
+        iaRecipeDebug = config.getBoolean("iaRecipe.debug", iaRecipeDebug)
         iaRecipeCost.clear()
         iaRecipeCostCoinName = config.getString("iaRecipe.coinName", iaRecipeCostCoinName)!!
         val iaRecipeCostSect = config.getSection("iaRecipe.recipeCost")

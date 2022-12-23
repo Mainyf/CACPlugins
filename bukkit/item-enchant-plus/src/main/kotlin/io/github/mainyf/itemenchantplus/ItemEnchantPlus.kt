@@ -172,7 +172,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                 withArguments(playerArguments("玩家"))
                 executeOP {
                     val player = player()
-//                    LanRenEnchant.launchBullet(player)
+                    //                    LanRenEnchant.launchBullet(player)
                 }
             }
             "giveEnchant" {
@@ -195,6 +195,46 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                     player.msg("&6附灵成功")
                 }
             }
+            "giveExtra" {
+                withArguments(
+                    playerArguments("玩家"),
+                    stringArguments("附灵类型") { _ -> ItemEnchantType.values().map { it.name }.toTypedArray() })
+                executeOP {
+                    val player = player()
+                    val enchantType =
+                        EnumUtils.getEnum(ItemEnchantType::class.java, text().uppercase()) ?: return@executeOP
+                    val item = player.inventory.itemInMainHand
+                    if (item.isEmpty()) return@executeOP
+                    val data = EnchantManager.getItemEnchant(item)
+                    if (data == null) {
+                        player.errorMsg("该物品不是一个附灵物品")
+                        return@executeOP
+                    }
+                    EnchantManager.setExtraDataToItem(enchantType, item, enchantType.plusExtraDataName())
+                    EnchantManager.updateItemMeta(item, EnchantManager.getItemEnchant(item)!!)
+                    player.msg("&6给与额外数据成功")
+                }
+            }
+            "takeExtra" {
+                withArguments(
+                    playerArguments("玩家"),
+                    stringArguments("附灵类型") { _ -> ItemEnchantType.values().map { it.name }.toTypedArray() })
+                executeOP {
+                    val player = player()
+                    val enchantType =
+                        EnumUtils.getEnum(ItemEnchantType::class.java, text().uppercase()) ?: return@executeOP
+                    val item = player.inventory.itemInMainHand
+                    if (item.isEmpty()) return@executeOP
+                    val data = EnchantManager.getItemEnchant(item)
+                    if (data == null) {
+                        player.errorMsg("该物品不是一个附灵物品")
+                        return@executeOP
+                    }
+                    EnchantManager.removeExtraDataToItem(enchantType, item, enchantType.plusExtraDataName())
+                    EnchantManager.updateItemMeta(item, EnchantManager.getItemEnchant(item)!!)
+                    player.msg("&6删除额外数据成功")
+                }
+            }
             "maxExp" {
                 withArguments(playerArguments("玩家"))
                 executeOP {
@@ -213,7 +253,10 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                 }
             }
             "addSkin" {
-                withArguments(playerArguments("玩家"), stringArguments("皮肤名"))
+                withArguments(
+                    playerArguments("玩家"),
+                    stringArguments("皮肤名") { _ -> ConfigIEP.itemSkins.keys.toTypedArray() }
+                )
                 executeOP {
                     val player = player()
                     val skinName = text()
@@ -226,7 +269,10 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                 }
             }
             "removeSkin" {
-                withArguments(playerArguments("玩家"), stringArguments("皮肤名"))
+                withArguments(
+                    playerArguments("玩家"),
+                    stringArguments("皮肤名") { _ -> ConfigIEP.itemSkins.keys.toTypedArray() }
+                )
                 executeOP {
                     val player = player()
                     val skinName = text()
@@ -241,7 +287,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
             "addSkinTemp" {
                 withArguments(
                     playerArguments("玩家"),
-                    stringArguments("皮肤名"),
+                    stringArguments("皮肤名") { _ -> ConfigIEP.itemSkins.keys.toTypedArray() },
                     IntegerArgument("阶段"),
                     IntegerArgument("生效时间(小时)")
                 )
@@ -261,7 +307,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
             "removeSkinTemp" {
                 withArguments(
                     playerArguments("玩家"),
-                    stringArguments("皮肤名")
+                    stringArguments("皮肤名") { _ -> ConfigIEP.itemSkins.keys.toTypedArray() }
                 )
                 executeOP {
                     val player = player()

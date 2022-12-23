@@ -1,9 +1,9 @@
 package io.github.mainyf.loginsettings.menu
 
 import io.github.mainyf.loginsettings.LoginSettings
-import io.github.mainyf.loginsettings.config.ConfigManager
+import io.github.mainyf.loginsettings.config.ConfigLS
 import io.github.mainyf.loginsettings.module.BindQQs
-import io.github.mainyf.loginsettings.storage.StorageManager
+import io.github.mainyf.loginsettings.storage.StorageLS
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.runTaskLaterBR
 import io.github.mainyf.newmclib.exts.uuid
@@ -22,11 +22,11 @@ class TeachingMenu : AbstractMenuHandler() {
     private var slotB = 0
 
     override fun open(player: Player) {
-        setup(ConfigManager.teachingMenuConfig.settings)
-        val slotAList = ConfigManager.teachingMenuConfig.slotA.slot
+        setup(ConfigLS.teachingMenuConfig.settings)
+        val slotAList = ConfigLS.teachingMenuConfig.slotA.slot
         slotAIndex = Random.nextInt(slotAList.size)
         slotA = slotAList.elementAt(slotAIndex)
-        val slotBConfig = ConfigManager.teachingMenuConfig.slotB
+        val slotBConfig = ConfigLS.teachingMenuConfig.slotB
         val slotBList = (slotBConfig.slotMin..slotBConfig.slotMax).toList().toMutableList()
         if (slotBList.contains(slotA)) {
             slotBList.remove(slotA)
@@ -41,7 +41,7 @@ class TeachingMenu : AbstractMenuHandler() {
     }
 
     override fun updateTitle(player: Player): String {
-        val teachingMenuConfig = ConfigManager.teachingMenuConfig
+        val teachingMenuConfig = ConfigLS.teachingMenuConfig
         val icons = mutableListOf<IaIcon>()
         icons.add(teachingMenuConfig.slotA.iaIcons[slotAIndex])
         icons.addAll(teachingMenuConfig.slotB.itemSlot.iaIcons.icons())
@@ -49,17 +49,17 @@ class TeachingMenu : AbstractMenuHandler() {
     }
 
     private fun updateInv(inv: Inventory) {
-        val teachingMenuConfig = ConfigManager.teachingMenuConfig
+        val teachingMenuConfig = ConfigLS.teachingMenuConfig
         val slotAConfig = teachingMenuConfig.slotA
         inv.setRightIcon(slotA, slotAConfig.itemSlot.toItemStack()) {
             ok = true
-            if (ConfigManager.qqEnable && !BindQQs.hasLinkQQ(it.uuid)) {
+            if (ConfigLS.qqEnable && !BindQQs.hasLinkQQ(it.uuid)) {
                 it.closeInventory()
                 BindQQs.startLinkQQ(it, true) {}
                 return@setRightIcon
             }
-            if (!StorageManager.hasAgreePlayRuleInWeek(it)) {
-                ConfigManager.teachingMenuSlotA?.execute(it)
+            if (!StorageLS.hasAgreePlayRuleInWeek(it)) {
+                ConfigLS.teachingMenuSlotA?.execute(it)
             } else {
                 slotAConfig.itemSlot.execAction(it)
             }

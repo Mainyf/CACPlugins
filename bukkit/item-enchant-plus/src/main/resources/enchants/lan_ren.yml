@@ -1,8 +1,14 @@
 enable: true
 name: '岚刃'
+plusName: '岚刃 plus'
 description:
   - '&r'
   - '&f&l岚刃 {stage}'
+  - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
+  - '&r'
+plusDescription:
+  - '&r'
+  - '&f&l岚刃 {stage} plus'
   - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
   - '&r'
 allowGiveItem: [diamond_sword]
@@ -21,10 +27,23 @@ upgradeMaterials:
   - "itemenchants:eqMaterial1|32,itemenchants:eqMaterial2|32,itemenchants:eqMaterial3|32,itemenchants:eqMaterial4|32,itemenchants:eqMaterial5|32"
   - "itemenchants:eqMaterial1|64,itemenchants:eqMaterial2|64,itemenchants:eqMaterial3|64,itemenchants:eqMaterial4|64,itemenchants:eqMaterial5|64"
   - "itemenchants:eqMaterial1|128,itemenchants:eqMaterial2|128,itemenchants:eqMaterial3|128,itemenchants:eqMaterial4|128,itemenchants:eqMaterial5|128"
+# 攻击速度修正
+attackSpeedModifier: -2.4
+# 氪金版攻速修正
+plusAttackSpeedModifier: -1.0
+# 是否向玩家发送剑光造成的伤害
+debug: true
+cheatBypass:
+  # 移动 tick
+  move: 10
+  # 移动 tick
+  hitBox: 10
 skills:
   # 连招衰减时间
   comboAttenuation: 40
   combo1_2:
+    # 附灵装备的耐久损耗
+    itemDurabilityLoss: 2
     # 剑气距离
     distance: 5,7,10
     # 剑气宽度
@@ -41,14 +60,20 @@ skills:
       - "SPEED,60,1,true,true,true"
       - "SPEED,60,2,true,true,true"
   combo3:
+    # 附灵装备的耐久损耗
+    itemDurabilityLoss: 3
     # 剑气数量
     count: 3
+    # 发出剑气的间隔
+    speed: 5
     distance: 7
     size: 2,2
     throughDamage: "0.4,0.5"
     # 给被攻击的实体debuff
     hitTargetBuff: "SLOW,60,4,true,true,true"
   combo4:
+    # 附灵装备的耐久损耗
+    itemDurabilityLoss: 4
     distance: 10
     size: 3,2
     throughDamage: 2.0

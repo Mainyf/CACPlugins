@@ -2,12 +2,18 @@
 enable: true
 # 进阶装备的名称
 name: '凿石'
+plusName: '凿石 plus'
 # 装备lore介绍
 # {stage}  阶段级别  I、II、III
 # {exp_progress}  经验进度条
 description:
   - '&r'
   - '&f&l凿石 {stage}'
+  - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
+  - '&r'
+plusDescription:
+  - '&r'
+  - '&f&l凿石 {stage} plus'
   - ' &7等级: &f&lLv.{level}  &8&l[{exp_progress}&8&l] '
   - '&r'
 allowGiveItem: [netherite_pickaxe]

@@ -11,7 +11,7 @@ import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 
-object ConfigManager {
+object ConfigLS {
 
     private lateinit var mainConfigFile: FileConfiguration
     private lateinit var qqConfigFile: FileConfiguration

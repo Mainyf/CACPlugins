@@ -1,8 +1,8 @@
 package io.github.mainyf.loginsettings.module
 
 import io.github.mainyf.loginsettings.LoginSettings
-import io.github.mainyf.loginsettings.config.ConfigManager
-import io.github.mainyf.loginsettings.storage.StorageManager
+import io.github.mainyf.loginsettings.config.ConfigLS
+import io.github.mainyf.loginsettings.storage.StorageLS
 import io.github.mainyf.newmclib.exts.*
 import io.papermc.paper.event.player.AsyncChatEvent
 import me.dreamvoid.miraimc.bukkit.event.message.passive.MiraiGroupMessageEvent
@@ -32,7 +32,7 @@ object ResetPasswords : Listener {
                 }
             }
             unVerityPlayers.forEach {
-                ConfigManager.resetPasswdConfig.actions?.execute(
+                ConfigLS.resetPasswdConfig.actions?.execute(
                     it.key,
                     "{player}", it.key.name,
                     "{qqNum}", it.value.first,
@@ -45,7 +45,7 @@ object ResetPasswords : Listener {
                 }
             }
             resetPasswordStage1.forEach {
-                ConfigManager.resetPasswdConfig.sendNewPasswd?.execute(it)
+                ConfigLS.resetPasswdConfig.sendNewPasswd?.execute(it)
             }
             resetPasswordStage2.keys.forEach {
                 if(!it.isOnline) {
@@ -53,13 +53,13 @@ object ResetPasswords : Listener {
                 }
             }
             resetPasswordStage2.forEach {
-                ConfigManager.resetPasswdConfig.confirmNewPasswd?.execute(it.key)
+                ConfigLS.resetPasswdConfig.confirmNewPasswd?.execute(it.key)
             }
         }
     }
 
     fun startResetPassword(player: Player) {
-        val qqNum = StorageManager.getLinkQQNum(player.uuid)
+        val qqNum = StorageLS.getLinkQQNum(player.uuid)
         if (qqNum == null) {
             player.errorMsg("内部错误: LQ0x2")
             LoginSettings.LOGGER.error("内部错误: LQ0x2")
@@ -70,12 +70,12 @@ object ResetPasswords : Listener {
 
     @EventHandler
     fun onGroupMessage(event: MiraiGroupMessageEvent) {
-        if (event.botID != ConfigManager.qqBot) return
-        if (!ConfigManager.qqGroup.contains(event.groupID)) return
+        if (event.botID != ConfigLS.qqBot) return
+        if (!ConfigLS.qqGroup.contains(event.groupID)) return
         val senderId = event.senderID
         val message = event.message
         val p = unVerityPlayers.findKey { it.value.first == senderId && it.value.second == message } ?: return
-        ConfigManager.resetPasswdConfig.veritySuccess?.let { veritySuccessMsg ->
+        ConfigLS.resetPasswdConfig.veritySuccess?.let { veritySuccessMsg ->
             val msg = veritySuccessMsg.tvar("player", p.name)
             event.group.sendMessageMirai("[mirai:at:$senderId] $msg")
         }
@@ -84,9 +84,9 @@ object ResetPasswords : Listener {
 //            event.reply(msg)
 //        }
         unVerityPlayers.remove(p)
-        ConfigManager.resetPasswdConfig.nextStage?.execute(p)
+        ConfigLS.resetPasswdConfig.nextStage?.execute(p)
         resetPasswordStage1.add(p)
-        ConfigManager.resetPasswdConfig.sendNewPasswd?.execute(p)
+        ConfigLS.resetPasswdConfig.sendNewPasswd?.execute(p)
     }
 
     @EventHandler(ignoreCancelled = false)
@@ -102,24 +102,24 @@ object ResetPasswords : Listener {
                     return
                 }
                 resetPasswordStage1.remove(player)
-                ConfigManager.resetPasswdConfig.nextStage?.execute(player)
+                ConfigLS.resetPasswdConfig.nextStage?.execute(player)
                 resetPasswordStage2[player] = text
-                ConfigManager.resetPasswdConfig.confirmNewPasswd?.execute(player)
+                ConfigLS.resetPasswdConfig.confirmNewPasswd?.execute(player)
             }
             resetPasswordStage2.contains(player) -> {
                 event.isCancelled = true
                 val prevPasswd = resetPasswordStage2[player]!!
                 if (text != prevPasswd) {
                     resetPasswordStage2.remove(player)
-                    ConfigManager.resetPasswdConfig.passwdDiscrepancy?.execute(player)
-                    ConfigManager.resetPasswdConfig.nextStage?.execute(player)
+                    ConfigLS.resetPasswdConfig.passwdDiscrepancy?.execute(player)
+                    ConfigLS.resetPasswdConfig.nextStage?.execute(player)
                     resetPasswordStage1.add(player)
-                    ConfigManager.resetPasswdConfig.sendNewPasswd?.execute(player)
+                    ConfigLS.resetPasswdConfig.sendNewPasswd?.execute(player)
                     return
                 }
                 resetPasswordStage2.remove(player)
                 LoginSettings.asyncChangePassword.changePasswordAsAdmin(console(), player.name, prevPasswd)
-                ConfigManager.resetPasswdConfig.finish?.execute(player)
+                ConfigLS.resetPasswdConfig.finish?.execute(player)
             }
         }
     }
