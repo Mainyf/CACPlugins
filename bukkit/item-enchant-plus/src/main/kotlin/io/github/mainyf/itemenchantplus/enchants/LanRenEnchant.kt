@@ -1,12 +1,13 @@
 package io.github.mainyf.itemenchantplus.enchants
 
+import co.aikar.timings.Timings
 import com.ticxo.modelengine.api.ModelEngineAPI
 import com.ticxo.modelengine.api.model.ModeledEntity
 import io.github.mainyf.itemenchantplus.EnchantData
 import io.github.mainyf.itemenchantplus.EnchantManager
 import io.github.mainyf.itemenchantplus.ItemEnchantPlus
 import io.github.mainyf.itemenchantplus.config.*
-import io.github.mainyf.newmclib.config.action.MultiAction
+import io.github.mainyf.itemenchantplus.hook.MyIsLandHooks
 import io.github.mainyf.newmclib.config.play.MultiPlay
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.nms.asNmsEntity
@@ -17,7 +18,6 @@ import io.lumine.mythic.api.MythicProvider
 import io.lumine.mythic.core.mobs.MobExecutor
 import me.rerere.matrix.api.HackType
 import me.rerere.matrix.api.MatrixAPIProvider
-import org.apache.commons.lang3.RandomStringUtils
 import org.bukkit.Location
 import org.bukkit.attribute.Attribute
 import org.bukkit.block.Block
@@ -93,7 +93,6 @@ object LanRenEnchant : Listener {
             event.isCancelled = true
             return
         }
-        damager.msg("释放失败")
         val item = damager.inventory.itemInMainHand
         if (item.isEmpty()) return
         val data = EnchantManager.getItemEnchant(ItemEnchantType.LAN_REN, item) ?: return
@@ -114,13 +113,12 @@ object LanRenEnchant : Listener {
             return false
         }
 
-        EnchantManager.updateItemMeta(item)
+        EnchantManager.updateItemMeta(item, player)
         val data = EnchantManager.getItemEnchant(ItemEnchantType.LAN_REN, item) ?: return false
 
         if (data.stage < 1) return false
         val config = data.enchantType.enchantConfig() as LanRenEnchantConfig
         if (player.attackCooldown >= 1.0f) {
-            player.msg("发出了剑气 ${RandomStringUtils.randomAlphabetic(4)}")
             val currentTime = currentTime()
             var combo = playerCombo[player.uuid] ?: (1 to currentTime)
             var comboCount = combo.first
@@ -161,6 +159,7 @@ object LanRenEnchant : Listener {
     ) {
         MatrixAPIProvider.getAPI().tempBypass(player, HackType.MOVE, config.cheatBypassMove * 50L)
         MatrixAPIProvider.getAPI().tempBypass(player, HackType.HITBOX, config.cheatBypassHitBox * 50L)
+        MatrixAPIProvider.getAPI().tempBypass(player, HackType.KILLAURA, config.cheatBypassKillAura * 50L)
         val meta = item.itemMeta
         var durabilityLoss = 1
         when (comboCount) {
@@ -398,6 +397,13 @@ object LanRenEnchant : Listener {
                             return@run
                         }
                     }
+                    if(!MyIsLandHooks.hasAttack(player)) {
+                        return@run
+                    }
+
+                    if (hitEntity.hasMetadata("NPC")) {
+                        return@run
+                    }
                     attackTarget(mobExecutor, hitEntity, player, buffFlag)
                 }
             }
@@ -418,19 +424,26 @@ object LanRenEnchant : Listener {
             } else {
                 baseDamage * throughDamage
             }
-            val noDamageTicks = hitEntity.noDamageTicks
-            hitEntity.noDamageTicks = 5
+            //            val noDamageTicks = hitEntity.noDamageTicks
+            //            if(hitEntity !is Player) {
+            //                hitEntity.noDamageTicks = 5
+            //            }
 
             hitEntities.add(hitEntity)
+            val prevHealth = hitEntity.health
             hitEntity.damage(fDamage, player)
+            if (debug) {
+                val entityName = hitEntity.customName() ?: hitEntity.name()
+                player.msg("${entityName.serialize()} 造成的伤害: ${fDamage.toInt()}, 之前的血量: ${prevHealth.toInt()}，现在的血量: ${hitEntity.health.toInt()}")
+            }
             hitEntities.remove(hitEntity)
+            hitEntity.noDamageTicks = 0
 
             val fireEnchantLevel = itemStack.getEnchantmentLevel(Enchantment.FIRE_ASPECT)
             if (fireEnchantLevel > 0 && hitEntity.fireTicks <= 0) {
                 hitEntity.fireTicks = fireEnchantLevel * 4 * 20
             }
 
-            hitEntity.noDamageTicks = noDamageTicks
             if (!buffFlag.get() && shooterBuff != null) {
                 buffFlag.set(true)
                 shooter.addPotionEffect(shooterBuff)
@@ -439,12 +452,6 @@ object LanRenEnchant : Listener {
                 hitEntity.addPotionEffect(hitEntityBuff)
             }
 
-            if (debug) {
-                val entityName = hitEntity.customName() ?: hitEntity.name()
-                player.sendMessage(
-                    "对".toComp().append(entityName).append("造成了 ${fDamage.toInt()} 点伤害".toComp())
-                )
-            }
         }
 
         private fun addModelToEntity(entity: ArmorStand): ModeledEntity {

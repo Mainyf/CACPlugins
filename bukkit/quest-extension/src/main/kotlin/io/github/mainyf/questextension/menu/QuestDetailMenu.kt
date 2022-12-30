@@ -104,7 +104,7 @@ class QuestDetailMenu(
         if (playerPoints != null) {
             inv.setIcon(questDetailMenuConfig.fsSlot, itemBlock = {
                 setDisplayName {
-                    it?.text()?.tvar("count", playerPoints)?.toComp()
+                    it?.serialize()?.tvar("count", playerPoints)?.deserialize()
                 }
             })
         }
@@ -112,7 +112,7 @@ class QuestDetailMenu(
         if (money != null) {
             inv.setIcon(questDetailMenuConfig.moneySlot, itemBlock = {
                 setDisplayName {
-                    it?.text()?.tvar("count", money)?.toComp()
+                    it?.serialize()?.tvar("count", money)?.deserialize()
                 }
             })
         }
@@ -120,7 +120,7 @@ class QuestDetailMenu(
         if (token1 != null) {
             inv.setIcon(questDetailMenuConfig.xypSlot, itemBlock = {
                 setDisplayName {
-                    it?.text()?.tvar("count", token1)?.toComp()
+                    it?.serialize()?.tvar("count", token1)?.deserialize()
                 }
             })
         }
@@ -183,7 +183,7 @@ class QuestDetailMenu(
             withMeta(
                 loreBlock = { lore ->
                     if (lore == null || lore.isEmpty()) return@withMeta lore
-                    lore.mapToString()
+                    lore.mapToSerialize()
                         .tvarList("desc", questObject.objectiveDetail.rawValue)
                         .map { it.tvar("progression", proText) }
                         .map {
@@ -194,7 +194,7 @@ class QuestDetailMenu(
                                     .tvar("objective_goal", pro.goalTotal.toDisplayText())
                             } else it
                         }
-                        .mapToComp()
+                        .mapToDeserialize()
                 }
             )
         })

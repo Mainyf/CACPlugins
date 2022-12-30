@@ -27,20 +27,21 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
 }
 
-val itemsAdderPath = "./plugins/ItemsAdder_3.2.3-r10.jar"
-val cmiPath = "./plugins/CMI9.2.2.0.jar"
-val plotPath = "./plugins/PlotSquared-Bukkit-6.9.3-Premium.jar"
-val mmPath = "./plugins/MythicMobs-5.1.4.jar"
+val itemsAdderPath = "./plugins/ItemsAdder_3.3.0b-r2.jar"
+val cmiPath = "./plugins/CMI-9.3.0.2.jar"
+val plotPath = "./plugins/PlotSquared-Bukkit-6.10.5-Premium.jar"
+val mmPath = "./plugins/MythicMobs-5.2.1.jar"
 val miraiMCPath = "./libs/MiraiMC-Bukkit.jar"
 val authmePath = "./libs/AuthMe-5.6.0-beta2.jar"
 val papiPath = "./plugins/PlaceholderAPI-2.11.2.jar"
 val qsPath = "./libs/QuickShop.jar"
-val customStructuresPath = "./plugins/CustomStructures-1.8.0.jar"
-val commandAPIPath = "./plugins/CommandAPI-8.5.1.jar"
-val ppPath = "./plugins/PlayerPoints-3.2.4.jar"
+val customStructuresPath = "./plugins/CustomStructures-1.8.2.jar"
+val commandAPIPath = "./plugins/CommandAPI-8.7.1.jar"
+val ppPath = "./plugins/PlayerPoints-3.2.5.jar"
 val modelEngine = "./plugins/Model-Engine-R3.1.2.jar"
-val lpPath = "./plugins/LuckPerms-Bukkit-5.4.30.jar"
-val matrixPath = "./plugins/Matrix_6.8.14.jar"
+val lpPath = "./plugins/LuckPerms-Bukkit-5.4.40.jar"
+val matrixPath = "./plugins/Matrix_7.0.0_alpha06.jar"
+val citizensPath = "./plugins/Citizens.jar"
 
 subprojects {
 
@@ -94,8 +95,8 @@ subprojects {
             implementation("io.netty:netty-all:4.1.68.Final")
             implementation(rootProject.files("./bukkit-rebel-plugin.jar"))
             //            compileOnly(rootProject.files("./libs/paper-server-1.18.2-R0.1-SNAPSHOT-reobf.jar"))
-            compileOnly(rootProject.files("./libs/authlib-3.3.39.jar"))
-            implementation("io.github.mainyf:newmclib-craftbukkit:1.7.3:")
+            compileOnly(rootProject.files("./libs/authlib-3.16.29.jar"))
+            implementation("io.github.mainyf:newmclib-craftbukkit:1.7.4:")
             compileOnly(rootProject.files("./plugins/ProtocolLib.jar"))
             compileOnly(rootProject.files(papiPath))
             compileOnly(rootProject.files(commandAPIPath))
@@ -127,10 +128,13 @@ subprojects {
                     embed("com.udojava:EvalEx:2.7")
                     compileOnly(rootProject.project(":bukkit:soul-bind"))
                     compileOnly(rootProject.project(":bukkit:world-settings"))
+                    compileOnly(rootProject.project(":bukkit:my-islands"))
+                    compileOnly(rootProject.files(plotPath))
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(mmPath))
                     compileOnly(rootProject.files(modelEngine))
                     compileOnly(rootProject.files(matrixPath))
+                    compileOnly(rootProject.files(citizensPath))
                 }
 
                 "my-islands" -> {
@@ -272,9 +276,14 @@ subprojects {
                             "SoulBind",
                             "ModelEngine",
                             "WorldSettings",
-                            "Matrix"
+                            "Matrix",
+                            "Citizens"
                         )
                     )
+                    sd.addAll(listOf(
+                        "PlotSquared",
+                        "MyIslands"
+                    ))
                 }
 
                 "my-islands" -> {

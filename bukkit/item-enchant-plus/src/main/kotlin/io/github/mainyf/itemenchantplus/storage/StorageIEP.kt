@@ -13,105 +13,38 @@ import kotlin.math.min
 
 object StorageIEP : AbstractStorageManager() {
 
-    val stageLevel = arrayOf(
-        10,
-        20,
-        30
-    )
-
     override fun init() {
         super.init()
         transaction {
             arrayOf(
-                ItemEnchantDatas,
+                EnchantItemIDDatas,
                 EnchantSkinDatas,
                 EnchantSkinTemporaryDatas
             ).forEach {
                 SchemaUtils.createMissingTablesAndColumns(it)
             }
-        }
-    }
-
-    fun setItemSkin(itemId: Long, skinConfig: EnchantSkinConfig) {
-        transaction {
-            val data = ItemEnchantData.findById(itemId)
-            if (data != null) {
-                data.skinName = skinConfig.name
-            }
-        }
-    }
-
-    fun setLevelAndExp(itemId: Long, enchantType: ItemEnchantType, stage: Int, level: Int, exp: Double) {
-        transaction {
-            val data = ItemEnchantData.findById(itemId)
-            if (data == null) {
-                handleSkillLevel(ItemEnchantData.new(itemId) {
-                    this.stage = stage
-                    this.level = level
-                    this.exp = exp
-                    this.skinName = enchantType.defaultSkin().name
-                })
-            } else {
-                data.stage = stage
-                data.level = level
-                data.exp = exp
-                handleSkillLevel(data)
-            }
-        }
-    }
-
-    fun addExp(itemId: Long, value: Double, enchantType: ItemEnchantType): ItemEnchantData {
-        return transaction {
-            val data = getEnchantData(itemId, enchantType)
-            data.exp += value
-            handleSkillLevel(data)
-            val maxExp = ConfigIEP.getLevelMaxExp(data.level)
-            if (data.exp > maxExp) {
-                data.exp = maxExp
-            }
-            data
-        }
-    }
-
-    fun getEnchantData(itemId: Long, enchantType: ItemEnchantType): ItemEnchantData {
-        return transaction {
-            var data = ItemEnchantData.findById(itemId)
-            if (data == null) {
-                data = ItemEnchantData.new(itemId) {
-                    this.stage = 0
-                    this.level = 1
-                    this.exp = 0.0
-                    this.skinName = enchantType.defaultSkin().name
+            if (EnchantItemIDData.count() == 0L) {
+                EnchantItemIDData.new(1) {
+                    nextID = 1
                 }
             }
-            data
-        }
-    }
-
-    fun exists(itemId: Long): Boolean {
-        return transaction {
-            ItemEnchantData.findById(itemId) != null
-        }
-    }
-
-    fun getStageMaxLevel(stage: Int): Int {
-        return stageLevel.getOrNull(stage) ?: 30
-    }
-
-    private fun handleSkillLevel(data: ItemEnchantData) {
-        if (data.stage >= 3) return
-        var maxExp = ConfigIEP.getLevelMaxExp(data.level)
-        val maxLevel = stageLevel[data.stage]
-        while (data.exp >= maxExp && data.level < maxLevel) {
-            data.exp -= maxExp
-            data.level++
-            maxExp = ConfigIEP.getLevelMaxExp(data.level)
         }
     }
 
     fun nextItemLongID(): Long {
         return transaction {
-            ItemEnchantData.count()
+            val data = EnchantItemIDData.findById(1L)
+            val rs: Long
+            if (data == null) {
+                EnchantItemIDData.new(1) {
+                    nextID = 1
+                }
+                rs = 1
+            } else {
+                rs = data.nextID
+                data.nextID++
+            }
+            rs
         }
     }
 
@@ -210,7 +143,7 @@ object StorageIEP : AbstractStorageManager() {
                 EnchantSkinData.find { (EnchantSkinDatas.playerUID eq playerUID) and (EnchantSkinDatas.skinName eq skinConfig.name) }
                     .firstOrNull()
             if (enchantSkinData == null) {
-                EnchantSkinData.new(EnchantSkinData.count()) {
+                EnchantSkinData.new {
                     this.playerUID = playerUID
                     this.skinName = skinConfig.name
                     this.stage = 1
@@ -236,7 +169,7 @@ object StorageIEP : AbstractStorageManager() {
                 EnchantSkinTemporaryData.find { (EnchantSkinTemporaryDatas.playerUID eq playerUID) and (EnchantSkinTemporaryDatas.skinName eq skinConfig.name) }
                     .firstOrNull()
             if (enchantSkinData == null) {
-                EnchantSkinTemporaryData.new(EnchantSkinTemporaryData.count()) {
+                EnchantSkinTemporaryData.new {
                     this.playerUID = playerUID
                     this.skinName = skinConfig.name
                     this.stage = stage

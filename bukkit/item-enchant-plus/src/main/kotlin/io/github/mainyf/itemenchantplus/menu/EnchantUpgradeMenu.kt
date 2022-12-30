@@ -60,7 +60,7 @@ class EnchantUpgradeMenu : AbstractMenuHandler() {
             player.sendLang("enchantUpgradeLevelUnqualified")
             return
         }
-        if (enchantData.stage >= StorageIEP.stageLevel.size) {
+        if (enchantData.stage >= ConfigIEP.stageLevel.size) {
             player.sendLang("enchantMaxStage")
             return
         }
@@ -122,7 +122,7 @@ class EnchantUpgradeMenu : AbstractMenuHandler() {
             val enchantItemUpgradeResult = enchantItem.clone()
             EnchantManager.updateItemMeta(
                 enchantItemUpgradeResult,
-                enchantData!!.copy(stage = min(StorageIEP.stageLevel.size, enchantData!!.stage + 1))
+                enchantData!!.copy(stage = min(ConfigIEP.stageLevel.size, enchantData!!.stage + 1))
             )
             inv.setIcon(gum.upgradeResultSlot.slot, itemStack = enchantItemUpgradeResult)
             val upgradeMaterials = enchantType.upgradeMaterials()[enchantData!!.stage + 1]
@@ -164,7 +164,7 @@ class EnchantUpgradeMenu : AbstractMenuHandler() {
             player.sendLang("enchantUpgradeLevelUnqualified")
             return
         }
-        if (data.stage >= StorageIEP.stageLevel.size) {
+        if (data.stage >= ConfigIEP.stageLevel.size) {
             player.sendLang("enchantMaxStage")
             return
         }

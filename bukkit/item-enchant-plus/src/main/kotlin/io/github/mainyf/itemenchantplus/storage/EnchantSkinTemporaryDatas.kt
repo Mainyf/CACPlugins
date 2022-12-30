@@ -5,13 +5,10 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.jodatime.datetime
 
-object EnchantSkinTemporaryDatas : IdTable<Long>("t_EnchantSkinTemporaryData_${env()}") {
-
-    override val id = long("id").entityId()
-
-    override val primaryKey = PrimaryKey(id)
+object EnchantSkinTemporaryDatas : LongIdTable("t_EnchantSkinTemporaryData_${env()}") {
 
     val playerUID = uuid("player_uid")
 

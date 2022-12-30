@@ -104,6 +104,10 @@ class DungeonMenu(val dungeon: DungeonStructure) : AbstractMenuHandler() {
             )
             return
         }
+        val battle = CsDungeon.INSTANCE.getBattle(dungeon) { DungeonBattle(dungeon, level) }
+        if (battle.start) {
+            return
+        }
         dungeonMaterial.item.forEach { dmItem ->
             player.takeItem(dmItem.amount) {
                 it?.equalsByIaNamespaceID(dmItem.iaName) == true
@@ -118,7 +122,8 @@ class DungeonMenu(val dungeon: DungeonStructure) : AbstractMenuHandler() {
         if (dungeonMaterial.exp > 0) {
             player.totalExperience -= dungeonMaterial.exp
         }
-        CsDungeon.INSTANCE.getBattles(dungeon) { DungeonBattle(dungeon, level) }.apply {
+        battle.apply {
+            this.level = level
             addPlayer(player)
         }.startBattle()
         player.closeInventory()

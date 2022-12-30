@@ -277,7 +277,7 @@ class IslandsSettingsMenu(
 
                 inv.setIcon(helpersSlot[i], settingsMenuConfig.helpersSlot.default()!!.toItemStack(skullItem) {
                     val meta = itemMeta
-                    meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer.name)))
+                    meta.displayName(meta.displayName()!!.serialize().tvar("player", offlinePlayer.name).deserialize())
                     meta.lore(IslandsManager.replaceVarByLoreList(meta.lore(), plot, islandsData))
                     this.itemMeta = meta
                     setPlaceholder(player)

@@ -5,12 +5,9 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
-object EnchantSkinDatas : IdTable<Long>("t_EnchantSkinData_${env()}") {
-
-    override val id = long("id").entityId()
-
-    override val primaryKey = PrimaryKey(id)
+object EnchantSkinDatas : LongIdTable("t_EnchantSkinData_${env()}") {
 
     val playerUID = uuid("player_uid")
 

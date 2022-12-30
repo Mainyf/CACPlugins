@@ -68,6 +68,8 @@ allowBlocks:
   - ancient_debris
   - cobaltite_ore
   - erythrite_ore
+conflictEnchant:
+  - knockback
 defaultSkin: "pickaxeDefault"
 upgradeMaterials:
   - "itemenchants:eqMaterial1|16,itemenchants:eqMaterial2|16,itemenchants:eqMaterial3|16,itemenchants:eqMaterial4|16,itemenchants:eqMaterial5|16"

@@ -17,6 +17,8 @@ object ConfigTP {
     var iaRecipeCostLack: MultiAction? = null
     var iaRecipeSuccess: MultiAction? = null
 
+    var chunkLoggerDebug = false
+
     fun load() {
         ToolsPlugin.INSTANCE.saveDefaultConfig()
         ToolsPlugin.INSTANCE.reloadConfig()
@@ -33,6 +35,8 @@ object ConfigTP {
         }
         iaRecipeCostLack = config.getAction("iaRecipe.iaRecipeCostLack")
         iaRecipeSuccess = config.getAction("iaRecipe.iaRecipeSuccess")
+
+        chunkLoggerDebug = config.getBoolean("chunkLogger.debug", chunkLoggerDebug)
     }
 
 }

@@ -12,3 +12,5 @@ iaRecipe:
     - "mini: &c&l！&4合成 {itemName} 失败，需要 {cost}，当前拥有: {money}"
   iaRecipeSuccess:
     - "mini: &c&l！&4合成 {itemName} 成功，消耗金钱 {cost}，当前拥有: {money}"
+chunkLogger:
+  debug: true

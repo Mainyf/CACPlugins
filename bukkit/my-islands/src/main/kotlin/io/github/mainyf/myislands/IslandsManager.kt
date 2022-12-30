@@ -411,7 +411,7 @@ object IslandsManager {
     ): List<Component>? {
         if (lore == null) return null
         return lore.map { comp ->
-            comp.text().tvar(
+            comp.serialize().tvar(
                 "owner", plot?.owner?.asOfflineData()?.name ?: "无",
                 "helpers", getIslandHelpers(islandData).let { list ->
                     if (list.isEmpty()) "无" else list.joinToString(",") {
@@ -420,7 +420,7 @@ object IslandsManager {
                 },
                 "kudos", "${islandData?.kudos ?: "无"}",
                 "heats", "${islandData?.heats ?: "无"}"
-            ).toComp()
+            ).deserialize()
         }
     }
 

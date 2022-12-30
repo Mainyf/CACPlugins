@@ -1,5 +1,6 @@
 package io.github.mainyf.csdungeon
 
+import io.github.mainyf.newmclib.exts.serialize
 import io.lumine.mythic.core.mobs.ActiveMob
 import org.bukkit.entity.LivingEntity
 
@@ -16,6 +17,8 @@ class MobWrapper(
         }
 
     val location get() = bukkitEntity.location
+
+    val customName get() = bukkitEntity.customName()?.serialize() ?: bukkitEntity.type.name
 
     fun setDead() {
         if(entity != null) {

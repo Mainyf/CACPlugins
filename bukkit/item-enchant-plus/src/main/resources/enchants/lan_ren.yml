@@ -21,6 +21,8 @@ menuItemInGiveMenu:
 menuItemInUpgradeMenu:
   - ' &8【&7剑附灵&8】'
   - ' &7&m                       &r'
+conflictEnchant:
+  - knockback
 defaultSkin: "swordDefault"
 upgradeMaterials:
   - "itemenchants:eqMaterial1|16,itemenchants:eqMaterial2|16,itemenchants:eqMaterial3|16,itemenchants:eqMaterial4|16,itemenchants:eqMaterial5|16"
@@ -38,6 +40,8 @@ cheatBypass:
   move: 10
   # 移动 tick
   hitBox: 10
+  # 杀戮光环 tick
+  killAura: 10
 skills:
   # 连招衰减时间
   comboAttenuation: 40

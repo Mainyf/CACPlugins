@@ -14,12 +14,13 @@ import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.scheduler.BukkitRunnable
 import kotlin.collections.find
 
-class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
+class DungeonBattle(val dungeon: DungeonStructure, var level: Int) {
 
     var start = false
     var endCheckTask: BukkitRunnable? = null
     val mobSpawnTasks = mutableListOf<BukkitRunnable>()
-    var flyCheckTask: BukkitRunnable? = null
+
+    //    var flyCheckTask: BukkitRunnable? = null
     var tipsTask: BukkitRunnable? = null
     val dungeonConfig get() = ConfigCSD.dungeonConfigMap[dungeon.dungeonName]
     val dungeonLevelConfig get() = dungeonConfig!!.levels.find { it.level == level }
@@ -41,14 +42,14 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
         endCheckTask = CsDungeon.INSTANCE.submitTask(period = 10L) {
             checkPlayers()
         }
-        flyCheckTask = CsDungeon.INSTANCE.submitTask(period = 10L) {
-            if (!dungeonConfig!!.noFly) return@submitTask
-            players.forEach {
-                if (it.allowFlight) {
-                    it.allowFlight = false
-                }
-            }
-        }
+        //        flyCheckTask = CsDungeon.INSTANCE.submitTask(period = 10L) {
+        //            if (!dungeonConfig!!.noFly) return@submitTask
+        //            players.forEach {
+        //                if (it.allowFlight) {
+        //                    it.allowFlight = false
+        //                }
+        //            }
+        //        }
         tipsTask = CsDungeon.INSTANCE.submitTask(period = dungeonConfig!!.tipPeriod) {
             players.forEach { player ->
                 dungeonConfig!!.tipActions.execute(
@@ -117,8 +118,16 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
     }
 
     fun end() {
-        players.forEach {
-            dungeonConfig!!.endActions.execute(it)
+        players.forEach { player ->
+            dungeonConfig!!.endActions.execute(
+                player,
+                "{player}",
+                player.name,
+                "{kill}",
+                mobList.count { it.isDead },
+                "{total}",
+                dungeonLevelConfig!!.totalMob
+            )
         }
         val coreLoc = Location(dungeon.worldName.asWorld(), dungeon.coreX, dungeon.coreY, dungeon.coreZ)
         dungeonConfig!!.endPlays.execute(coreLoc)
@@ -132,8 +141,8 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
         }
         mobSpawnTasks.clear()
 
-        flyCheckTask?.cancel()
-        flyCheckTask = null
+        //        flyCheckTask?.cancel()
+        //        flyCheckTask = null
 
         tipsTask?.cancel()
         tipsTask = null
@@ -166,7 +175,7 @@ class DungeonBattle(val dungeon: DungeonStructure, val level: Int) {
             }
             return
         }
-        if(players.contains(player)) {
+        if (players.contains(player)) {
             val boundaryDamage = dungeonConfig!!.boundaryDamage
             if (boundaryDamage == -1) return
             if (!dungeon.containsDungeonArea(event.to)) {

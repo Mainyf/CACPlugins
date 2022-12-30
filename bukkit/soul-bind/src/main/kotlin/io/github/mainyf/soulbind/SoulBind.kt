@@ -42,6 +42,23 @@ class SoulBind : JavaPlugin() {
                     sender.successMsg("[SoulBind] 重载成功")
                 }
             }
+            "auto-bind" {
+                withArguments(
+                    playerArguments("玩家")
+                )
+                executeOP {
+                    val player = player()
+                    val inv = player.inventory
+                    inv.forEachIndexed { index, itemStack ->
+                        if (itemStack.isEmpty()) return@forEachIndexed
+                        if(SBManager.hasBindItem(itemStack)) return@forEachIndexed
+                        var rs = SBManager.handleItemBind(player, itemStack)
+                        rs = RecallSBManager.handleItemBind(player, rs)
+                        inv.setItem(index, rs)
+                    }
+                    sender.msg("绑定成功")
+                }
+            }
             "bind" {
                 withArguments(
                     playerArguments("玩家")

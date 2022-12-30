@@ -9,7 +9,6 @@ import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
-import io.github.mainyf.newmclib.serverId
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.event.HoverEvent
 import org.apache.logging.log4j.LogManager
@@ -156,7 +155,8 @@ class Celebration : JavaPlugin(), Listener {
             togetherName,
             currentTime(),
             onlinePlayers().map { it.uuid },
-            mutableSetOf()
+            mutableSetOf(),
+            playerName
         )
         onlinePlayers().forEach {
             togetherReward.startActions?.execute(it, "{player}", playerName)
@@ -184,10 +184,14 @@ class Celebration : JavaPlugin(), Listener {
                 if (message.length < togetherReward.msgLength) {
                     return@forEach
                 }
-                if (togetherReward.chinese && !isChinese(message)) {
+                if (togetherReward.chinese && getChineseCharCount(message) < togetherReward.msgLength) {
                     return@forEach
                 }
-                togetherReward.reward?.execute(player)
+                togetherReward.reward?.execute(
+                    player,
+                    "{player}", player.name,
+                    "{owner}", activeTogethersReward.ownerName
+                )
                 activeTogethersReward.players.add(player.uuid)
                 if (activeTogethersReward.players.size == activeTogethersReward.availablePlayers.size) {
                     removeRewards.add(key)
@@ -199,15 +203,16 @@ class Celebration : JavaPlugin(), Listener {
         }
     }
 
-    private fun isChinese(string: String): Boolean {
+    private fun getChineseCharCount(string: String): Int {
         var n: Int
+        var rs = 0
         for (element in string) {
             n = element.code
-            if (n !in 19968 .. 40868) {
-                return false
+            if (n in 19968 .. 40868) {
+                rs++
             }
         }
-        return true
+        return rs
     }
 
     @EventHandler
@@ -227,7 +232,8 @@ class Celebration : JavaPlugin(), Listener {
         val togetherName: String,
         val startTime: Long,
         val availablePlayers: List<UUID>,
-        val players: MutableSet<UUID>
+        val players: MutableSet<UUID>,
+        val ownerName: String
     )
 
 }

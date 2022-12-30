@@ -82,6 +82,9 @@ allowBlocks:
   - red_sandstone
   - crimson_nylium
   - warped_nylium
+# 冲突附魔
+conflictEnchant:
+  - knockback
 defaultSkin: "pickaxeDefault"
 upgradeMaterials:
   - "itemsadder:cobaltite_ingot|1,netherite_ingot|1"

@@ -5,6 +5,7 @@ import io.github.mainyf.newmclib.exts.toReflect
 import org.apache.commons.lang3.EnumUtils
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.enchantments.Enchantment
 
 enum class ItemEnchantType(val namespacedKey: NamespacedKey) {
 
@@ -26,6 +27,10 @@ enum class ItemEnchantType(val namespacedKey: NamespacedKey) {
 
     fun enchantConfig(): Any {
         return ConfigIEP.enchants[this]!!
+    }
+
+    fun conflictEnchant(): List<Enchantment> {
+        return enchantConfig().toReflect().get("conflictEnchant")
     }
 
     fun defaultSkin(): EnchantSkinConfig {

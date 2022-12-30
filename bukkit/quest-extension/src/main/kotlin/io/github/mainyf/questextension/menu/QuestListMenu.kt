@@ -8,7 +8,6 @@ import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.questextension.config.ConfigManager
-import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
@@ -69,11 +68,11 @@ class QuestListMenu(
             inv.setIcon(slotConfig, if (hasCompleteQuest(model.id)) "complete" else "default", itemBlock = {
                 withMeta(
                     {
-                        it?.text()?.tvar("displayName", model.displayName.getRawValueLine(0))?.toComp()
+                        it?.serialize()?.tvar("displayName", model.displayName.getRawValueLine(0))?.deserialize()
                     },
                     { lore ->
                         if (lore == null || lore.isEmpty()) return@withMeta lore
-                        lore.mapToString().tvarList("desc", model.description.rawValue).mapToComp()
+                        lore.mapToSerialize().tvarList("desc", model.description.rawValue).mapToDeserialize()
                     }
                 )
             }) {

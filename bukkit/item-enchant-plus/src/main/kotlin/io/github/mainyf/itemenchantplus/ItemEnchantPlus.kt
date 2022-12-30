@@ -8,6 +8,8 @@ import io.github.mainyf.itemenchantplus.config.ItemEnchantType
 import io.github.mainyf.itemenchantplus.enchants.ExpandEnchant
 import io.github.mainyf.itemenchantplus.enchants.LanRenEnchant
 import io.github.mainyf.itemenchantplus.enchants.LuckEnchant
+import io.github.mainyf.itemenchantplus.hook.MyIsLandHooks
+import io.github.mainyf.itemenchantplus.listeners.PlayerListeners
 import io.github.mainyf.itemenchantplus.menu.DashboardMenu
 import io.github.mainyf.itemenchantplus.menu.EnchantSkinMenu
 import io.github.mainyf.itemenchantplus.storage.StorageIEP
@@ -15,7 +17,9 @@ import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
 import io.github.mainyf.soulbind.RecallSBManager
+import io.github.mainyf.soulbind.storage.StorageSB
 import org.apache.commons.lang3.EnumUtils
 import org.apache.logging.log4j.LogManager
 import org.bukkit.Bukkit
@@ -36,6 +40,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
 
     override fun onEnable() {
         INSTANCE = this
+        MyIsLandHooks.init()
         ConfigIEP.init()
         StorageIEP.init()
         ExpandEnchant.init()
@@ -43,13 +48,32 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
         Bukkit.getServer().pluginManager.registerEvents(ExpandEnchant, this)
         Bukkit.getServer().pluginManager.registerEvents(LuckEnchant, this)
         Bukkit.getServer().pluginManager.registerEvents(LanRenEnchant, this)
-        Bukkit.getServer().pluginManager.registerEvents(this, this)
+        Bukkit.getServer().pluginManager.registerEvents(PlayerListeners, this)
         RecallSBManager.addRecallSBItemPredicate(this.name) { itemStack ->
             EnchantManager.hasEnchantItem(itemStack)
         }
-        RecallSBManager.addRecallSBItemIDProvider(this.name) { itemStack ->
-            val enchantData = EnchantManager.getItemEnchant(itemStack)
-            enchantData?.itemUID ?: -1L
+//        RecallSBManager.addRecallSBItemIDProvider(this.name) { itemStack ->
+//            val enchantData = EnchantManager.getItemEnchant(itemStack)
+//            enchantData?.itemUID ?: -1L
+//        }
+        addPlaceholderExpansion("itemenchantplus") papi@{ offlinePlayer, params ->
+            val player = offlinePlayer?.player ?: return@papi null
+            val paramType = params?.substringBefore("_") ?: return@papi null
+            when (paramType) {
+                "extra" -> {
+                    val typeText = params.substringAfter("_")
+                    val type = ItemEnchantType.of(typeText) ?: return@papi null
+                    val items = StorageSB.getPlayerRecallItems(player.uuid).values
+
+                    if (items.any {
+                            EnchantManager.hasExtraData(type, it, type.plusExtraDataName())
+                        }) {
+                        "on"
+                    } else "off"
+                }
+
+                else -> null
+            }
         }
         //        RecallSBManager.addRecallSBItemListProvider(this.name) { player ->
         //            player
@@ -148,7 +172,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                         return@executeOP
                     }
 
-                    EnchantManager.addExpToItem(data, exp)
+                    EnchantManager.addExpToItem(data.enchantType, item, exp)
                     EnchantManager.updateItemMeta(item, data)
                     player.msg("获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")
                 }
@@ -247,7 +271,7 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                         return@executeOP
                     }
                     val exp = EnchantManager.getToNextStageNeedExp(data)
-                    EnchantManager.addExpToItem(data, exp)
+                    EnchantManager.addExpToItem(data.enchantType, item, exp)
                     EnchantManager.updateItemMeta(item, data)
                     player.msg("&6升级成功")
                 }
@@ -345,11 +369,6 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
         }
         LanRenEnchant.clean()
     }
-
-    //    @EventHandler
-    //    fun onQuit(event: PlayerQuitEvent) {
-    //
-    //    }
 
 }
 

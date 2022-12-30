@@ -8,6 +8,7 @@ import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.soulbind.RecallSBManager
+import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
@@ -83,12 +84,12 @@ class GiveEnchantMenu(val enchantType: ItemEnchantType) : AbstractMenuHandler() 
         }
         EnchantManager.initItemEnchant(player, enchantType, enchantItem)
         val data = EnchantManager.getItemEnchant(enchantItem)!!
-        EnchantManager.updateItemMeta(enchantItem, data)
+        EnchantManager.updateItemMeta(enchantItem, data, player)
 
-        RecallSBManager.bindItem(enchantItem, player.uuid, player.name, RecallSBManager.getItemID(enchantItem)!!)
-//        if(!player.isOp) {
-//            RecallSBManager.bindItem(enchantItem, player.uuid, player.name, RecallSBManager.getItemID(enchantItem)!!)
-//        }
+        RecallSBManager.bindItem(enchantItem, player.uuid, player.name, RecallSBManager.getNextItemID())
+        //        if(!player.isOp) {
+        //            RecallSBManager.bindItem(enchantItem, player.uuid, player.name, RecallSBManager.getItemID(enchantItem)!!)
+        //        }
 
         player.giveItem(enchantItem)
         player.updateInventory()
@@ -116,7 +117,12 @@ class GiveEnchantMenu(val enchantType: ItemEnchantType) : AbstractMenuHandler() 
                 inv.setIcon(mSlot[index], gem.materialsSlot.default()!!.toItemStack(materialItem.clone()) {
                     withMeta(
                         {
-                            it?.tvar("itemName", materialDName, "count", enchantMaterial.amount.toString().deserialize())
+                            it?.tvar(
+                                "itemName",
+                                materialDName,
+                                "count",
+                                enchantMaterial.amount.toString().deserialize()
+                            )
                         },
                         { lore ->
                             if (lore.isNullOrEmpty()) return@withMeta lore
@@ -158,6 +164,20 @@ class GiveEnchantMenu(val enchantType: ItemEnchantType) : AbstractMenuHandler() 
         }
         if (EnchantManager.hasEnchantItem(itemStack)) {
             player.sendLang("enchantItemPutGiveEnchantMenu")
+            return
+        }
+
+        val conflictEnchants = enchantType.conflictEnchant().filter {
+            itemStack.containsEnchantment(it)
+        }
+        if (conflictEnchants.isNotEmpty()) {
+            conflictEnchants.forEach {
+                player.sendLang(
+                    "giveEnchantConflictEnchant",
+                    "{enchantName}", enchantType.displayName(),
+                    "{enchant_text}", Component.translatable(it)
+                )
+            }
             return
         }
 

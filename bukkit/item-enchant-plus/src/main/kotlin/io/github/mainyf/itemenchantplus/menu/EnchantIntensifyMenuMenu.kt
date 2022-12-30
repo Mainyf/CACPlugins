@@ -67,7 +67,7 @@ class EnchantIntensifyMenuMenu : AbstractMenuHandler() {
         if (materials.all { it -> it.isEmpty() }) {
             return
         }
-        val data = EnchantManager.getItemEnchant(enchantItem) ?: return
+        var data = EnchantManager.getItemEnchant(enchantItem) ?: return
 
         val exp = materials.sumOf { materialItemStack ->
             (ConfigIEP.enchantIntensifyMaterials.find { it.key.equalsItem(materialItemStack) }
@@ -105,12 +105,13 @@ class EnchantIntensifyMenuMenu : AbstractMenuHandler() {
                     materialItemStack.amount -= amount
                 }
             }
-            EnchantManager.addExpToItem(data, needExp)
+            EnchantManager.addExpToItem(data.enchantType, enchantItem, needExp)
         } else {
-            EnchantManager.addExpToItem(data, exp)
+            EnchantManager.addExpToItem(data.enchantType, enchantItem, exp)
             clearMaterials()
         }
 
+        data = EnchantManager.getItemEnchant(enchantItem)!!
         EnchantManager.updateItemMeta(enchantItem, data)
         //        putBack(player, inv)
 
@@ -230,9 +231,9 @@ class EnchantIntensifyMenuMenu : AbstractMenuHandler() {
             enchantItem = itemStack
             pInv.setItem(slot, null)
         } else {
-            pInv.setItem(slot, enchantItem)
             putBack(player, inv)
             enchantItem = itemStack
+            pInv.setItem(slot, AIR_ITEM)
         }
         updateTitle(player)
         updateEquip(inv)
@@ -255,6 +256,10 @@ class EnchantIntensifyMenuMenu : AbstractMenuHandler() {
             }
         }
         enchantItem = AIR_ITEM
+        updateMenu(player, inv)
+    }
+
+    private fun updateMenu(player: Player, inv: Inventory) {
         clearMaterials()
         player.updateInventory()
         updateEquip(inv)

@@ -10,10 +10,12 @@ import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.utils.ItemTypeWrapper
 import org.apache.commons.lang3.EnumUtils
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -25,6 +27,12 @@ fun CommandSender.sendLang(key: String, vararg data: Any) {
 }
 
 object ConfigIEP {
+
+    val stageLevel = arrayOf(
+        10,
+        20,
+        30
+    )
 
     private lateinit var langConfig: FileConfiguration
     private lateinit var mainConfig: FileConfiguration
@@ -241,6 +249,7 @@ object ConfigIEP {
             expandConfig.getStringList("menuItemInGiveMenu"),
             expandConfig.getStringList("menuItemInUpgradeMenu"),
             expandConfig.getStringList("allowBlocks").map { EnchantBlock(it) },
+            expandConfig.getStringList("conflictEnchant").mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
             itemSkins[expandConfig.getString("defaultSkin")]!!,
             expandConfig.getStringList("upgradeMaterials").map {
                 val pair = it.split(",")
@@ -277,6 +286,7 @@ object ConfigIEP {
                 )
             },
             luckConfig.getStringList("allowBlocks").map { EnchantBlock(it) },
+            luckConfig.getStringList("conflictEnchant").mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
             itemSkins[luckConfig.getString("defaultSkin")]!!,
             luckConfig.getStringList("upgradeMaterials").map {
                 val pair = it.split(",")
@@ -303,6 +313,7 @@ object ConfigIEP {
             lanrenConfig.getStringList("menuItemInListMenu"),
             lanrenConfig.getStringList("menuItemInGiveMenu"),
             lanrenConfig.getStringList("menuItemInUpgradeMenu"),
+            lanrenConfig.getStringList("conflictEnchant").mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
             itemSkins[lanrenConfig.getString("defaultSkin")]!!,
             lanrenConfig.getStringList("upgradeMaterials").map {
                 val pair = it.split(",")
@@ -319,6 +330,7 @@ object ConfigIEP {
             lanrenConfig.getBoolean("debug"),
             lanrenConfig.getLong("cheatBypass.move", 40L),
             lanrenConfig.getLong("cheatBypass.hitBox", 40L),
+            lanrenConfig.getLong("cheatBypass.killAura", 40L),
             lanrenConfig.getLong("skills.comboAttenuation", 40L),
             lanrenConfig.getSection("skills.combo1_2").let { combo1_2Sect ->
                 LanRenCombo1_2Config(
@@ -395,6 +407,10 @@ object ConfigIEP {
 
     fun getSkinByName(skinName: String): EnchantSkinConfig? {
         return itemSkins[skinName]
+    }
+
+    fun getStageMaxLevel(stage: Int): Int {
+        return stageLevel.getOrNull(stage) ?: 30
     }
 
 }

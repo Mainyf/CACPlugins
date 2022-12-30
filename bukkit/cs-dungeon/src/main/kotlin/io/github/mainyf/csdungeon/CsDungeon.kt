@@ -5,7 +5,6 @@ import dev.jorel.commandapi.arguments.IntegerArgument
 import io.github.mainyf.csdungeon.config.ConfigCSD
 import io.github.mainyf.csdungeon.listeners.DungeonListeners
 import io.github.mainyf.csdungeon.listeners.PlayerListeners
-import io.github.mainyf.csdungeon.menu.DungeonMenu
 import io.github.mainyf.csdungeon.storage.DungeonStructure
 import io.github.mainyf.csdungeon.storage.StorageCSD
 import io.github.mainyf.newmclib.command.apiCommand
@@ -43,7 +42,13 @@ class CsDungeon : JavaPlugin(), Listener {
         dungeonBattles.add(DungeonBattle(dungeonStructure, level))
     }
 
-    fun getBattles(dungeonStructure: DungeonStructure, addBlock: () -> DungeonBattle): DungeonBattle {
+    fun getBattle(dungeonStructure: DungeonStructure): DungeonBattle? {
+        return dungeonBattles.find {
+            it.dungeon.worldName == dungeonStructure.worldName && it.dungeon.coreX == dungeonStructure.coreX && it.dungeon.coreY == dungeonStructure.coreY && it.dungeon.coreZ == dungeonStructure.coreZ
+        }
+    }
+
+    fun getBattle(dungeonStructure: DungeonStructure, addBlock: () -> DungeonBattle): DungeonBattle {
         var rs = dungeonBattles.find {
             it.dungeon.worldName == dungeonStructure.worldName && it.dungeon.coreX == dungeonStructure.coreX && it.dungeon.coreY == dungeonStructure.coreY && it.dungeon.coreZ == dungeonStructure.coreZ
         }
@@ -94,6 +99,33 @@ class CsDungeon : JavaPlugin(), Listener {
                             MiniMessage.miniMessage()
                                 .deserialize("${it.createTime.formatYMDHMS()} 结构名: ${it.structureName}, 位置: <click:run_command:/tppos ${it.coreX} ${it.coreY} ${it.coreZ}><hover:show_text:点击传送>${it.coreX} ${it.coreY} ${it.coreZ}</hover></click>")
                         )
+                    }
+                }
+            }
+            "info" {
+                withArguments(
+                    playerArguments("玩家")
+                )
+                executeOP {
+                    val player = player()
+                    val battle = dungeonBattles.find { it.hasInBattle(player) }
+                    if (battle == null) {
+                        sender.errorMsg("此玩家没有开启一场遗迹战斗")
+                        return@executeOP
+                    }
+                    sender.msg("遗迹等级: ${battle.level}")
+                    sender.msg("遗迹怪物数量: ${battle.mobList.count { it.isDead }}/${battle.dungeonLevelConfig!!.totalMob}")
+                    sender.msg("遗迹怪物位置(未死亡): ")
+                    battle.mobList.forEach {
+                        if (!it.isDead) {
+                            val loc = it.location
+                            sender.sendMessage(
+                                "${it.customName}: ".deserialize().append(
+                                    MiniMessage.miniMessage()
+                                        .deserialize("位置: <click:run_command:/tppos ${loc.x} ${loc.y} ${loc.z}><hover:show_text:点击传送>${loc.x} ${loc.y} ${loc.z}</hover></click>")
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -171,7 +203,18 @@ class CsDungeon : JavaPlugin(), Listener {
         }.register()
         ConfigWS.addAreaWS { loc ->
             val dungeonS = StorageCSD.findDungeonByLoc(loc) ?: return@addAreaWS null
-            ConfigCSD.dungeonConfigMap.values.find { it.structureName == dungeonS.structureName }?.wsConfig
+            var wsConfig =
+                ConfigCSD.dungeonConfigMap.values.find { it.structureName == dungeonS.structureName }?.wsConfig
+                    ?: return@addAreaWS null
+            if (wsConfig.antiFly) {
+                val battle = getBattle(dungeonS)
+                if (battle == null || !battle.start) {
+                    wsConfig = wsConfig.copy(
+                        antiFly = false
+                    )
+                }
+            }
+            wsConfig
         }
     }
 

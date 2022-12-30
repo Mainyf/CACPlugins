@@ -126,7 +126,7 @@ class EnchantSkinMenu : AbstractMenuHandler() {
                 val skin = currentSkin ?: return@setIcon
                 val data = enchantData ?: return@setIcon
                 if (skin.hasOwn) {
-                    StorageIEP.setItemSkin(data.itemUID, skin.skinConfig)
+                    EnchantManager.setItemSkin(data.enchantType, currentItem, skin.skinConfig)
                     EnchantManager.updateItemMeta(currentItem)
                     it.sendLang("enchantSkinSetSuccess")
                 } else {

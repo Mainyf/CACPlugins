@@ -10,7 +10,11 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IdTable
 import java.util.UUID
 
-object SoulBindItemDatas : BaseTable("t_SoulBindItemDatas_${env()}") {
+object SoulBindItemDatas : IdTable<Long>("t_SoulBindItemDatas_${env()}") {
+
+    override val id = long("id").entityId()
+
+    override val primaryKey = PrimaryKey(id)
 
     val ownerUUID = uuid("owner_uuid")
 
@@ -23,9 +27,9 @@ object SoulBindItemDatas : BaseTable("t_SoulBindItemDatas_${env()}") {
 }
 
 
-class SoulBindItemData(id: EntityID<UUID>) : BaseEntity(SoulBindItemDatas, id) {
+class SoulBindItemData(id: EntityID<Long>) : LongEntity(id) {
 
-    companion object : UUIDEntityClass<SoulBindItemData>(SoulBindItemDatas)
+    companion object : LongEntityClass<SoulBindItemData>(SoulBindItemDatas)
 
     var ownerUUID by SoulBindItemDatas.ownerUUID
 

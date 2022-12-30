@@ -1,6 +1,9 @@
 package io.github.mainyf.itemenchantplus.enchants
 
+import co.aikar.timings.Timing
+import co.aikar.timings.Timings
 import io.github.mainyf.itemenchantplus.EnchantManager
+import io.github.mainyf.itemenchantplus.ItemEnchantPlus
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
 import io.github.mainyf.itemenchantplus.config.EffectTriggerType
 import io.github.mainyf.itemenchantplus.config.ItemEnchantType
@@ -27,8 +30,12 @@ object LuckEnchant : Listener {
     private val blockKey = mutableSetOf<Long>()
     private val breakBlock = mutableMapOf<Long, BlockData>()
 
-    fun init() {
+    private lateinit var luckStage1Timings: Timing
+    private lateinit var luckStage2Timings: Timing
 
+    fun init() {
+        luckStage1Timings = Timings.of(ItemEnchantPlus.INSTANCE, "luck stage 1")
+        luckStage2Timings = Timings.of(ItemEnchantPlus.INSTANCE, "luck stage 2")
     }
 
     @EventHandler
@@ -47,11 +54,12 @@ object LuckEnchant : Listener {
         if (!ConfigIEP.luckEnchantConfig.enable) return
         val item = player.inventory.itemInMainHand
         if (item.isEmpty()) return
+        luckStage1Timings.startTiming()
         val bindData = SBManager.getBindItemData(item)
         if (!player.isOp && bindData != null && bindData.ownerUUID != player.uuid) {
             return
         }
-        EnchantManager.updateItemMeta(item)
+        EnchantManager.updateItemMeta(item, player)
         val data = EnchantManager.getItemEnchant(ItemEnchantType.LUCK, item) ?: return
 
         //        val exp = ConfigIEP.getBlockExp(event.block)
@@ -92,7 +100,7 @@ object LuckEnchant : Listener {
             }
         }
 
-        if(EnchantManager.hasExtraData(ItemEnchantType.LUCK, item, ItemEnchantType.LUCK.plusExtraDataName())) {
+        if (EnchantManager.hasExtraData(ItemEnchantType.LUCK, item, ItemEnchantType.LUCK.plusExtraDataName())) {
             markRecursive(player)
             getNearBlocks(block.location).forEach {
                 breakBlock[it.getKey()] = BlockData(
@@ -116,6 +124,7 @@ object LuckEnchant : Listener {
             EffectTriggerType.BREAK_BLOCK
         )
         unMarkRecursive(player)
+        luckStage1Timings.stopTiming()
     }
 
     private fun markRecursive(player: Player) {
@@ -135,6 +144,7 @@ object LuckEnchant : Listener {
     @EventHandler
     fun onDropItem(event: BlockDropItemEvent) {
         if (!ConfigIEP.luckEnchantConfig.enable) return
+        luckStage2Timings.startTiming()
         val item = event.player.inventory.itemInMainHand
         if (item.isEmpty()) return
         if (EnchantManager.getItemEnchant(ItemEnchantType.LUCK, item) == null) return
@@ -147,6 +157,7 @@ object LuckEnchant : Listener {
             }
         }
         breakBlock.remove(key)
+        luckStage2Timings.stopTiming()
     }
 
     private fun addBlockToList(

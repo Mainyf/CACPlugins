@@ -73,8 +73,13 @@ object PlayerListeners : Listener {
         if (itemStack.isEmpty()) return
 
         if (!SBManager.hasBindItem(itemStack)) {
-            tryAutoBind(player, itemStack) {
-                event.item.itemStack = it
+            if (RecallSBManager.hasBindable(itemStack)) {
+                player.sendLang("antiPickupBindableItem")
+                event.isCancelled = true
+            } else {
+                tryAutoBind(player, itemStack) {
+                    event.item.itemStack = it
+                }
             }
         } else {
             handleItemInteract(player, event.item.itemStack, event)
@@ -101,6 +106,13 @@ object PlayerListeners : Listener {
             tryHandleInvalidItem(player, itemStack) {
                 event.isCancelled = true
                 event.itemDrop.remove()
+            }
+            if(!event.isCancelled) {
+                val data = SBManager.getBindItemData(itemStack)
+                if(data != null && data.ownerUUID == player.uuid) {
+                    player.sendLang("antiDropBindItem")
+                    event.isCancelled = true
+                }
             }
         }
     }
@@ -174,7 +186,7 @@ object PlayerListeners : Listener {
         block: (ItemStack) -> Unit
     ) {
         var rs = itemStack
-        if (!hasBindable(player, rs)) return
+        if (!hasBindable(rs)) return
         event?.isCancelled = true
         rs = handleItemBind(player, rs)
         block(rs)
@@ -211,7 +223,7 @@ object PlayerListeners : Listener {
         return false
     }
 
-    private fun hasBindable(player: Player, itemStack: ItemStack): Boolean {
+    private fun hasBindable(itemStack: ItemStack): Boolean {
         return SBManager.hasBindable(itemStack) || RecallSBManager.hasBindable(itemStack)
     }
 

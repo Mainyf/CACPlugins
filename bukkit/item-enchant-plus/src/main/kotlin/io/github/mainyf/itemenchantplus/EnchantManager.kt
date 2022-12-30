@@ -1,9 +1,6 @@
 package io.github.mainyf.itemenchantplus
 
-import io.github.mainyf.itemenchantplus.config.ConfigIEP
-import io.github.mainyf.itemenchantplus.config.EffectTriggerType
-import io.github.mainyf.itemenchantplus.config.ItemEnchantType
-import io.github.mainyf.itemenchantplus.config.LanRenEnchantConfig
+import io.github.mainyf.itemenchantplus.config.*
 import io.github.mainyf.itemenchantplus.storage.StorageIEP
 import io.github.mainyf.newmclib.exts.*
 import net.kyori.adventure.text.Component
@@ -13,6 +10,7 @@ import org.bukkit.attribute.AttributeModifier
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -31,9 +29,17 @@ object EnchantManager {
     // 主人 Name
     private val ownerNameDataKey = NamespacedKey(ItemEnchantPlus.INSTANCE, "ownerName")
 
+    private val stageKey = NamespacedKey(ItemEnchantPlus.INSTANCE, "stageKey")
+
+    private val levelKey = NamespacedKey(ItemEnchantPlus.INSTANCE, "levelKey")
+
+    private val expKey = NamespacedKey(ItemEnchantPlus.INSTANCE, "expKey")
+
+    private val skinKey = NamespacedKey(ItemEnchantPlus.INSTANCE, "skinKey")
+
     private val stageText = arrayOf("", "I", "II", "III")
 
-    private val enchantLoreSpliter = "§i§t§c§h§a§n§t"
+    private const val enchantLoreSpliter = "§i§t§c§h§a§n§t"
 
     fun initItemEnchant(
         player: Player,
@@ -50,13 +56,11 @@ object EnchantManager {
         root.set(itemUIDDataKey, PersistentDataType.LONG, itemUID)
         root.set(ownerUIDDataKey, PersistentDataType.STRING, player.uniqueId.toString())
         root.set(ownerNameDataKey, PersistentDataType.STRING, player.name)
-        StorageIEP.setLevelAndExp(
-            itemUID,
-            enchantType,
-            0,
-            1,
-            0.0
-        )
+
+        root.set(stageKey, PersistentDataType.INTEGER, 0)
+        root.set(levelKey, PersistentDataType.INTEGER, 1)
+        root.set(expKey, PersistentDataType.DOUBLE, 0.0)
+        root.set(skinKey, PersistentDataType.STRING, enchantType.defaultSkin().name)
 
         dataContainer.set(
             enchantType.namespacedKey,
@@ -80,43 +84,28 @@ object EnchantManager {
     }
 
     fun setItemEnchantData(enchantType: ItemEnchantType, item: ItemStack, data: EnchantData) {
-        val meta = item.itemMeta ?: return
-        val rootTag = meta.persistentDataContainer
-        val dataContainer = rootTag.get(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER) ?: return
+        trySetEnchantItemData(enchantType, item) { dataContainer ->
+            dataContainer.set(itemUIDDataKey, PersistentDataType.LONG, data.itemUID)
+            dataContainer.set(ownerUIDDataKey, PersistentDataType.STRING, data.ownerUID.toString())
+            dataContainer.set(ownerNameDataKey, PersistentDataType.STRING, data.ownerName)
 
-        dataContainer.set(itemUIDDataKey, PersistentDataType.LONG, data.itemUID)
-        dataContainer.set(ownerUIDDataKey, PersistentDataType.STRING, data.ownerUID.toString())
-        dataContainer.set(ownerNameDataKey, PersistentDataType.STRING, data.ownerName)
-        StorageIEP.setLevelAndExp(data.itemUID, enchantType, data.stage, data.level, data.exp)
-
-        rootTag.set(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER, dataContainer)
-        rootTag.set(itemEnchantNameDataKey, PersistentDataType.STRING, enchantType.name.lowercase())
-
-        item.itemMeta = meta
+            dataContainer.set(stageKey, PersistentDataType.INTEGER, data.stage)
+            dataContainer.set(levelKey, PersistentDataType.INTEGER, data.level)
+            dataContainer.set(expKey, PersistentDataType.DOUBLE, data.exp)
+            dataContainer.set(skinKey, PersistentDataType.STRING, data.enchantSkin.skinConfig.name)
+        }
     }
 
     fun setExtraDataToItem(enchantType: ItemEnchantType, item: ItemStack, name: String) {
-        val meta = item.itemMeta ?: return
-        val rootTag = meta.persistentDataContainer
-        val dataContainer = rootTag.get(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER) ?: return
-
-        dataContainer.set(NamespacedKey(ItemEnchantPlus.INSTANCE, name), PersistentDataType.INTEGER, 1)
-
-        rootTag.set(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER, dataContainer)
-        rootTag.set(itemEnchantNameDataKey, PersistentDataType.STRING, enchantType.name.lowercase())
-        item.itemMeta = meta
+        trySetEnchantItemData(enchantType, item) {
+            it.set(NamespacedKey(ItemEnchantPlus.INSTANCE, name), PersistentDataType.INTEGER, 1)
+        }
     }
 
     fun removeExtraDataToItem(enchantType: ItemEnchantType, item: ItemStack, name: String) {
-        val meta = item.itemMeta ?: return
-        val rootTag = meta.persistentDataContainer
-        val dataContainer = rootTag.get(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER) ?: return
-
-        dataContainer.set(NamespacedKey(ItemEnchantPlus.INSTANCE, name), PersistentDataType.INTEGER, 0)
-
-        rootTag.set(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER, dataContainer)
-        rootTag.set(itemEnchantNameDataKey, PersistentDataType.STRING, enchantType.name.lowercase())
-        item.itemMeta = meta
+        trySetEnchantItemData(enchantType, item) {
+            it.set(NamespacedKey(ItemEnchantPlus.INSTANCE, name), PersistentDataType.INTEGER, 0)
+        }
     }
 
     fun hasExtraData(enchantType: ItemEnchantType, item: ItemStack, name: String): Boolean {
@@ -142,29 +131,53 @@ object EnchantManager {
     }
 
     fun getItemEnchant(enchantType: ItemEnchantType, item: ItemStack): EnchantData? {
-        val meta = item.itemMeta ?: return null
-        //        val enchantName = meta.persistentDataContainer.get(itemEnchantNameDataKey, PersistentDataType.STRING) ?: return null
-        //        val enchantType = ItemEnchantType.of(enchantName)
-        val dataContainer =
-            meta.persistentDataContainer.get(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER) ?: return null
+        val dataContainer = tryGetEnchantItemData(enchantType, item) ?: return null
+
         val itemUID = dataContainer.get(itemUIDDataKey, PersistentDataType.LONG) ?: return null
-        if (!StorageIEP.exists(itemUID)) {
-            return null
-        }
         val ownerUID = dataContainer.get(ownerUIDDataKey, PersistentDataType.STRING)?.asUUID() ?: return null
         val ownerName = dataContainer.get(ownerNameDataKey, PersistentDataType.STRING) ?: return null
-        val data = StorageIEP.getEnchantData(itemUID, enchantType)
+        val stage = dataContainer.get(stageKey, PersistentDataType.INTEGER) ?: return null
+        val level = dataContainer.get(levelKey, PersistentDataType.INTEGER) ?: return null
+        val exp = dataContainer.get(expKey, PersistentDataType.DOUBLE) ?: return null
+        val skinName = dataContainer.get(skinKey, PersistentDataType.STRING) ?: return null
+
         val enchantSkin =
-            StorageIEP.getPlayerCurrentEnchantSkin(ownerUID, data.skinName) ?: EnchantSkin(enchantType.defaultSkin(), 1)
-        return EnchantData(enchantType, itemUID, ownerUID, ownerName, data.stage, data.level, data.exp, enchantSkin)
+            StorageIEP.getPlayerCurrentEnchantSkin(ownerUID, skinName) ?: EnchantSkin(enchantType.defaultSkin(), 1)
+        return EnchantData(enchantType, itemUID, ownerUID, ownerName, stage, level, exp, enchantSkin)
     }
 
-    fun addExpToItem(data: EnchantData, value: Double): EnchantData {
-        val d = StorageIEP.addExp(data.itemUID, value, data.enchantType)
-        data.stage = d.stage
-        data.level = d.level
-        data.exp = d.exp
-        return data
+    fun addExpToItem(enchantType: ItemEnchantType, item: ItemStack, value: Double) {
+        trySetEnchantItemData(enchantType, item) {
+            val stage = it.get(stageKey, PersistentDataType.INTEGER)!!
+            val level = it.get(levelKey, PersistentDataType.INTEGER)!!
+            val exp = it.get(expKey, PersistentDataType.DOUBLE)!!
+            val data = ItemEnchantData(stage, level, exp)
+            data.exp += value
+            handleEnchantLevel(data)
+            val maxExp = ConfigIEP.getLevelMaxExp(data.level)
+            if (data.exp > maxExp) {
+                data.exp = maxExp
+            }
+            it.set(levelKey, PersistentDataType.INTEGER, data.level)
+            it.set(expKey, PersistentDataType.DOUBLE, data.exp)
+        }
+    }
+
+    private fun handleEnchantLevel(data: ItemEnchantData) {
+        if (data.stage >= 3) return
+        var maxExp = ConfigIEP.getLevelMaxExp(data.level)
+        val maxLevel = ConfigIEP.stageLevel[data.stage]
+        while (data.exp >= maxExp && data.level < maxLevel) {
+            data.exp -= maxExp
+            data.level++
+            maxExp = ConfigIEP.getLevelMaxExp(data.level)
+        }
+    }
+
+    fun setItemSkin(enchantType: ItemEnchantType, item: ItemStack, skinConfig: EnchantSkinConfig) {
+        trySetEnchantItemData(enchantType, item) {
+            it.set(skinKey, PersistentDataType.STRING, skinConfig.name)
+        }
     }
 
     fun getToNextStageNeedExp(data: EnchantData): Double {
@@ -178,14 +191,14 @@ object EnchantManager {
         return rs
     }
 
-    fun updateItemMeta(item: ItemStack) {
+    fun updateItemMeta(item: ItemStack, player: Player? = null) {
         val enchantData = getItemEnchant(item)
         if (enchantData != null) {
-            updateItemMeta(item, enchantData)
+            updateItemMeta(item, enchantData, player)
         }
     }
 
-    fun updateItemMeta(item: ItemStack, data: EnchantData) {
+    fun updateItemMeta(item: ItemStack, data: EnchantData, player: Player? = null) {
         val meta = item.itemMeta ?: return
         val hasExtra = hasExtraData(
             data.enchantType,
@@ -294,6 +307,22 @@ object EnchantManager {
             )
         }
 
+        val conflictEnchants = data.enchantType.conflictEnchant().filter {
+            meta.hasEnchant(it)
+        }
+        if (conflictEnchants.isNotEmpty() && player != null) {
+            conflictEnchants.forEach {
+                player.sendLang(
+                    "updateEnchantDataConflictEnchant",
+                    "{enchantName}", data.enchantType.displayName(),
+                    "{enchant_text}", Component.translatable(it)
+                )
+            }
+            conflictEnchants.forEach {
+                meta.removeEnchant(it)
+            }
+        }
+
         item.itemMeta = meta
     }
 
@@ -311,6 +340,59 @@ object EnchantManager {
         }
     }
 
+    private fun trySetEnchantItemData(
+        itemStack: ItemStack,
+        block: (PersistentDataContainer) -> Unit
+    ) {
+        val meta = itemStack.itemMeta ?: return
+        val enchantName =
+            meta.persistentDataContainer.get(itemEnchantNameDataKey, PersistentDataType.STRING) ?: return
+        val enchantType = ItemEnchantType.of(enchantName) ?: return
+        trySetEnchantItemData(enchantType, itemStack, block)
+    }
+
+    private fun trySetEnchantItemData(
+        enchantType: ItemEnchantType,
+        itemStack: ItemStack,
+        block: (PersistentDataContainer) -> Unit
+    ) {
+        val meta = itemStack.itemMeta ?: return
+        val rootTag = meta.persistentDataContainer
+        val dataContainer =
+            rootTag.get(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER) ?: return
+
+        block.invoke(dataContainer)
+
+        rootTag.set(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER, dataContainer)
+        rootTag.set(itemEnchantNameDataKey, PersistentDataType.STRING, enchantType.name.lowercase())
+        itemStack.itemMeta = meta
+    }
+
+    private fun tryGetEnchantItemData(
+        itemStack: ItemStack
+    ): PersistentDataContainer? {
+        val meta = itemStack.itemMeta ?: return null
+        val enchantName =
+            meta.persistentDataContainer.get(itemEnchantNameDataKey, PersistentDataType.STRING) ?: return null
+        val enchantType = ItemEnchantType.of(enchantName) ?: return null
+        return tryGetEnchantItemData(enchantType, itemStack)
+    }
+
+    private fun tryGetEnchantItemData(
+        enchantType: ItemEnchantType,
+        itemStack: ItemStack
+    ): PersistentDataContainer? {
+        val meta = itemStack.itemMeta ?: return null
+
+        return meta.persistentDataContainer.get(enchantType.namespacedKey, PersistentDataType.TAG_CONTAINER)
+    }
+
+    data class ItemEnchantData(
+        val stage: Int,
+        var level: Int,
+        var exp: Double
+    )
+
 }
 
 data class EnchantData(
@@ -327,7 +409,7 @@ data class EnchantData(
     val hasMaxLevel get() = level == maxLevel
     val hasMaxExp get() = exp == maxExp
 
-    val maxLevel get() = StorageIEP.getStageMaxLevel(stage)
+    val maxLevel get() = ConfigIEP.getStageMaxLevel(stage)
     val maxExp get() = ConfigIEP.getLevelMaxExp(level)
 
 }

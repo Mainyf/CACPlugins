@@ -15,17 +15,14 @@ typealias RecallSBItemIDProvider = (itemStack: ItemStack) -> Long
 
 object RecallSBManager {
 
+    private val uidKey = NamespacedKey(SoulBind.INSTANCE, "uid")
+
     private val recallCountKey = NamespacedKey(SoulBind.INSTANCE, "recallCount")
 
     private val recallSBItemPredicates = mutableMapOf<String, RecallSBItemPredicate>()
-    private val recallSBItemIDProviders = mutableMapOf<String, RecallSBItemIDProvider>()
 
     fun addRecallSBItemPredicate(providerName: String, predicate: RecallSBItemPredicate) {
         recallSBItemPredicates[providerName] = predicate
-    }
-
-    fun addRecallSBItemIDProvider(providerName: String, provider: RecallSBItemIDProvider) {
-        recallSBItemIDProviders[providerName] = provider
     }
 
     fun trySaveRecallItem(items: List<ItemStack>) {
@@ -34,19 +31,15 @@ object RecallSBManager {
         }
     }
 
-    private fun getItemID(providerName: String, itemID: Long): UUID {
-        return "${providerName}-${itemID}".asUUIDFromByte()
+    fun getNextItemID(): Long {
+        return StorageSB.nextItemLongID()
     }
 
-    fun getItemID(itemStack: ItemStack): UUID? {
-        var rs: UUID? = null
-        for ((providerName, provider) in recallSBItemIDProviders) {
-            val itemID = provider.invoke(itemStack)
-            if (itemID == -1L) continue
-            rs = getItemID(providerName, itemID)
-            break
-        }
-        return rs
+    fun getItemID(itemStack: ItemStack): Long? {
+        val meta = itemStack.itemMeta
+        val dataContainer = meta.persistentDataContainer
+        val root = dataContainer.get(SBManager.soulBindKey, PersistentDataType.TAG_CONTAINER) ?: return null
+        return root.get(uidKey, PersistentDataType.LONG)
     }
 
     fun hasInvalidSBItem(itemStack: ItemStack?): Boolean {
@@ -77,16 +70,17 @@ object RecallSBManager {
     }
 
     fun handleItemBind(player: Player, itemStack: ItemStack): ItemStack {
-        val itemID = getItemID(itemStack) ?: return itemStack
+        //        val itemID = getItemID(itemStack) ?: return itemStack
         for ((_, predicate) in recallSBItemPredicates) {
             if (predicate.invoke(itemStack)) {
-                bindItem(itemStack, player.uuid, player.name, itemID)
+                bindItem(itemStack, player.uuid, player.name, getNextItemID())
+                break
             }
         }
         return itemStack
     }
 
-    fun bindItem(itemStack: ItemStack, ownerUUID: UUID, ownerName: String, itemId: UUID) {
+    fun bindItem(itemStack: ItemStack, ownerUUID: UUID, ownerName: String, itemId: Long) {
         val meta = itemStack.itemMeta
         val dataContainer = meta.persistentDataContainer
         val root = dataContainer.adapterContext.newPersistentDataContainer()
@@ -95,6 +89,7 @@ object RecallSBManager {
 
         root.set(SBManager.ownerNameTag, PersistentDataType.STRING, ownerName)
         root.set(recallCountKey, PersistentDataType.INTEGER, 0)
+        root.set(uidKey, PersistentDataType.LONG, itemId)
 
         dataContainer.set(
             SBManager.soulBindKey,
@@ -110,11 +105,9 @@ object RecallSBManager {
 
     fun tryUpdateRecallCount(itemStack: ItemStack) {
         val bindData = SBManager.getBindItemData(itemStack) ?: return
-        for ((providerName, provider) in recallSBItemIDProviders) {
-            val itemID = provider.invoke(itemStack)
-            if (itemID != -1L) {
-                StorageSB.updateRecallCount(bindData.ownerUUID, getItemID(providerName, itemID), itemStack)
-            }
+        val itemID = getItemID(itemStack)
+        if (itemID != null) {
+            StorageSB.updateRecallCount(bindData.ownerUUID, itemID, itemStack)
         }
     }
 
@@ -122,7 +115,7 @@ object RecallSBManager {
         val meta = itemStack.itemMeta
         val dataContainer = meta.persistentDataContainer
         val root = dataContainer.get(SBManager.soulBindKey, PersistentDataType.TAG_CONTAINER) ?: return
-//        val recallCount = root.get(recallCountKey, PersistentDataType.INTEGER) ?: return
+        //        val recallCount = root.get(recallCountKey, PersistentDataType.INTEGER) ?: return
         root.set(recallCountKey, PersistentDataType.INTEGER, count)
         dataContainer.set(
             SBManager.soulBindKey,

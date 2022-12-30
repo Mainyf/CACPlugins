@@ -13,7 +13,6 @@ import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.Heads
-import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import kotlin.math.ceil
@@ -104,7 +103,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
         }
         inv.setIcon(menuConfig.switchViewIslandSlot, itemBlock = {
             setDisplayName {
-                it?.text()?.tvar("filterText", viewIslandType.text)?.toComp()
+                it?.serialize()?.tvar("filterText", viewIslandType.text)?.deserialize()
             }
         }) {
             viewIslandTypeIndex++
@@ -194,7 +193,7 @@ class IslandsMainMenu : AbstractMenuHandler() {
 
                 inv.setIcon(viewListSlots.slot[i], viewListSlots.default()!!.toItemStack(skullItem) {
                     val meta = itemMeta
-                    meta.displayName(Component.text(meta.displayName()!!.text().tvar("player", offlinePlayer)))
+                    meta.displayName(meta.displayName()!!.serialize().tvar("player", offlinePlayer).deserialize())
                     meta.lore(IslandsManager.replaceVarByLoreList(meta.lore(), plot, islandData))
                     this.itemMeta = meta
                 }) {

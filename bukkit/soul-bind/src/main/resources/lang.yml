@@ -14,3 +14,7 @@ abandonCostDeficiency:
   - "mini: &6召回所需金钱不足, 需要: {money}"
 bindItemNotAllowedCreateShop:
   - "mini: &6绑定的物品不允许上架商店"
+antiDropBindItem:
+  - "mini: &6禁止丢弃和自己绑定的装备"
+antiPickupBindableItem:
+  - "mini: &6禁止捡起待绑定的装备"

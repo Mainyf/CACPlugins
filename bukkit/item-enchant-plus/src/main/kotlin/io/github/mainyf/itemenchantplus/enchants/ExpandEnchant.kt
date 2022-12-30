@@ -61,7 +61,7 @@ object ExpandEnchant : Listener {
         if (!player.isOp && bindData != null && bindData.ownerUUID != player.uuid) {
             return
         }
-        EnchantManager.updateItemMeta(item)
+        EnchantManager.updateItemMeta(item, player)
         val data = EnchantManager.getItemEnchant(ItemEnchantType.EXPAND, item) ?: return
 
         val world = player.world
@@ -171,7 +171,7 @@ object ExpandEnchant : Listener {
         }
         val bList = clockwiseBlockList.filter { hasValid(it) }
         if (bList.isNotEmpty()) {
-            if (data.stage == 1) {
+            if (data.stage == 1 || data.stage == 2) {
                 event.isCancelled = true
                 markRecursive(player)
                 playerBreakBlock(player, bList.first())
@@ -196,7 +196,8 @@ object ExpandEnchant : Listener {
         val event = BlockBreakEvent(block, player)
         pluginManager().callEvent(event)
         if (!event.isCancelled) {
-            block.breakNaturally()
+            player.breakBlock(block)
+//            block.breakNaturally()
         }
     }
 

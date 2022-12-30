@@ -2,6 +2,7 @@ package io.github.mainyf.itemenchantplus.config
 
 import io.github.mainyf.newmclib.utils.ItemTypeWrapper
 import org.bukkit.Material
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.potion.PotionEffect
 
 class ExpandEnchantConfig(
@@ -15,6 +16,7 @@ class ExpandEnchantConfig(
     val menuItemInGiveMenu: List<String>,
     val menuItemInUpgradeMenu: List<String>,
     val allowBlocks: List<EnchantBlock>,
+    val conflictEnchant: List<Enchantment>,
     val defaultSkin: EnchantSkinConfig,
     val upgradeMaterials: List<List<EnchantMaterial>>
 )
@@ -32,6 +34,7 @@ class LuckEnchantConfig(
     val max: Int,
     val luckPercentage: LuckPercentage,
     val allowBlocks: List<EnchantBlock>,
+    val conflictEnchant: List<Enchantment>,
     val defaultSkin: EnchantSkinConfig,
     val upgradeMaterials: List<List<EnchantMaterial>>
 )
@@ -46,6 +49,7 @@ class LanRenEnchantConfig(
     val menuItemInListMenu: List<String>,
     val menuItemInGiveMenu: List<String>,
     val menuItemInUpgradeMenu: List<String>,
+    val conflictEnchant: List<Enchantment>,
     val defaultSkin: EnchantSkinConfig,
     val upgradeMaterials: List<List<EnchantMaterial>>,
     val attackSpeedModifier: Double,
@@ -53,6 +57,7 @@ class LanRenEnchantConfig(
     val debug: Boolean,
     val cheatBypassMove: Long,
     val cheatBypassHitBox: Long,
+    val cheatBypassKillAura: Long,
     val comboAttenuation: Long,
     val combo1_2: LanRenCombo1_2Config,
     val combo3: LanRenCombo3Config,

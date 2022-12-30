@@ -21,9 +21,9 @@ class RecallItemMenu : AbstractMenuHandler() {
     private var pageSize = 0
     private var maxPageIndex = 0
 
-    private val items = mutableListOf<Pair<UUID, ItemStack>>()
+    private val items = mutableListOf<Pair<Long, ItemStack>>()
 
-    private val currentItems = mutableListOf<Pair<UUID, ItemStack>>()
+    private val currentItems = mutableListOf<Pair<Long, ItemStack>>()
 
     override fun open(player: Player) {
         this.pageSize = ConfigSB.recallItemMenuConfig.recallItemSlot.slot.size
@@ -132,6 +132,7 @@ class RecallItemMenu : AbstractMenuHandler() {
                 player.updateInventory()
                 player.sendLang("recallSuccess")
             }, rightClickBlock = {
+                if (!it.isOp) return@setIcon
                 rim.recallItemSlot.default()?.execAction(it)
                 AbandonConfirmMenu(
                     itemStack,

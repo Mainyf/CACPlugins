@@ -8,7 +8,8 @@ giveItemEnchantMaterialsDeficiency:
   - "mini: &4赋予附灵所需的材料不足"
 giveItemEnchantSuccess:
   - "mini: &6赋予附灵 {enchantName} 成功"
-
+giveEnchantConflictEnchant:
+  - "mini: &4赋予附灵 {enchantName} 失败，<enchant_text> 冲突"
 
 
 enchantMaxExp:
@@ -36,3 +37,9 @@ enchantUpgradeSuccess:
 
 enchantSkinSetSuccess:
   - "mini: &6附灵皮肤切换成功"
+conflictEnchantToEnchantPlus:
+  - "mini: &6附魔失败，附灵 {enchantName} 与附魔 <enchant_text> 冲突"
+updateEnchantDataConflictEnchant:
+  - "mini: &6更新附灵数据，附灵 {enchantName} 与附魔 <enchant_text> 冲突，已删除"
+antiUseGrindstone:
+  - "mini: &6氪金版附灵装备无法放入砂轮"
