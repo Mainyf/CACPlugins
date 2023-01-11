@@ -12,7 +12,7 @@ import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.questextension.QuestManager
-import io.github.mainyf.questextension.config.ConfigManager
+import io.github.mainyf.questextension.config.ConfigQE
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
@@ -48,9 +48,9 @@ class QuestDetailMenu(
 
     override fun open(player: Player) {
         if (hasTwoObject) {
-            setup(ConfigManager.questDetailMenuConfig.settings)
+            setup(ConfigQE.questDetailMenuConfig.settings)
         } else {
-            setup(ConfigManager.questDetailMenuConfig.settings.copy(background = ConfigManager.questDetail3XMenuConfig.background))
+            setup(ConfigQE.questDetailMenuConfig.settings.copy(background = ConfigQE.questDetail3XMenuConfig.background))
         }
         val inv = createInv(player)
 
@@ -60,9 +60,9 @@ class QuestDetailMenu(
     }
 
     override fun updateTitle(player: Player): String {
-        val questDetailMenuConfig = ConfigManager.questDetailMenuConfig
-        val questDetail2XMenuConfig = ConfigManager.questDetail2XMenuConfig
-        val questDetail3XMenuConfig = ConfigManager.questDetail3XMenuConfig
+        val questDetailMenuConfig = ConfigQE.questDetailMenuConfig
+        val questDetail2XMenuConfig = ConfigQE.questDetail2XMenuConfig
+        val questDetail3XMenuConfig = ConfigQE.questDetail3XMenuConfig
         val icons = mutableListOf<IaIcon>()
 
         val stepSlots = if (hasTwoObject) arrayOf(
@@ -89,9 +89,9 @@ class QuestDetailMenu(
     }
 
     private fun updateInv(inv: Inventory) {
-        val questDetailMenuConfig = ConfigManager.questDetailMenuConfig
-        val questDetail2XMenuConfig = ConfigManager.questDetail2XMenuConfig
-        val questDetail3XMenuConfig = ConfigManager.questDetail3XMenuConfig
+        val questDetailMenuConfig = ConfigQE.questDetailMenuConfig
+        val questDetail2XMenuConfig = ConfigQE.questDetail2XMenuConfig
+        val questDetail3XMenuConfig = ConfigQE.questDetail3XMenuConfig
         if (hasTwoObject) {
             inv.setQuestStepIcon(questDetail2XMenuConfig.step1Slot, 0)
             inv.setQuestStepIcon(questDetail2XMenuConfig.step2Slot, 1)

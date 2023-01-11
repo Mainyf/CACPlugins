@@ -7,7 +7,7 @@ import com.guillaumevdn.questcreator.lib.quest.QuestEndType
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
-import io.github.mainyf.questextension.config.ConfigManager
+import io.github.mainyf.questextension.config.ConfigQE
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
@@ -20,7 +20,7 @@ class QuestListMenu(
 ) : AbstractMenuHandler() {
 
     override fun open(player: Player) {
-        setup(ConfigManager.questListMenuConfig.settings)
+        setup(ConfigQE.questListMenuConfig.settings)
         val inv = createInv(player)
 
         updateInv(inv)
@@ -42,7 +42,7 @@ class QuestListMenu(
     }
 
     override fun updateTitle(player: Player): String {
-        val questListMenuConfig = ConfigManager.questListMenuConfig
+        val questListMenuConfig = ConfigQE.questListMenuConfig
         val icons = mutableListOf<IaIcon>()
         questListMenuConfig.questSlotList.forEachIndexed { index, slotConfig ->
             val model = dailyQuests.getOrNull(index) ?: return@forEachIndexed
@@ -59,7 +59,7 @@ class QuestListMenu(
     }
 
     private fun updateInv(inv: Inventory) {
-        val questListMenuConfig = ConfigManager.questListMenuConfig
+        val questListMenuConfig = ConfigQE.questListMenuConfig
 
         questListMenuConfig.questSlotList.forEachIndexed { index, slotConfig ->
             val model = dailyQuests.getOrNull(index) ?: return@forEachIndexed

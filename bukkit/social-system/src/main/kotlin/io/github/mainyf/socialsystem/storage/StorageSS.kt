@@ -1,16 +1,15 @@
 package io.github.mainyf.socialsystem.storage
 
-import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.storage.AbstractStorageManager
 import io.github.mainyf.newmclib.storage.newByID
-import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select
+import org.joda.time.DateTime
 import java.util.*
 
-object StorageManager : AbstractStorageManager() {
+object StorageSS : AbstractStorageManager() {
 
     override fun init() {
         super.init()
@@ -19,7 +18,8 @@ object StorageManager : AbstractStorageManager() {
                 PlayerSocials,
                 PlayerFriends,
                 PlayerFriendRequests,
-                PlayerLinkQQs
+                PlayerLinkQQs,
+                PlayerNicknames
             ).forEach {
                 SchemaUtils.createMissingTablesAndColumns(it)
             }
@@ -128,6 +128,63 @@ object StorageManager : AbstractStorageManager() {
     fun setAllowRepair(social: PlayerSocial, value: Boolean) {
         transaction {
             social.allowRepair = value
+        }
+    }
+
+    fun getNickname(uuid: UUID): String? {
+        return transaction {
+            val social = getPlayerSocial(uuid)
+            social.nickname?.nickname
+        }
+    }
+
+    fun getNicknamePrevModifyTime(uuid: UUID): DateTime? {
+        return transaction {
+            val social = getPlayerSocial(uuid)
+            social.nickname?.prevModify
+        }
+    }
+
+    fun containsNickname(nickname: String): Boolean {
+        return transaction {
+            PlayerNickname.find {
+                PlayerNicknames.nickname eq nickname
+            }.firstOrNull() != null
+        }
+    }
+
+    fun hasVisibleNickname(uuid: UUID): Boolean {
+        return transaction {
+            val social = getPlayerSocial(uuid)
+            val nicknameData =
+                PlayerNickname.find { PlayerNicknames.social eq social.id }.firstOrNull() ?: return@transaction false
+            nicknameData.visible
+        }
+    }
+
+    fun setVisibleNickname(uuid: UUID, visible: Boolean) {
+        transaction {
+            val social = getPlayerSocial(uuid)
+            val nicknameData =
+                PlayerNickname.find { PlayerNicknames.social eq social.id }.firstOrNull() ?: return@transaction false
+            nicknameData.visible = visible
+        }
+    }
+
+    fun setNickname(uuid: UUID, nickname: String) {
+        transaction {
+            val social = getPlayerSocial(uuid)
+            val nicknameData = PlayerNickname.find { PlayerNicknames.social eq social.id }.firstOrNull()
+            if (nicknameData == null) {
+                PlayerNickname.newByID {
+                    this.social = social.id
+                    this.nickname = nickname
+                    this.prevModify = DateTime.now()
+                }
+            } else {
+                nicknameData.nickname = nickname
+                nicknameData.prevModify = DateTime.now()
+            }
         }
     }
 

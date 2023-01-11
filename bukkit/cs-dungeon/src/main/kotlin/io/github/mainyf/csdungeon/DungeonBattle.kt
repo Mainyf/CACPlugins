@@ -6,6 +6,7 @@ import io.github.mainyf.csdungeon.storage.DungeonStructure
 import io.github.mainyf.csdungeon.storage.StorageCSD
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.utils.Cooldown
+import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
@@ -18,12 +19,27 @@ class DungeonBattle(val dungeon: DungeonStructure, var level: Int) {
 
     var start = false
     var endCheckTask: BukkitRunnable? = null
+    var checkMobValidTask: BukkitRunnable? = null
     val mobSpawnTasks = mutableListOf<BukkitRunnable>()
 
     //    var flyCheckTask: BukkitRunnable? = null
     var tipsTask: BukkitRunnable? = null
     val dungeonConfig get() = ConfigCSD.dungeonConfigMap[dungeon.dungeonName]
     val dungeonLevelConfig get() = dungeonConfig!!.levels.find { it.level == level }
+
+    //    val chunks by lazy {
+    //        val world = dungeon.worldName.asWorld()!!
+    //        val minChunk = world.getChunkAt(dungeon.minX.toInt(), dungeon.minZ.toInt())
+    //        val maxChunk = world.getChunkAt(dungeon.maxX.toInt(), dungeon.maxZ.toInt())
+    //        val rs = mutableListOf<Chunk>()
+    //        for (x in minChunk.x .. maxChunk.x) {
+    //            for (z in minChunk.z .. maxChunk.z) {
+    //                rs.add(world.getChunkAt(x, z))
+    //            }
+    //        }
+    //        rs
+    //    }
+    //    val chunkEntities get() = chunks.flatMap { it.entities.toList() }
     val dungeonMobSpawnLoc by lazy { StorageCSD.getDungeonMobSpawnLoc(dungeon) }
     val players = mutableSetOf<Player>()
     val moveMsgCD = Cooldown()
@@ -40,8 +56,27 @@ class DungeonBattle(val dungeon: DungeonStructure, var level: Int) {
         start = true
 
         endCheckTask = CsDungeon.INSTANCE.submitTask(period = 10L) {
+            if(!dungeonConfig!!.enable) {
+                players.forEach {
+                    it.sendLang("dungeonDisable")
+                }
+                end()
+                return@submitTask
+            }
             checkPlayers()
         }
+//        checkMobValidTask = CsDungeon.INSTANCE.submitTask(period = 10L) {
+//            val world = dungeon.worldName.asWorld() ?: return@submitTask
+//            val entities = world.livingEntities
+//            val iter = mobList.iterator()
+//            while (iter.hasNext()) {
+//                val mob = iter.next()
+//                if (!entities.contains(mob.bukkitEntity)) {
+//                    mob.setDead()
+//                    iter.remove()
+//                }
+//            }
+//        }
         //        flyCheckTask = CsDungeon.INSTANCE.submitTask(period = 10L) {
         //            if (!dungeonConfig!!.noFly) return@submitTask
         //            players.forEach {
@@ -135,6 +170,9 @@ class DungeonBattle(val dungeon: DungeonStructure, var level: Int) {
 
         endCheckTask?.cancel()
         endCheckTask = null
+
+        checkMobValidTask?.cancel()
+        checkMobValidTask = null
 
         mobSpawnTasks.forEach {
             it.cancel()

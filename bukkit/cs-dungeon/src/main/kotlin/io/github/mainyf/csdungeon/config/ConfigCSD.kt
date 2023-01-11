@@ -73,6 +73,7 @@ object ConfigCSD {
             ?.forEach { dungeonConfigFile ->
                 kotlin.runCatching {
                     val dungeonSect = YamlConfiguration.loadConfiguration(dungeonConfigFile)
+                    val enable = dungeonSect.getBoolean("enable", true)
                     val dungeonName = dungeonSect.getString("dungeonName")!!
                     val worldName = dungeonSect.getString("worldName")!!
                     val structureName = dungeonSect.getString("structureName")!!
@@ -149,6 +150,7 @@ object ConfigCSD {
                         )
                     }
                     dungeonConfigMap[dungeonName] = DungeonConfig(
+                        enable,
                         worldName,
                         dungeonName,
                         structureName,

@@ -22,6 +22,8 @@ class PlayerSocial(uuid: EntityID<UUID>) : BaseEntity(PlayerSocials, uuid) {
 
     val friends by PlayerFriend referrersOn PlayerFriends.social
 
+    val nickname by PlayerNickname optionalBackReferencedOn PlayerNicknames.social
+
     val sendRequests by PlayerFriendRequest referrersOn PlayerFriendRequests.sender
 
     val receiveRequests by PlayerFriendRequest referrersOn PlayerFriendRequests.receiver

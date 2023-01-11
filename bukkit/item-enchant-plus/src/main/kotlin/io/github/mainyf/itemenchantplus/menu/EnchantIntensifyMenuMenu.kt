@@ -177,6 +177,9 @@ class EnchantIntensifyMenuMenu : AbstractMenuHandler() {
         if (materials.any { it -> it.isSimilar(itemStack) }) {
             materials.forEach {
                 if (!it.isSimilar(itemStack)) return@forEach
+                if(itemStack.amount <= 0) {
+                    return@forEach
+                }
                 if (it.amount >= it.maxStackSize) {
                     return@forEach
                 }
@@ -188,6 +191,7 @@ class EnchantIntensifyMenuMenu : AbstractMenuHandler() {
                 } else {
                     pInv.setItem(slot, null)
                     it.amount = rsAmount
+                    itemStack.amount = 0
                 }
             }
             if (itemStack.amount > 0) {

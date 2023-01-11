@@ -6,10 +6,9 @@ import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.offline_player_ext.OfflinePlayerData
-import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.Cooldown
 import io.github.mainyf.newmclib.utils.Heads
-import io.github.mainyf.socialsystem.config.ConfigManager
+import io.github.mainyf.socialsystem.config.ConfigSS
 import io.github.mainyf.socialsystem.config.sendLang
 import io.github.mainyf.socialsystem.module.FriendHandler
 import org.bukkit.Bukkit
@@ -42,7 +41,7 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
             Bukkit.getServer().toReflect().call("getOfflinePlayer", GameProfile(offlineData.uuid, offlineData.name))
                 .get()
         this.player = player
-        setup(ConfigManager.socialCardMenuConfig.settings)
+        setup(ConfigSS.socialCardMenuConfig.settings)
         val inv = createInv(player)
 
         updateInv(player, inv)
@@ -50,7 +49,7 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
     }
 
     override fun updateTitle(player: Player): String {
-        val scmConfig = ConfigManager.socialCardMenuConfig
+        val scmConfig = ConfigSS.socialCardMenuConfig
         val icons = mutableListOf<IaIcon>()
         icons.addAll(scmConfig.requestSlot.iaIcon())
         icons.addAll(scmConfig.repairSlot.iaIcon())
@@ -74,7 +73,7 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
-        val scmConfig = ConfigManager.socialCardMenuConfig
+        val scmConfig = ConfigSS.socialCardMenuConfig
         if (offlineData.uuid != player.uuid) {
             inv.setIcon(scmConfig.requestSlot) {
                 if (FriendHandler.isFriend(it, offlineData.uuid)) {
@@ -85,7 +84,7 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     player.sendLang("targetOffline", "{player}", offlineData.name)
                     return@setIcon
                 }
-                friendRequestCooldown.invoke(it.uuid, ConfigManager.friendRequestCooldown * 1000L, {
+                friendRequestCooldown.invoke(it.uuid, ConfigSS.friendRequestCooldown * 1000L, {
                     FriendHandler.sendFriendRequest(it, offlineData.uuid)
                     player.sendLang("sendFriendRequestToSender")
                     target?.sendLang("sendFriendRequestToReceiver", "{player}", player.name)
@@ -98,7 +97,7 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     player.sendLang("targetNoAllowRepairHand", "{player}", offlineData.name)
                     return@setIcon
                 }
-                if (!it.hasPermission(ConfigManager.repairPermission)) {
+                if (!it.hasPermission(ConfigSS.repairPermission)) {
                     player.sendLang("noPermissionRepairHand")
                     return@setIcon
                 }
@@ -106,7 +105,7 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     player.sendLang("targetOffline", "{player}", offlineData.name)
                     return@setIcon
                 }
-                repairCooldown.invoke(it.uuid, ConfigManager.repairCooldown * 1000L, {
+                repairCooldown.invoke(it.uuid, ConfigSS.repairCooldown * 1000L, {
                     execmd("cmi repair hand ${target!!.name}")
                     player.sendLang("sendRepairHandEquipmentToSender")
                     target.sendLang("sendRepairHandEquipmentToReceiver", "{player}", player.name)
@@ -119,7 +118,9 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         inv.setIcon(
             scmConfig.headSlot.slot,
             scmConfig.headSlot.default()!!
-                .toItemStack(Heads.getPlayerHead(offlineData.name).clone()).tvar("player", offlineData.name)
+                .toItemStack(Heads.getPlayerHead(offlineData.name).clone()).tvar("player", offlineData.name).apply {
+                    setPlaceholder(offlinePlayer)
+                }
         )
 
         arrayOf(

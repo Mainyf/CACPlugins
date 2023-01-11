@@ -36,7 +36,8 @@ class SocialMainMenuConfig(
     val deleteSlot: DefaultSlotConfig,
     val allowRepairSlot: DefaultSlotConfig,
     val tpSlot: DefaultSlotConfig,
-    val tpIsland: DefaultSlotConfig
+    val tpIsland: DefaultSlotConfig,
+    val nickname: DefaultSlotConfig
 )
 
 class SocialIslandTPMenuConfig(

@@ -198,6 +198,11 @@ socialMainMenu:
     default:
       type: itemsadder:air
       name: " &c&l> &3好友岛屿"
+  nickname:
+    slot: [ 48 ]
+    default:
+      type: itemsadder:air
+      name: " &c&l> &3修改昵称 当前 {visible}"
 socialIslandTPMenu:
   # 点击速度限制
   cooldown: 250

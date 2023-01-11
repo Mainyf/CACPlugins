@@ -7,6 +7,7 @@ import io.github.mainyf.bungeesettingsbukkit.ServerPacket
 import io.github.mainyf.myislands.config.ConfigMI
 import io.github.mainyf.myislands.features.IsLandCreatureLimit
 import io.github.mainyf.myislands.features.MoveIsLandCore
+import io.github.mainyf.myislands.hook.QuestExtensionHooks
 import io.github.mainyf.myislands.listeners.AuthListeners
 import io.github.mainyf.myislands.listeners.NoAuthListeners
 import io.github.mainyf.myislands.listeners.PlayerListeners
@@ -49,6 +50,7 @@ class MyIslands : BasePlugin() {
 
         MoveIsLandCore.init()
         IsLandCreatureLimit.init()
+        QuestExtensionHooks.init()
         pluginManager().registerEvents(MoveIsLandCore, this)
         pluginManager().registerEvents(IsLandCreatureLimit, this)
         pluginManager().registerEvents(PlayerListeners, this)

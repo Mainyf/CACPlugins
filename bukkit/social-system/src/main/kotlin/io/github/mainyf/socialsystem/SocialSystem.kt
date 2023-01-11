@@ -6,10 +6,11 @@ import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.newmclib.exts.tvar
 import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
 import io.github.mainyf.newmclib.hooks.placeholders
-import io.github.mainyf.socialsystem.config.ConfigManager
+import io.github.mainyf.socialsystem.config.ConfigSS
 import io.github.mainyf.socialsystem.listeners.PlayerListeners
+import io.github.mainyf.socialsystem.module.NicknameConversation
 import io.github.mainyf.socialsystem.module.SocialManager
-import io.github.mainyf.socialsystem.storage.StorageManager
+import io.github.mainyf.socialsystem.storage.StorageSS
 import org.apache.logging.log4j.LogManager
 
 class SocialSystem : BasePlugin() {
@@ -40,27 +41,36 @@ class SocialSystem : BasePlugin() {
 
     override fun enable() {
         INSTANCE = this
-        ConfigManager.load()
-        StorageManager.init()
+        ConfigSS.load()
+        StorageSS.init()
+        NicknameConversation.initTasks()
         CommandHandler.register()
         pluginManager().registerEvents(PlayerListeners, this)
         pluginManager().registerEvents(CrossServerHandler, this)
+        pluginManager().registerEvents(NicknameConversation, this)
         addPlaceholderExpansion("socialcard") papi@{ offlinePlayer, params ->
             if (params == "qqnum") {
                 return@papi SocialManager.getPlayerQQNum(offlinePlayer?.uniqueId ?: return@papi null)?.toString()
                     ?: "未绑定QQ"
             }
+            if (params == "nickname") {
+                val uuid = offlinePlayer?.uniqueId ?: return@papi offlinePlayer?.name
+                return@papi if (StorageSS.hasVisibleNickname(uuid)) {
+                    StorageSS.getNickname(uuid) ?: offlinePlayer.name
+                } else offlinePlayer.name
+            }
             val player = offlinePlayer?.player ?: return@papi null
             when (params) {
-                "tab" -> ConfigManager.getPlayerTabCard(player).tvar("player", player.name).placeholders(player)
-                "chat" -> ConfigManager.getPlayerChatCard(player).tvar("player", player.name).placeholders(player)
+                "tab" -> ConfigSS.getPlayerTabCard(player).tvar("player", player.name).placeholders(player)
+                "chat" -> ConfigSS.getPlayerChatCard(player).tvar("player", player.name).placeholders(player)
+                "tag" -> ConfigSS.getPlayerTagCard(player).tvar("player", player.name).placeholders(player)
                 else -> null
             }
         }
     }
 
     override fun onDisable() {
-        StorageManager.close()
+        StorageSS.close()
     }
 
 }

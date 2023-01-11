@@ -14,6 +14,7 @@ import org.bukkit.entity.Painting
 import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
@@ -42,7 +43,7 @@ object PlayerListeners : Listener {
         RecallSBManager.trySaveRecallItem(items.filterNotNull())
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onInvClick(event: InventoryClickEvent) {
         val player = event.whoClicked as? Player ?: return
         if (player.isOp) return
@@ -217,7 +218,7 @@ object PlayerListeners : Listener {
         val itemData = SBManager.getBindItemData(itemStack) ?: return false
         if (itemData.ownerUUID != player.uuid) {
             cancellable.isCancelled = true
-            player.sendLang("noBindItemOwnerInteract")
+            player.sendLang("noBindItemOwnerInteract", "{owner}", player.name)
             return true
         }
         return false

@@ -5,6 +5,7 @@ package io.github.mainyf.myislands.config
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.newmclib.config.*
 import io.github.mainyf.newmclib.config.action.MultiAction
+import io.github.mainyf.newmclib.exts.getAction
 import io.github.mainyf.newmclib.hooks.money
 import io.github.mainyf.newmclib.hooks.takeMoney
 import org.bukkit.command.CommandSender
@@ -44,6 +45,7 @@ object ConfigMI {
 
     var moveCoreAction: MultiAction? = null
     lateinit var creatureLimitConfig: IsLandsCreatureLimitConfig
+    var tutorialQuestEndAction: MultiAction? = null
 
     lateinit var lang: BaseLang
 
@@ -212,6 +214,7 @@ object ConfigMI {
                 )
             )
         )
+        tutorialQuestEndAction = mainConfigFile.getAction("tutorialQuestEndAction")
     }
 
     fun tryPayMyIslandCost(player: Player, cost: Double, langKey: String): Boolean {

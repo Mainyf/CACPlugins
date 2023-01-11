@@ -14,3 +14,13 @@ iaRecipe:
     - "mini: &c&l！&4合成 {itemName} 成功，消耗金钱 {cost}，当前拥有: {money}"
 chunkLogger:
   debug: true
+checkPlayerInventory:
+  log: "玩家: {player} 持有物品({status}) {itemText}，超出限制"
+  info: "&c玩家: {player} 持有物品({status}) {itemText}，超出限制"
+  item:
+    - "itemsadder:xxx|10"
+iaItemAutoUpdate:
+  info:
+    - "mini: 物品 {itemName} 已经被更新"
+  item:
+    - "itemsadder:xxx"

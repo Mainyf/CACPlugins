@@ -268,7 +268,8 @@ data class WorldSettingConfig(
     val antiPlayerMoveToInhabitedTimeChunk: Long = 0L,
     val antiAnvilsDamage: Boolean = false,
     val randomFrogColor: Boolean = false,
-    val randomRabbitColor: Boolean = false
+    val randomRabbitColor: Boolean = false,
+    val antiBlockExplode: Boolean = false
 )
 
 enum class CommandMatchType {

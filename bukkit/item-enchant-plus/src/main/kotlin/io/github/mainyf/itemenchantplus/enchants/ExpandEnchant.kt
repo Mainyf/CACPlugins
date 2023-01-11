@@ -2,6 +2,7 @@ package io.github.mainyf.itemenchantplus.enchants
 
 import io.github.mainyf.itemenchantplus.EnchantManager
 import io.github.mainyf.itemenchantplus.ItemEnchantPlus
+import io.github.mainyf.itemenchantplus.blockBreakRecursiveFixer
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
 import io.github.mainyf.itemenchantplus.config.EffectTriggerType
 import io.github.mainyf.itemenchantplus.config.ItemEnchantType
@@ -23,7 +24,6 @@ import kotlin.collections.any
 
 object ExpandEnchant : Listener {
 
-    private val recursiveFixer = mutableSetOf<UUID>()
     private val playerHeldItem = mutableSetOf<UUID>()
 
     fun init() {
@@ -57,6 +57,9 @@ object ExpandEnchant : Listener {
         if (!ConfigIEP.expandEnchantConfig.enable) return
         val item = player.inventory.itemInMainHand
         if (item.isEmpty()) return
+        if (blockBreakRecursiveFixer.has(player)) {
+            return
+        }
         val bindData = SBManager.getBindItemData(item)
         if (!player.isOp && bindData != null && bindData.ownerUUID != player.uuid) {
             return
@@ -67,9 +70,6 @@ object ExpandEnchant : Listener {
         val world = player.world
         val loc = player.location
 
-        if (hasRecursive(player)) {
-            return
-        }
         var clockwiseBlockList = mutableListOf<Block>()
         val facing = player.facing
         //        player.msg(facing.toString())
@@ -173,11 +173,11 @@ object ExpandEnchant : Listener {
         if (bList.isNotEmpty()) {
             if (data.stage == 1 || data.stage == 2) {
                 event.isCancelled = true
-                markRecursive(player)
+                blockBreakRecursiveFixer.mark(player)
                 playerBreakBlock(player, bList.first())
                 //                bList.first().breakNaturally()
             } else if (data.stage >= 3) {
-                markRecursive(player)
+                blockBreakRecursiveFixer.mark(player)
                 bList.forEach {
                     playerBreakBlock(player, it)
                     //                    it.breakNaturally()
@@ -189,30 +189,17 @@ object ExpandEnchant : Listener {
         EnchantManager.triggerItemSkinEffect(
             player, data, EffectTriggerType.BREAK_BLOCK
         )
-        unMarkRecursive(player)
+        blockBreakRecursiveFixer.unMark(player)
     }
 
     private fun playerBreakBlock(player: Player, block: Block) {
-        val event = BlockBreakEvent(block, player)
-        pluginManager().callEvent(event)
-        if (!event.isCancelled) {
-            player.breakBlock(block)
-//            block.breakNaturally()
-        }
-    }
-
-    private fun markRecursive(player: Player) {
-        if (!recursiveFixer.contains(player.uniqueId)) {
-            recursiveFixer.add(player.uniqueId)
-        }
-    }
-
-    private fun hasRecursive(player: Player): Boolean {
-        return recursiveFixer.contains(player.uniqueId)
-    }
-
-    private fun unMarkRecursive(player: Player) {
-        recursiveFixer.remove(player.uniqueId)
+        player.breakBlock(block)
+//        val event = BlockBreakEvent(block, player)
+//        pluginManager().callEvent(event)
+//        if (!event.isCancelled) {
+//            player.breakBlock(block)
+////            block.breakNaturally()
+//        }
     }
 
     private fun hasValid(block: Block): Boolean {

@@ -9,6 +9,8 @@ import org.jetbrains.exposed.sql.and
 
 object StorageCSD : AbstractStorageManager() {
 
+    private val dungeonStructures = mutableListOf<DungeonStructure>()
+
     override fun init() {
         super.init()
         transaction {
@@ -18,6 +20,7 @@ object StorageCSD : AbstractStorageManager() {
             ).forEach {
                 SchemaUtils.createMissingTablesAndColumns(it)
             }
+            dungeonStructures.addAll(DungeonStructure.all())
         }
     }
 
@@ -60,6 +63,7 @@ object StorageCSD : AbstractStorageManager() {
                 this.maxY = maxLoc.y
                 this.maxZ = maxLoc.z
             }
+            dungeonStructures.add(dungeon)
             locs.forEach { (loc, mobName) ->
                 DungeonMobSpawnLoc.newByID {
                     this.dungeon = dungeon.id
@@ -80,20 +84,42 @@ object StorageCSD : AbstractStorageManager() {
         }
     }
 
+    //    fun findDungeonByLoc(location: Location): DungeonStructure? {
+    //        val worldName = location.world.name
+    //        return transaction {
+    //            val rs = DungeonStructure.find {
+    //                (DungeonStructures.worldName eq worldName) and
+    //                        (DungeonStructures.minX lessEq location.x) and
+    //                        (DungeonStructures.minY lessEq location.y) and
+    //                        (DungeonStructures.minZ lessEq location.z) and
+    //                        (DungeonStructures.maxX greaterEq location.x) and
+    //                        (DungeonStructures.maxY greaterEq location.y) and
+    //                        (DungeonStructures.maxZ greaterEq location.z)
+    //            }
+    //            rs.firstOrNull()
+    //        }
+    //    }
+
     fun findDungeonByLoc(location: Location): DungeonStructure? {
         val worldName = location.world.name
-        return transaction {
-            val rs = DungeonStructure.find {
-                (DungeonStructures.worldName eq worldName) and
-                        (DungeonStructures.minX lessEq location.x) and
-                        (DungeonStructures.minY lessEq location.y) and
-                        (DungeonStructures.minZ lessEq location.z) and
-                        (DungeonStructures.maxX greaterEq location.x) and
-                        (DungeonStructures.maxY greaterEq location.y) and
-                        (DungeonStructures.maxZ greaterEq location.z)
-            }
-            rs.firstOrNull()
+        return dungeonStructures.find {
+            it.worldName == worldName &&
+                    location.x in it.minX .. it.maxX &&
+                    location.y in it.minY .. it.maxY &&
+                    location.z in it.minZ .. it.maxZ
         }
+//        return transaction {
+//            val rs = DungeonStructure.find {
+//                (DungeonStructures.worldName eq worldName) and
+//                        (DungeonStructures.minX lessEq location.x) and
+//                        (DungeonStructures.minY lessEq location.y) and
+//                        (DungeonStructures.minZ lessEq location.z) and
+//                        (DungeonStructures.maxX greaterEq location.x) and
+//                        (DungeonStructures.maxY greaterEq location.y) and
+//                        (DungeonStructures.maxZ greaterEq location.z)
+//            }
+//            rs.firstOrNull()
+//        }
     }
 
 }

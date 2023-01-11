@@ -7,13 +7,10 @@ import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.successMsg
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
-import io.github.mainyf.socialsystem.config.ConfigManager
+import io.github.mainyf.socialsystem.config.ConfigSS
 import io.github.mainyf.socialsystem.menu.SocialCardMenu
 import io.github.mainyf.socialsystem.menu.SocialMainMenu
-import io.github.mainyf.socialsystem.module.FriendHandler
-import io.github.mainyf.socialsystem.module.FriendInvites
-import io.github.mainyf.socialsystem.module.FriendTPRequests
-import io.github.mainyf.socialsystem.module.SocialManager
+import io.github.mainyf.socialsystem.module.*
 import org.bukkit.entity.Player
 
 object CommandHandler : APICommand("social") {
@@ -22,7 +19,9 @@ object CommandHandler : APICommand("social") {
         withAliases("ss", "ssm", "friend")
         "reload" {
             executeOP {
-                ConfigManager.load()
+                NicknameConversation.endTasks()
+                ConfigSS.load()
+                NicknameConversation.initTasks()
                 sender.successMsg("[SocialSystem] 重载完成")
             }
         }
@@ -108,7 +107,15 @@ object CommandHandler : APICommand("social") {
             executePlayer {
                 val target = text()
                 FriendInvites.handleInviteTPRefuse(sender, target)
-
+            }
+        }
+        "nickname" {
+            withArguments(
+                playerArguments("玩家名")
+            )
+            executePlayer {
+                val player = player()
+                NicknameConversation.join(player)
             }
         }
     }

@@ -28,6 +28,10 @@ object PlayerDropItemStorage {
         return storage.find { it.world == item.world.name && it.pUUID != player.uniqueId && it.itemUUID == item.uniqueId }
     }
 
+    fun get(item: Item): DropItemData? {
+        return storage.find { it.world == item.world.name && it.itemUUID == item.uniqueId }
+    }
+
     fun removeData(item: Item) {
         val data = storage.find { it.world == item.world.name && it.itemUUID == item.uniqueId }
         if (data != null) {

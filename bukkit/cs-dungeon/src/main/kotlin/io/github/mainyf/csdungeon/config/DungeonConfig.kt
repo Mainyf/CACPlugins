@@ -16,6 +16,7 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.util.Vector
 
 class DungeonConfig(
+    val enable: Boolean,
     val worldName: String,
     val dungeonName: String,
     val structureName: String,

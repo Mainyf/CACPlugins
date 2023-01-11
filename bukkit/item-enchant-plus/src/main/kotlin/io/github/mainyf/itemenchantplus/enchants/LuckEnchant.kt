@@ -1,14 +1,17 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package io.github.mainyf.itemenchantplus.enchants
 
-import co.aikar.timings.Timing
-import co.aikar.timings.Timings
+import dev.lone.itemsadder.api.CustomBlock
 import io.github.mainyf.itemenchantplus.EnchantManager
-import io.github.mainyf.itemenchantplus.ItemEnchantPlus
+import io.github.mainyf.itemenchantplus.blockBreakRecursiveFixer
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
 import io.github.mainyf.itemenchantplus.config.EffectTriggerType
 import io.github.mainyf.itemenchantplus.config.ItemEnchantType
 import io.github.mainyf.itemenchantplus.getKey
-import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.exts.any
+import io.github.mainyf.newmclib.exts.isEmpty
+import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.random.Percentage
 import io.github.mainyf.soulbind.SBManager
 import org.bukkit.Location
@@ -22,20 +25,15 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.block.BlockPlaceEvent
-import java.util.*
+import org.bukkit.inventory.ItemStack
 
 object LuckEnchant : Listener {
 
-    private val recursiveFixer = mutableSetOf<UUID>()
     private val blockKey = mutableSetOf<Long>()
     private val breakBlock = mutableMapOf<Long, BlockData>()
 
-    private lateinit var luckStage1Timings: Timing
-    private lateinit var luckStage2Timings: Timing
-
     fun init() {
-        luckStage1Timings = Timings.of(ItemEnchantPlus.INSTANCE, "luck stage 1")
-        luckStage2Timings = Timings.of(ItemEnchantPlus.INSTANCE, "luck stage 2")
+
     }
 
     @EventHandler
@@ -54,7 +52,10 @@ object LuckEnchant : Listener {
         if (!ConfigIEP.luckEnchantConfig.enable) return
         val item = player.inventory.itemInMainHand
         if (item.isEmpty()) return
-        luckStage1Timings.startTiming()
+
+        if (blockBreakRecursiveFixer.has(player)) {
+            return
+        }
         val bindData = SBManager.getBindItemData(item)
         if (!player.isOp && bindData != null && bindData.ownerUUID != player.uuid) {
             return
@@ -70,41 +71,52 @@ object LuckEnchant : Listener {
             blockKey.remove(block.getKey())
             return
         }
-
-        if (hasRecursive(player)) {
-            return
-        }
         val luckPercentage = ConfigIEP.luckEnchantConfig.luckPercentage
-        when (data.stage) {
-            1 -> {
-                if (Percentage.hasHit(luckPercentage.stage1_2x)) {
-                    breakBlock[block.getKey()] = BlockData(block.type, block.isLiquid, 2)
-                }
-            }
-
-            2 -> {
-                if (Percentage.hasHit(luckPercentage.stage2_2x)) {
-                    breakBlock[block.getKey()] = BlockData(block.type, block.isLiquid, 2)
-                }
-            }
-
-            3 -> {
-                if (Percentage.hasHit(luckPercentage.stage3_2x)) {
-                    breakBlock[block.getKey()] =
-                        BlockData(
-                            block.type,
-                            block.isLiquid,
-                            if (Percentage.hasHit(luckPercentage.stage3_3x)) 3 else 2
+        if (hasValid(block)) {
+            when (data.stage) {
+                1 -> {
+                    if (Percentage.hasHit(luckPercentage.stage1_2x)) {
+                        breakBlock[block.getKey()] = newBlockData(
+                            block.location,
+                            block
                         )
+                        dropBlockLoot(2, block.location, item, block)
+                    }
+                }
+
+                2 -> {
+                    if (Percentage.hasHit(luckPercentage.stage2_2x)) {
+                        breakBlock[block.getKey()] = newBlockData(
+                            block.location,
+                            block
+                        )
+                        dropBlockLoot(2, block.location, item, block)
+                    }
+                }
+
+                3 -> {
+                    if (Percentage.hasHit(luckPercentage.stage3_2x)) {
+                        breakBlock[block.getKey()] = newBlockData(
+                            block.location,
+                            block
+                        )
+                        if (Percentage.hasHit(luckPercentage.stage3_3x)) {
+                            dropBlockLoot(3, block.location, item, block)
+                        } else {
+                            dropBlockLoot(2, block.location, item, block)
+                        }
+                    }
                 }
             }
-        }
+            if (EnchantManager.hasExtraData(ItemEnchantType.LUCK, item, ItemEnchantType.LUCK.plusExtraDataName())) {
+                blockBreakRecursiveFixer.mark(player)
+                getNearBlocks(block.location).forEach {
+                    breakBlock[it.getKey()] = newBlockData(
+                        block.location,
+                        it
+                    )
 
-        if (EnchantManager.hasExtraData(ItemEnchantType.LUCK, item, ItemEnchantType.LUCK.plusExtraDataName())) {
-            markRecursive(player)
-            getNearBlocks(block.location).forEach {
-                breakBlock[it.getKey()] = BlockData(
-                    it.type, it.isLiquid, when (data.stage) {
+                    val amount = when (data.stage) {
                         1 -> if (Percentage.hasHit(luckPercentage.stage1_2x)) 2 else 1
                         2 -> if (Percentage.hasHit(luckPercentage.stage2_2x)) 2 else 1
                         3 -> if (Percentage.hasHit(luckPercentage.stage3_2x)) {
@@ -113,51 +125,51 @@ object LuckEnchant : Listener {
 
                         else -> 1
                     }
-                )
-                player.breakBlock(it)
+                    player.breakBlock(it)
+                    dropBlockLoot(amount, block.location, item, it)
+                }
             }
         }
+
         //        EnchantManager.updateItemMeta(item, data)
         EnchantManager.triggerItemSkinEffect(
             player,
             data,
             EffectTriggerType.BREAK_BLOCK
         )
-        unMarkRecursive(player)
-        luckStage1Timings.stopTiming()
-    }
-
-    private fun markRecursive(player: Player) {
-        if (!recursiveFixer.contains(player.uniqueId)) {
-            recursiveFixer.add(player.uniqueId)
-        }
-    }
-
-    private fun hasRecursive(player: Player): Boolean {
-        return recursiveFixer.contains(player.uniqueId)
-    }
-
-    private fun unMarkRecursive(player: Player) {
-        recursiveFixer.remove(player.uniqueId)
+        blockBreakRecursiveFixer.unMark(player)
     }
 
     @EventHandler
     fun onDropItem(event: BlockDropItemEvent) {
         if (!ConfigIEP.luckEnchantConfig.enable) return
-        luckStage2Timings.startTiming()
         val item = event.player.inventory.itemInMainHand
         if (item.isEmpty()) return
         if (EnchantManager.getItemEnchant(ItemEnchantType.LUCK, item) == null) return
         val key = event.block.getKey()
         if (breakBlock.containsKey(key)) {
-            repeat(breakBlock[key]!!.amount - 1) {
+            val data = breakBlock[key]!!
+            if (ConfigIEP.luckEnchantConfig.allowBlocks.any { it -> it.equalsBlock(data.type, data.customBlock) }) {
                 event.items.forEach {
-                    event.block.world.dropItem(event.block.location, it.itemStack)
+                    it.teleport(data.loc)
                 }
             }
+            breakBlock.remove(key)
         }
-        breakBlock.remove(key)
-        luckStage2Timings.stopTiming()
+    }
+
+    private fun dropBlockLoot(amount: Int, loc: Location, itemStack: ItemStack, block: Block) {
+        val customBlock = CustomBlock.byAlreadyPlaced(block)
+        val drops =
+            (customBlock?.getLoot(itemStack, false) as? ArrayList<ItemStack>)?.toMutableList() ?: block.getDrops(
+                itemStack
+            ).toMutableList()
+        repeat(amount - 2) {
+            drops.addAll(drops)
+        }
+        drops.forEach {
+            loc.world.dropItem(loc, it)
+        }
     }
 
     private fun addBlockToList(
@@ -241,6 +253,15 @@ object LuckEnchant : Listener {
     //        return true
     //    }
 
+    private fun newBlockData(loc: Location, block: Block): BlockData {
+        return BlockData(
+            loc,
+            CustomBlock.byAlreadyPlaced(block),
+            block.type,
+            block.isLiquid
+        )
+    }
+
     private fun hasValid(block: Block?): Boolean {
         if (block == null) {
             return false
@@ -283,9 +304,10 @@ object LuckEnchant : Listener {
     }
 
     data class BlockData(
+        val loc: Location,
+        val customBlock: CustomBlock?,
         val type: Material,
-        val isLiquid: Boolean,
-        val amount: Int
+        val isLiquid: Boolean
     )
 
 }

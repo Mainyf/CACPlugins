@@ -87,6 +87,8 @@ gloablServer:
     randomFrogColor: true
     # 随机的兔子颜色
     randomRabbitColor: true
+    # 阻止方块被爆炸破坏
+    antiBlockExplode: true
   worlds:
     world:
       difficulty: NORMAL

@@ -1,18 +1,15 @@
 package io.github.mainyf.toolsplugin
 
 import dev.jorel.commandapi.arguments.BooleanArgument
+import io.github.mainyf.bungeesettingsbukkit.ServerPacket
 import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.toolsplugin.config.ConfigTP
-import io.github.mainyf.toolsplugin.module.ChunkLogger
-import io.github.mainyf.toolsplugin.module.ExportPlayerData
-import io.github.mainyf.toolsplugin.module.IaRecipe
-import io.github.mainyf.toolsplugin.module.RecycleEnderDragonEgg
+import io.github.mainyf.toolsplugin.module.*
 import io.papermc.paper.configuration.GlobalConfiguration
 import net.luckperms.api.LuckPermsProvider
-import net.minecraft.server.MinecraftServer
 import org.apache.logging.log4j.LogManager
 import org.bukkit.event.Listener
 import java.util.*
@@ -26,6 +23,8 @@ class ToolsPlugin : BasePlugin(), Listener {
 
         lateinit var INSTANCE: ToolsPlugin
 
+        val OP_MSG = ServerPacket.registerPacket("broadcast_toolsplugin_op_msg")
+
     }
 
     private val luckPerms by lazy { LuckPermsProvider.get() }
@@ -37,6 +36,10 @@ class ToolsPlugin : BasePlugin(), Listener {
         pluginManager().registerEvents(RecycleEnderDragonEgg, this)
         pluginManager().registerEvents(IaRecipe, this)
         pluginManager().registerEvents(ChunkLogger, this)
+        pluginManager().registerEvents(CheckPlayerInventory, this)
+        pluginManager().registerEvents(IaItemAutoUpdate, this)
+        CheckPlayerInventory.init()
+        IaItemAutoUpdate.init()
         ExportPlayerData.init()
         apiCommand("toolsPlugin") {
             withAliases("tools", "toolsp")

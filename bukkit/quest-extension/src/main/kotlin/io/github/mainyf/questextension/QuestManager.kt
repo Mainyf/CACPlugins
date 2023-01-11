@@ -8,9 +8,8 @@ import com.guillaumevdn.questcreator.lib.quest.QuestStopCause
 import com.guillaumevdn.questcreator.lib.quest.QuestUtilsFlowStart
 import com.guillaumevdn.questcreator.lib.quest.QuestUtilsFlowStop
 import io.github.mainyf.newmclib.exts.errorMsg
-import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.uuid
-import io.github.mainyf.questextension.config.ConfigManager
+import io.github.mainyf.questextension.config.ConfigQE
 import io.github.mainyf.questextension.menu.QuestListMenu
 import io.github.mainyf.questextension.storage.PlayerDailyQuest
 import io.github.mainyf.questextension.storage.StorageManager
@@ -19,7 +18,7 @@ import org.joda.time.DateTime
 
 object QuestManager {
 
-    private fun getUserQC(player: Player): UserQC? {
+    fun getUserQC(player: Player): UserQC? {
         val userQC = UserQC.cachedOrNull(player)
         if (userQC == null) {
             player.errorMsg("发生错误，请告知管理员: USERQC_NULL")
@@ -30,7 +29,7 @@ object QuestManager {
 
     private fun getPlayerDailyQuest(userQC: UserQC): List<Quest> {
         return userQC.cachedActiveQuests.filter {
-            ConfigManager.questPool.contains(it.modelId)
+            ConfigQE.questPool.contains(it.modelId)
         }
     }
 
@@ -57,7 +56,7 @@ object QuestManager {
     fun addDailyQuestToPlayer(player: Player): PlayerDailyQuest {
         val rs = mutableListOf<Quest>()
         val quests = mutableSetOf<String>()
-        val questPool = ConfigManager.questPool.toMutableSet()
+        val questPool = ConfigQE.questPool.toMutableSet()
         repeat(5) {
             val questName = questPool.random()
             quests.add(questName)
@@ -77,7 +76,7 @@ object QuestManager {
     }
 
     fun cleanDailyQuestToPlayer(player: Player) {
-        val questPool = ConfigManager.questPool
+        val questPool = ConfigQE.questPool
         val userQC = getUserQC(player) ?: return
         questPool.forEach {
             val quest = userQC.getCachedActiveQuest(it) ?: return@forEach

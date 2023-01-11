@@ -1,5 +1,7 @@
 togethers:
   newbie:
+    # 自己是否可以领取
+    selfGive: true
     # 持续多久(tick)
     duration: 600
     # 需要发送多少字符的信息才能领取

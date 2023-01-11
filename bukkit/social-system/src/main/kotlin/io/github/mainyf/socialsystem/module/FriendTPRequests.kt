@@ -5,7 +5,7 @@ import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.offline_player_ext.OfflinePlayerData
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.socialsystem.SocialSystem
-import io.github.mainyf.socialsystem.config.ConfigManager
+import io.github.mainyf.socialsystem.config.ConfigSS
 import io.github.mainyf.socialsystem.config.sendLang
 import io.netty.buffer.ByteBuf
 import org.bukkit.entity.Player
@@ -44,7 +44,7 @@ object FriendTPRequests {
             return
         }
         val pair = tpRequests.remove(target)!!
-        if(currentTime() - pair.second >= ConfigManager.tpReqExpired * 1000L) {
+        if(currentTime() - pair.second >= ConfigSS.tpReqExpired * 1000L) {
             player.sendLang("tpRequestExpired")
             return
         }
@@ -76,7 +76,7 @@ object FriendTPRequests {
         if (!tpRequests.containsKey(target)) return
         val offlineData = target.asOfflineData() ?: return
         val pair = tpRequests.remove(target)!!
-        if(currentTime() - pair.second >= ConfigManager.tpReqExpired * 1000L) {
+        if(currentTime() - pair.second >= ConfigSS.tpReqExpired * 1000L) {
             player.sendLang("tpRequestExpired")
             return
         }

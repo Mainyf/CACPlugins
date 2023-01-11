@@ -57,3 +57,5 @@ creatureLimit:
     count: 10
     msg:
       - "mini: 村民数量已达到上限(10)"
+tutorialQuestEndAction:
+  - "console: qext complete {player} 点击岛屿"

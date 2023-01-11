@@ -16,3 +16,5 @@ breakDungeonOutside:
   - "mini: &4你无法在外面破坏遗迹"
 breakDungeonInside:
   - "mini: &4你无法在里面破坏遗迹"
+dungeonDisable:
+  - "mini: &4当前遗迹临时关闭"

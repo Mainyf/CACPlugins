@@ -5,6 +5,7 @@ import io.github.mainyf.myislands.IslandsManager
 import io.github.mainyf.myislands.MyIslands
 import io.github.mainyf.myislands.config.ConfigMI
 import io.github.mainyf.myislands.config.sendLang
+import io.github.mainyf.myislands.hook.QuestExtensionHooks
 import io.github.mainyf.myislands.menu.IslandViewListType.*
 import io.github.mainyf.myislands.storage.PlayerIsland
 import io.github.mainyf.myislands.storage.StorageMI
@@ -198,6 +199,13 @@ class IslandsMainMenu : AbstractMenuHandler() {
                     this.itemMeta = meta
                 }) {
                     viewListSlots.default()!!.execAction(it)
+                    if(pageIndex == 1 && i == 0) {
+                        ConfigMI.tutorialQuestEndAction?.execute(it)
+                    } else {
+                        if(QuestExtensionHooks.hasInTutorialQuest(it)) {
+                            return@setIcon
+                        }
+                    }
                     MyIslands.plotUtils.findPlot(islandData.id.value)
                         .let { plot ->
                             if (plot == null) {

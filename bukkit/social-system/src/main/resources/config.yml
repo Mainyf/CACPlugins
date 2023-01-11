@@ -9,6 +9,43 @@ tpRequestCooldown: 1
 tpReqExpired: 20
 # 传送邀请过期时间
 inviteTpExpired: 20
+nickname:
+  # 修改昵称的权限
+  permission: "socialsystem.nickname"
+  # 修改昵称冷却(天)
+  modifyCooldown: 7
+  # 最小字数限制
+  minLength: 2
+  # 最大字数限制
+  maxLength: 8
+  # 修改一次消耗的金钱
+  cost: 2000
+  # 敏感词
+  sensitiveWord:
+    - "中文"
+  # 提示间隔(tick)
+  tipsPeriod: 120
+  # 提示
+  tipsAction:
+    - "message: 请在聊天栏输入昵称，必须全中文"
+  minLengthAction:
+    - "message: 长度不能小于 {length} 位"
+  maxLengthAction:
+    - "message: 长度不能超过 {length} 位"
+  chineseAction:
+    - "message: 昵称必须为全中文"
+  sensitiveAction:
+    - "message: 你的昵称中带有敏感词，请重新输入"
+  quitAction:
+    - "message: 你已经退出昵称输入状态"
+  successAction:
+    - "message: 你成功将昵称设置为 {nickname}，2000 金钱已扣除"
+  costLackAction:
+    - "message: 你的金币不足，需要 2000 ，而你只有 {money}"
+  nicknameCooldownAction:
+    - "message: 昵称修改正在冷却，剩余 {time}"
+  repatNicknameAction:
+    - "message: 当前已经存在"
 card:
   permission: "social.card"
   tab:
@@ -20,6 +57,17 @@ card:
       priority: 0
       value: '&f[&c安&f] {player}'
   chat:
+    default: '#808080[#bebebe安#808080] {player}：'
+    vip:
+      priority: 2
+      value: ':tag_vip: &7{player}：'
+    svip:
+      priority: 1
+      value: ':tag_svip: &7{player}：'
+    mvp:
+      priority: 0
+      value: ':tag_mvp: &7{player}：'
+  tag:
     default: '#808080[#bebebe安#808080] {player}：'
     vip:
       priority: 2

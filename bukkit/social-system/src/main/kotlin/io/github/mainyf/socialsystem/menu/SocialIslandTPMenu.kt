@@ -4,7 +4,7 @@ import io.github.mainyf.bungeesettingsbukkit.CrossServerManager
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
-import io.github.mainyf.socialsystem.config.ConfigManager
+import io.github.mainyf.socialsystem.config.ConfigSS
 import io.github.mainyf.socialsystem.module.IslandStatus
 import io.github.mainyf.socialsystem.module.IslandTpReq
 import org.bukkit.entity.Player
@@ -16,7 +16,7 @@ class SocialIslandTPMenu(val tpReq: IslandTpReq) : AbstractMenuHandler() {
     private val plot2ServerName = "plot2"
 
     override fun open(player: Player) {
-        setup(ConfigManager.socialIslandTPMenuConfig.settings)
+        setup(ConfigSS.socialIslandTPMenuConfig.settings)
         val inv = createInv(player)
 
         updateInv(player, inv)
@@ -32,7 +32,7 @@ class SocialIslandTPMenu(val tpReq: IslandTpReq) : AbstractMenuHandler() {
     }
 
     override fun updateTitle(player: Player): String {
-        val sitpMenu = ConfigManager.socialIslandTPMenuConfig
+        val sitpMenu = ConfigSS.socialIslandTPMenuConfig
         val icons = mutableListOf<IaIcon>()
         icons.addAll(sitpMenu.plot1Slot.iaIcon(getStatusText(plot1ServerName)))
         icons.addAll(sitpMenu.plot2Slot.iaIcon(getStatusText(plot2ServerName)))
@@ -42,7 +42,7 @@ class SocialIslandTPMenu(val tpReq: IslandTpReq) : AbstractMenuHandler() {
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
-        val sitpMenu = ConfigManager.socialIslandTPMenuConfig
+        val sitpMenu = ConfigSS.socialIslandTPMenuConfig
 
         inv.setIcon(sitpMenu.plot1Slot, key = getStatusText(plot1ServerName)) {
             if(tpReq.statusMap[plot1ServerName] != IslandStatus.DEFAULT) return@setIcon

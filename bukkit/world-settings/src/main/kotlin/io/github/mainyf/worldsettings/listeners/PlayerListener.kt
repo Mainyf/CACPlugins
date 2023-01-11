@@ -21,6 +21,7 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityPickupItemEvent
+import org.bukkit.event.entity.ItemMergeEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.*
@@ -71,6 +72,7 @@ object PlayerListener : Listener {
                             return@ignorePermAndGetWorldSettings
                         }
                     }
+
                     START -> {
                         if (command.startsWith(cmd)) {
                             cancel = false
@@ -134,7 +136,7 @@ object PlayerListener : Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     fun onDamage(event: EntityDamageByEntityEvent) {
         val damager = event.damager.getShooterPlayer() ?: return
-//        event.damage += 200000.0
+        //        event.damage += 200000.0
         ignorePermAndGetWorldSettings(damager) { settings ->
             if (event.entity !is Monster && settings.antiDamageFriendEntityLiving) {
                 event.isCancelled = true
@@ -155,10 +157,10 @@ object PlayerListener : Listener {
         }
     }
 
-//    @EventHandler
-//    fun onRespawn(event: PlayerRespawnEvent) {
-//
-//    }
+    //    @EventHandler
+    //    fun onRespawn(event: PlayerRespawnEvent) {
+    //
+    //    }
 
     @EventHandler
     fun onTabComplete(event: TabCompleteEvent) {
@@ -180,13 +182,13 @@ object PlayerListener : Listener {
         }
     }
 
-//    @EventHandler(ignoreCancelled = true)
-//    fun onTeleport(event: PlayerTeleportEvent) {
-//        val settings = ConfigManager.getSetting(event.to?.world) ?: return
-//        if (settings.autoDeOp && event.player.isOp) {
-//            event.player.isOp = false
-//        }
-//    }
+    //    @EventHandler(ignoreCancelled = true)
+    //    fun onTeleport(event: PlayerTeleportEvent) {
+    //        val settings = ConfigManager.getSetting(event.to?.world) ?: return
+    //        if (settings.autoDeOp && event.player.isOp) {
+    //            event.player.isOp = false
+    //        }
+    //    }
 
     @EventHandler
     fun noBreakFarm(event: PlayerInteractEvent) {
@@ -221,7 +223,7 @@ object PlayerListener : Listener {
                 )
             ) {
                 event.setUseInteractedBlock(Event.Result.DENY)
-//            event.isCancelled = true
+                //            event.isCancelled = true
                 return@ignorePermAndGetWorldSettings
             }
             if (settings.antiTrampleTurtleEgg && event.action == Action.PHYSICAL && event.clickedBlock?.type == Material.TURTLE_EGG) {
@@ -251,6 +253,17 @@ object PlayerListener : Listener {
     }
 
     @EventHandler
+    fun onItemMerge(event: ItemMergeEvent) {
+        ignorePermAndGetWorldSettings(null, event.entity.location) { settings ->
+            val dropDataA = PlayerDropItemStorage.get(event.entity) ?: return@ignorePermAndGetWorldSettings
+            val dropDataB = PlayerDropItemStorage.get(event.target) ?: return@ignorePermAndGetWorldSettings
+            if (settings.antiPlayerPickupOtherPlayerDropOfItem && dropDataA.pUUID != dropDataB.pUUID) {
+                event.isCancelled = true
+            }
+        }
+    }
+
+    @EventHandler
     fun onPickup(event: EntityPickupItemEvent) {
         val entity = event.entity
         if (entity is Player) {
@@ -271,7 +284,7 @@ object PlayerListener : Listener {
                         val offlinePlayer = dropData.pUUID.asOfflineData()
                         if (offlinePlayer != null) {
                             settings.pickupItemAction?.execute(player)
-//                        player.msg("该世界不允许你拾取其他玩家(${offlinePlayer.name})掉落的物品")
+                            //                        player.msg("该世界不允许你拾取其他玩家(${offlinePlayer.name})掉落的物品")
                         }
                     }
                 }

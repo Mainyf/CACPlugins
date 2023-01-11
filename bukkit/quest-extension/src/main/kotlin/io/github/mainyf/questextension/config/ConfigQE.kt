@@ -11,22 +11,24 @@ import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 
 fun CommandSender.sendLang(key: String, vararg data: Any) {
-    ConfigManager.lang.apply {
+    ConfigQE.lang.apply {
         sendLang(key, *data)
     }
 }
 
-object ConfigManager {
+object ConfigQE {
 
     private lateinit var mainConfigFile: FileConfiguration
     private lateinit var menuConfigFile: FileConfiguration
     private lateinit var langConfigFile: FileConfiguration
 
+    var tutorialQuest = "tutorial"
     val questPool = mutableSetOf<String>()
     lateinit var questListMenuConfig: QuestListMenuConfig
     lateinit var questDetailMenuConfig: QuestDetailMenuConfig
     lateinit var questDetail2XMenuConfig: QuestDetail2XMenuConfig
     lateinit var questDetail3XMenuConfig: QuestDetail3XMenuConfig
+
 
     lateinit var lang: BaseLang
 
@@ -93,6 +95,7 @@ object ConfigManager {
     }
 
     private fun loadMainConfig() {
+        tutorialQuest = mainConfigFile.getString("tutorialQuest", tutorialQuest)!!
         this.questPool.clear()
         this.questPool.addAll(mainConfigFile.getStringList("questPool"))
     }

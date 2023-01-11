@@ -28,6 +28,7 @@ object ConfigCEL {
         val togethersSect = mainConfig.getSection("togethers")
         togethersSect.getKeys(false).forEach { togetherName ->
             val togetherSect = togethersSect.getSection(togetherName)
+            val selfGive = togetherSect.getBoolean("selfGive", false)
             val duration = togetherSect.getLong("duration")
             val msgLength = togetherSect.getInt("msgLength")
             val chinese = togetherSect.getBoolean("chinese")
@@ -35,6 +36,7 @@ object ConfigCEL {
             val reward = togetherSect.getAction("reward")
             togethers[togetherName] = TogethersReward(
                 togetherName,
+                selfGive,
                 duration,
                 msgLength,
                 chinese,
@@ -48,6 +50,7 @@ object ConfigCEL {
 
 data class TogethersReward(
     val name: String,
+    val selfGive: Boolean,
     val duration: Long,
     val msgLength: Int,
     val chinese: Boolean,

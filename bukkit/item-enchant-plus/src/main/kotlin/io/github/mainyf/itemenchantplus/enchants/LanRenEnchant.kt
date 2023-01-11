@@ -28,8 +28,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.bukkit.potion.PotionEffect
@@ -49,6 +48,7 @@ object LanRenEnchant : Listener {
         2 to 3,
         3 to 4
     )
+    private val blockInteractSet = mutableSetOf<UUID>()
 
     //    fun launchBullet(player: Player) {
     //        Bullet(player, null).launch()
@@ -74,11 +74,22 @@ object LanRenEnchant : Listener {
     @EventHandler
     fun onInteract(event: PlayerInteractEvent) {
         if (!ConfigIEP.lanrenEnchantConfig.enable) return
-        if (event.action != Action.LEFT_CLICK_AIR && event.action != Action.LEFT_CLICK_BLOCK) {
+        if (event.action == Action.RIGHT_CLICK_BLOCK || event.action == Action.RIGHT_CLICK_AIR) {
+            if (event.clickedBlock != null) {
+                blockInteractSet.add(event.player.uuid)
+            }
+        }
+    }
+
+    @EventHandler
+    fun onAnimation(event: PlayerAnimationEvent) {
+        if (!ConfigIEP.lanrenEnchantConfig.enable) return
+        if (blockInteractSet.contains(event.player.uuid)) {
+            blockInteractSet.remove(event.player.uuid)
             return
         }
-        if (handleSkill(event.player)) {
-            event.isCancelled = true
+        if (event.animationType == PlayerAnimationType.ARM_SWING) {
+            handleSkill(event.player)
         }
     }
 
@@ -397,7 +408,7 @@ object LanRenEnchant : Listener {
                             return@run
                         }
                     }
-                    if(!MyIsLandHooks.hasAttack(player)) {
+                    if (!MyIsLandHooks.hasAttack(player, hitEntity)) {
                         return@run
                     }
 

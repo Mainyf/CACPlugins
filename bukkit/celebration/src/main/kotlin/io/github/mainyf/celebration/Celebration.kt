@@ -151,10 +151,14 @@ class Celebration : JavaPlugin(), Listener {
     }
 
     private fun startCelebration(togetherName: String, togetherReward: TogethersReward, playerName: String) {
+        val availablePlayers = onlinePlayers().toMutableList()
+        if (!togetherReward.selfGive) {
+            availablePlayers.removeAll { it.name == playerName }
+        }
         activeTogethersRewards["${togetherName}-${currentTime()}"] = ActiveTogethersReward(
             togetherName,
             currentTime(),
-            onlinePlayers().map { it.uuid },
+            availablePlayers.map { it.uuid },
             mutableSetOf(),
             playerName
         )

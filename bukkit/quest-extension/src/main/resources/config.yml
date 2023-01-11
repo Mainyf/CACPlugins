@@ -1,3 +1,4 @@
+tutorialQuest: "tutorial"
 questPool:
   - "every_deepslate"
   - "every_granite"

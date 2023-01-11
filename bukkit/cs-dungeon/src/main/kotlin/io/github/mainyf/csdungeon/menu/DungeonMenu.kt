@@ -69,6 +69,10 @@ class DungeonMenu(val dungeon: DungeonStructure) : AbstractMenuHandler() {
     }
 
     private fun startBattle(player: Player, level: Int) {
+        if (!dungeonConfig.enable) {
+            player.sendLang("dungeonDisable")
+            return
+        }
         val dungeonMaterial = dungeonConfig.dungeonMaterials[level - 1]
         if (!dungeonMaterial.item.any { dmItem ->
                 val count = player.countByItem { it?.equalsByIaNamespaceID(dmItem.iaName) == true }

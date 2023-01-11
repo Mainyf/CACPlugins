@@ -1,15 +1,14 @@
 package io.github.mainyf.shopmanager.menu
 
 import io.github.mainyf.newmclib.config.IaIcon
-import io.github.mainyf.newmclib.exts.giveItem
-import io.github.mainyf.newmclib.exts.uuid
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.hooks.giveMoney
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
+import io.github.mainyf.newmclib.nms.asNmsPlayer
 import io.github.mainyf.shopmanager.ShopManager
 import io.github.mainyf.shopmanager.config.ConfigManager
 import io.github.mainyf.shopmanager.config.sendLang
 import io.github.mainyf.shopmanager.storage.StorageManager
-import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -19,7 +18,7 @@ import org.bukkit.inventory.ItemStack
 
 class SellMenu : AbstractMenuHandler() {
 
-    private val itemMap = mutableMapOf<Int, ItemStack>()
+    private val items = newItemList(45)
 
     override fun open(player: Player) {
         setup(ConfigManager.sellMenuConfig.settings)
@@ -40,6 +39,7 @@ class SellMenu : AbstractMenuHandler() {
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
+        updateItems(inv)
         val pSlot = ConfigManager.sellMenuConfig.placeholderSlot
         inv.setIcon(pSlot)
         val sellSlot = ConfigManager.sellMenuConfig.sellSlot
@@ -48,11 +48,24 @@ class SellMenu : AbstractMenuHandler() {
         }
     }
 
+    private fun updateItems(inv: Inventory) {
+        items.forEachIndexed { index, itemStack ->
+            inv.setIcon(index, itemStack) {
+                //                if (itemStack.isEmpty()) return@setIcon
+                //                items[index] = AIR_ITEM
+                //                if (it.giveItem(itemStack)) {
+                //                    it.sendLang("unSellItemBack")
+                //                }
+                //                updateItems(inv)
+            }
+        }
+    }
+
     private fun sell(player: Player, inv: Inventory) {
         val noSells = mutableListOf<ItemStack>()
         val itemMaterialGroupMap = mutableMapOf<Material, Int>()
         val itemStackGroupMap = mutableMapOf<Material, MutableList<ItemStack>>()
-        itemMap.forEach { (slot, itemStack) ->
+        items.forEach { itemStack ->
             val itemType = itemStack.type
             if (!ConfigManager.hasSellable(itemType)) {
                 noSells.add(itemStack)
@@ -81,12 +94,12 @@ class SellMenu : AbstractMenuHandler() {
                 } else {
                     flag = true
                     totalPrice = sellShop.price * sellCount
-//                    player.sendLang(
-//                        "sellSuccess",
-//                        "{count}", sellCount,
-//                        "{itemName}", Component.translatable(type),
-//                        "{totalPrice}", totalPrice
-//                    )
+                    //                    player.sendLang(
+                    //                        "sellSuccess",
+                    //                        "{count}", sellCount,
+                    //                        "{itemName}", Component.translatable(type),
+                    //                        "{totalPrice}", totalPrice
+                    //                    )
                     player.giveMoney(totalPrice)
                     allTotalPrice += totalPrice
                     StorageManager.updateHarvest(player.uuid, totalPrice, type)
@@ -100,36 +113,37 @@ class SellMenu : AbstractMenuHandler() {
                             removedItemCount -= itemStack.amount
                         } else {
                             itemStack.amount -= removedItemCount
-//                            removedItemCount = 0
+                            //                            removedItemCount = 0
                             break
                         }
                     }
                 }
             } else {
                 flag = true
-//                player.sendLang(
-//                    "sellSuccess",
-//                    "{count}", amount,
-//                    "{itemName}", Component.translatable(type),
-//                    "{totalPrice}", totalPrice
-//                )
+                //                player.sendLang(
+                //                    "sellSuccess",
+                //                    "{count}", amount,
+                //                    "{itemName}", Component.translatable(type),
+                //                    "{totalPrice}", totalPrice
+                //                )
                 allTotalPrice += totalPrice
                 player.giveMoney(totalPrice)
                 itemStackGroupMap.remove(type)
                 StorageManager.updateHarvest(player.uuid, totalPrice, type)
-//                itemMaterialGroupMap[type] = 0
+                //                itemMaterialGroupMap[type] = 0
             }
         }
-        itemMap.clear()
+        items.clear()
+        items.addAll(newItemList(45))
         inv.clear()
         noSells.forEach {
-            itemMap[itemMap.size] = it
+            mergeItems(it, items)
         }
         itemStackGroupMap.values.flatten().forEach {
-            itemMap[itemMap.size] = it
+            mergeItems(it, items)
         }
-        itemMap.forEach {
-            inv.setItem(it.key, it.value)
+        items.forEachIndexed { index, itemStack ->
+            inv.setItem(index, itemStack)
         }
         updateInv(player, inv)
 
@@ -139,20 +153,10 @@ class SellMenu : AbstractMenuHandler() {
         player.sendLang("fullItemSell")
     }
 
-    override fun onClick(slot: Int, player: Player, inv: Inventory, event: InventoryClickEvent) {
-        if (itemMap.containsKey(slot)) {
-            inv.setItem(slot, null)
-            val itemStack = itemMap.remove(slot)!!
-            if (player.giveItem(itemStack)) {
-                player.sendLang("unSellItemBack")
-            }
-        }
-    }
-
     override fun onClose(player: Player, inv: Inventory, event: InventoryCloseEvent) {
-        if (itemMap.isNotEmpty()) {
+        if (items.isNotEmpty()) {
             var flag = false
-            itemMap.forEach { (slot, itemStack) ->
+            items.forEachIndexed { slot, itemStack ->
                 inv.setItem(slot, null)
                 flag = player.giveItem(itemStack)
             }
@@ -162,6 +166,31 @@ class SellMenu : AbstractMenuHandler() {
         }
     }
 
+    override fun onClick(slot: Int, player: Player, inv: Inventory, event: InventoryClickEvent) {
+        val itemStack = items.getOrNull(slot) ?: return
+        if (itemStack.isEmpty()) return
+        if (event.isLeftClick && event.isShiftClick) {
+            for (i in 0 until items.size) {
+                val toItem = items[i]
+                if (!itemStack.isSimilar(toItem)) continue
+                if (itemStack.isEmpty()) continue
+                putItemToInventory(
+                    player,
+                    i,
+                    toItem,
+                    items,
+                    player.inventory
+                )
+            }
+        } else {
+            items[slot] = AIR_ITEM
+            if (player.giveItem(itemStack)) {
+                player.sendLang("unSellItemBack")
+            }
+        }
+        updateItems(inv)
+    }
+
     override fun onClickPlayerInv(slot: Int, player: Player, inv: Inventory, event: InventoryClickEvent) {
         super.onClickPlayerInv(slot, player, inv, event)
         val pInv = event.clickedInventory ?: return
@@ -169,12 +198,172 @@ class SellMenu : AbstractMenuHandler() {
         if (!ConfigManager.hasSellable(itemStack.type)) {
             return
         }
-        if (itemMap.size >= 45) return
         val freeSlot = inv.firstEmpty()
         if (freeSlot == -1) return
-        inv.setItem(freeSlot, itemStack)
-        pInv.setItem(slot, null)
-        itemMap[freeSlot] = itemStack
+        if (event.isLeftClick && event.isShiftClick) {
+            for (i in 0 until pInv.size) {
+                val toItem = pInv.getItem(i)
+                if (!itemStack.isSimilar(toItem)) continue
+                if (itemStack.isEmpty()) continue
+                val response = putItemToInventory(
+                    i,
+                    toItem!!,
+                    pInv,
+                    items
+                )
+                if (response == PutItemResponse.FREE_SLOT_LACK) {
+                    break
+                }
+            }
+        } else {
+            putItemToInventory(
+                slot,
+                itemStack,
+                pInv,
+                items
+            )
+        }
+        updateItems(inv)
+        //        inv.setItem(freeSlot, itemStack)
+        //        pInv.setItem(slot, null)
+        //        items[freeSlot] = itemStack
+    }
+
+    enum class PutItemResponse {
+        FREE_SLOT_LACK,
+        SUCCESS
+    }
+
+    fun newItemList(size: Int): MutableList<ItemStack> {
+        val rs = mutableListOf<ItemStack>()
+        repeat(size) {
+            rs.add(AIR_ITEM)
+        }
+        return rs
+    }
+
+    fun putItemToInventory(
+        slot: Int,
+        itemStack: ItemStack,
+        fromInv: Inventory,
+        toInv: MutableList<ItemStack>
+    ): PutItemResponse {
+        if (toInv.any { it -> it.isSimilar(itemStack) }) {
+            toInv.forEach {
+                if (!it.isSimilar(itemStack)) return@forEach
+                if (itemStack.amount <= 0) {
+                    return@forEach
+                }
+                if (it.amount >= it.maxStackSize) {
+                    return@forEach
+                }
+                val rsAmount = itemStack.amount + it.amount
+                if (rsAmount > it.maxStackSize) {
+                    it.amount = it.maxStackSize
+                    itemStack.amount = rsAmount - it.maxStackSize
+                    fromInv.setItem(slot, itemStack)
+                } else {
+                    fromInv.setItem(slot, null)
+                    it.amount = rsAmount
+                    itemStack.amount = 0
+                }
+            }
+            if (itemStack.amount > 0) {
+                val freeIndex = toInv.findIndex { it.isEmpty() }
+                if (freeIndex == -1) {
+                    return PutItemResponse.FREE_SLOT_LACK
+                }
+                toInv[freeIndex] = itemStack
+                fromInv.setItem(slot, null)
+            }
+        } else {
+            val freeIndex = toInv.findIndex { it.isEmpty() }
+            if (freeIndex == -1) {
+                return PutItemResponse.FREE_SLOT_LACK
+            }
+            toInv[freeIndex] = itemStack
+            fromInv.setItem(slot, null)
+        }
+        return PutItemResponse.SUCCESS
+    }
+
+    fun putItemToInventory(
+        player: Player,
+        slot: Int,
+        itemStack: ItemStack,
+        fromInv: MutableList<ItemStack>,
+        toInv: Inventory
+    ) {
+        if (toInv.any { it?.isSimilar(itemStack) == true }) {
+            toInv.forEach {
+                if (it.isEmpty()) return@forEach
+                if (!it.isSimilar(itemStack)) return@forEach
+                if (itemStack.amount <= 0) {
+                    return@forEach
+                }
+                if (it.amount >= it.maxStackSize) {
+                    return@forEach
+                }
+                val rsAmount = itemStack.amount + it.amount
+                if (rsAmount > it.maxStackSize) {
+                    it.amount = it.maxStackSize
+                    itemStack.amount = rsAmount - it.maxStackSize
+                    fromInv[slot] = itemStack
+                } else {
+                    fromInv[slot] = AIR_ITEM
+                    it.amount = rsAmount
+                    itemStack.amount = 0
+                }
+            }
+            if (itemStack.amount > 0) {
+                val leftover = toInv.addItem(itemStack)
+                val nmsPlayer = player.asNmsPlayer()
+                leftover.forEach {
+                    nmsPlayer.dropItemNaturally(it.value)
+                }
+                fromInv[slot] = AIR_ITEM
+            }
+        } else {
+            val leftover = toInv.addItem(itemStack)
+            val nmsPlayer = player.asNmsPlayer()
+            leftover.forEach {
+                nmsPlayer.dropItemNaturally(it.value)
+            }
+            fromInv[slot] = AIR_ITEM
+        }
+    }
+
+    private fun mergeItems(itemStack: ItemStack, itemList: MutableList<ItemStack>) {
+        if (itemList.any { it -> it.isSimilar(itemStack) }) {
+            itemList.forEach {
+                if (!it.isSimilar(itemStack)) return@forEach
+                if (itemStack.amount <= 0) {
+                    return@forEach
+                }
+                if (it.amount >= it.maxStackSize) {
+                    return@forEach
+                }
+                val rsAmount = itemStack.amount + it.amount
+                if (rsAmount > it.maxStackSize) {
+                    it.amount = it.maxStackSize
+                    itemStack.amount = rsAmount - it.maxStackSize
+                } else {
+                    it.amount = rsAmount
+                    itemStack.amount = 0
+                }
+            }
+            if (itemStack.amount > 0) {
+                val freeIndex = itemList.findIndex { it.isEmpty() }
+                if (freeIndex != -1) {
+                    itemList[freeIndex] = itemStack
+                }
+            }
+        } else {
+            val freeIndex = itemList.findIndex { it.isEmpty() }
+            if (freeIndex != -1) {
+                itemList[freeIndex] = itemStack
+            }
+        }
     }
 
 }

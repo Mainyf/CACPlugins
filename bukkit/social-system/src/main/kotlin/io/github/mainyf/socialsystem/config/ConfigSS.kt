@@ -3,17 +3,17 @@
 package io.github.mainyf.socialsystem.config
 
 import io.github.mainyf.newmclib.config.asDefaultSlotConfig
-import io.github.mainyf.newmclib.config.asItemSlotConfig
 import io.github.mainyf.newmclib.config.asMenuSettingsConfig
 import io.github.mainyf.newmclib.exts.colored
+import io.github.mainyf.newmclib.exts.getAction
+import io.github.mainyf.newmclib.exts.getSection
+import io.github.mainyf.newmclib.exts.saveResourceToFileAsConfiguration
 import io.github.mainyf.socialsystem.SocialSystem
-import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.permissions.Permissible
 
-object ConfigManager {
+object ConfigSS {
 
     private lateinit var mainConfigFile: FileConfiguration
     private lateinit var menuConfigFile: FileConfiguration
@@ -35,23 +35,16 @@ object ConfigManager {
     private var tabCardMap = mutableMapOf<String, Pair<Int, String>>()
     private var chatCardDefault = ""
     private var chatCardMap = mutableMapOf<String, Pair<Int, String>>()
+    private var tagCardDefault = ""
+    private var tagCardMap = mutableMapOf<String, Pair<Int, String>>()
+
+    lateinit var nicknameConfig: NicknameConfig
 
     fun load() {
-        SocialSystem.INSTANCE.saveDefaultConfig()
-        SocialSystem.INSTANCE.reloadConfig()
-
         kotlin.runCatching {
-            val menuFile = SocialSystem.INSTANCE.dataFolder.resolve("menu.yml")
-            if (!menuFile.exists()) {
-                SocialSystem.INSTANCE.saveResource("menu.yml", false)
-            }
-            val langFile = SocialSystem.INSTANCE.dataFolder.resolve("lang.yml")
-            if (!langFile.exists()) {
-                SocialSystem.INSTANCE.saveResource("lang.yml", false)
-            }
-            mainConfigFile = SocialSystem.INSTANCE.config
-            menuConfigFile = YamlConfiguration.loadConfiguration(menuFile)
-            langConfigFile = YamlConfiguration.loadConfiguration(langFile)
+            mainConfigFile = SocialSystem.INSTANCE.saveResourceToFileAsConfiguration("config.yml")
+            menuConfigFile = SocialSystem.INSTANCE.saveResourceToFileAsConfiguration("menu.yml")
+            langConfigFile = SocialSystem.INSTANCE.saveResourceToFileAsConfiguration("lang.yml")
 
             loadMenuConfig()
             loadMainConfig()
@@ -96,7 +89,8 @@ object ConfigManager {
             socialMainSect.asDefaultSlotConfig("deleteSlot"),
             socialMainSect.asDefaultSlotConfig("allowRepairSlot"),
             socialMainSect.asDefaultSlotConfig("tpSlot"),
-            socialMainSect.asDefaultSlotConfig("tpIsland")
+            socialMainSect.asDefaultSlotConfig("tpIsland"),
+            socialMainSect.asDefaultSlotConfig("nickname")
         )
         val socialIslandTPSect = menuConfigFile.getConfigurationSection("socialIslandTPMenu")!!
         socialIslandTPMenuConfig = SocialIslandTPMenuConfig(
@@ -119,6 +113,7 @@ object ConfigManager {
         cardPermission = mainConfigFile.getString("card.permission", "social.card")!!
         tabCardDefault = mainConfigFile.getString("card.tab.default", "")!!.colored()
         chatCardDefault = mainConfigFile.getString("card.chat.default", "")!!.colored()
+        tagCardDefault = mainConfigFile.getString("card.tag.default", "")!!.colored()
 
         tabCardMap.clear()
         val tabSect = mainConfigFile.getConfigurationSection("card.tab")!!
@@ -135,6 +130,33 @@ object ConfigManager {
             val value = chatSect.getString("${it}.value")!!.colored()
             chatCardMap[it] = priority to value
         }
+        val tagSect = mainConfigFile.getConfigurationSection("card.tag")!!
+        tagSect.getKeys(false).forEach {
+            if (it == "default") return@forEach
+            val priority = tagSect.getInt("${it}.priority")
+            val value = tagSect.getString("${it}.value")!!.colored()
+            tagCardMap[it] = priority to value
+        }
+        val nicknameSect = mainConfigFile.getSection("nickname")
+        nicknameConfig = NicknameConfig(
+            nicknameSect.getString("permission")!!,
+            nicknameSect.getInt("modifyCooldown"),
+            nicknameSect.getInt("minLength"),
+            nicknameSect.getInt("maxLength"),
+            nicknameSect.getDouble("cost"),
+            nicknameSect.getStringList("sensitiveWord"),
+            nicknameSect.getLong("tipsPeriod"),
+            nicknameSect.getAction("tipsAction"),
+            nicknameSect.getAction("minLengthAction"),
+            nicknameSect.getAction("maxLengthAction"),
+            nicknameSect.getAction("chineseAction"),
+            nicknameSect.getAction("sensitiveAction"),
+            nicknameSect.getAction("quitAction"),
+            nicknameSect.getAction("successAction"),
+            nicknameSect.getAction("costLackAction"),
+            nicknameSect.getAction("nicknameCooldownAction"),
+            nicknameSect.getAction("repatNicknameAction")
+        )
     }
 
     fun getPlayerTabCard(player: Player): String {
@@ -151,6 +173,16 @@ object ConfigManager {
         val cards = chatCardMap.filter { hasCardPermission(player, it.key) }
         if (cards.isEmpty()) {
             return chatCardDefault
+        }
+        return cards.values.minByOrNull {
+            it.first
+        }!!.second
+    }
+
+    fun getPlayerTagCard(player: Player): String {
+        val cards = tagCardMap.filter { hasCardPermission(player, it.key) }
+        if (cards.isEmpty()) {
+            return tagCardDefault
         }
         return cards.values.minByOrNull {
             it.first

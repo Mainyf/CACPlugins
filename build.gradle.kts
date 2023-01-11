@@ -149,6 +149,7 @@ subprojects {
                     compileOnly(rootProject.files("./libs/SkinsRestorer.jar"))
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                     compileOnly(rootProject.project(":bukkit:social-system"))
+                    compileOnly(rootProject.project(":bukkit:quest-extension"))
                 }
 
                 "login-settings" -> {
@@ -221,6 +222,7 @@ subprojects {
                 "tools-plugin" -> {
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(lpPath))
+                    compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                     compileOnly(rootProject.files("./libs/luckperms-bukkit-implement.jar"))
                     compileOnly(rootProject.project(":bukkit:custom-economy"))
                     compileOnly(rootProject.project(":bukkit:social-system"))
@@ -261,6 +263,7 @@ subprojects {
 
             val dd = mutableListOf<String>()
             val sd = mutableListOf<String>()
+            val loadBefore = mutableListOf<String>()
             when (project.name) {
                 "celebration" -> {
                     sd.addAll(listOf("BungeeSettingsBukkit"))
@@ -288,7 +291,7 @@ subprojects {
 
                 "my-islands" -> {
                     dd.addAll(listOf("CMI", "PlotSquared", "ItemsAdder", "ProtocolLib", "BungeeSettingsBukkit"))
-                    sd.addAll(listOf("AuthMe", "SocialSystem"))
+                    sd.addAll(listOf("AuthMe", "SocialSystem", "QuestExtension"))
                 }
 
                 "world-settings" -> {
@@ -304,7 +307,8 @@ subprojects {
                 }
 
                 "quest-extension" -> {
-                    dd.addAll(listOf("QuestCreator", "CustomEconomy"))
+                    dd.addAll(listOf(/*"QuestCreator", */"CustomEconomy"))
+                    loadBefore.add("QuestCreator")
                 }
 
                 "command-settings" -> {
@@ -342,7 +346,7 @@ subprojects {
                 }
 
                 "tools-plugin" -> {
-                    dd.addAll(listOf("ItemsAdder", "CustomEconomy", "LuckPerms", "SocialSystem"))
+                    dd.addAll(listOf("ItemsAdder", "CustomEconomy", "LuckPerms", "SocialSystem", "BungeeSettingsBukkit"))
                 }
 
                 "soul-bind" -> {
@@ -355,8 +359,9 @@ subprojects {
             if (project.name != "plugin-loader") {
                 dd.add("NewMCLib")
             }
-            depend = dd
-            softDepend = sd
+            this.depend = dd
+            this.softDepend = sd
+            this.loadBefore = loadBefore
         }
 
         tasks.register<DefaultTask>("initSources") {

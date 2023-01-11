@@ -9,14 +9,13 @@ import io.github.mainyf.newmclib.offline_player_ext.OfflinePlayerData
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.Cooldown
 import io.github.mainyf.newmclib.utils.Heads
-import io.github.mainyf.socialsystem.config.ConfigManager
+import io.github.mainyf.socialsystem.config.ConfigSS
 import io.github.mainyf.socialsystem.config.sendLang
-import io.github.mainyf.socialsystem.module.FriendHandler
-import io.github.mainyf.socialsystem.module.FriendInvites
-import io.github.mainyf.socialsystem.module.FriendIslandTPRequests
-import io.github.mainyf.socialsystem.module.FriendTPRequests
+import io.github.mainyf.socialsystem.module.*
 import io.github.mainyf.socialsystem.storage.PlayerSocial
+import io.github.mainyf.socialsystem.storage.StorageSS
 import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import kotlin.math.ceil
@@ -31,7 +30,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
 
     private val currentFriends = mutableListOf<OfflinePlayerData>()
 
-//    private val target = offlineData.uuid.asPlayer()
+    //    private val target = offlineData.uuid.asPlayer()
 
     private val isTargetOnline get() = CrossServerManager.isOnline(offlineData.uuid)
 
@@ -51,14 +50,14 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
 
     override fun open(player: Player) {
         this.player = player
-        this.pageSize = ConfigManager.socialMainMenuConfig.friendsSlot.slot.size
+        this.pageSize = ConfigSS.socialMainMenuConfig.friendsSlot.slot.size
         this.targetSocial = FriendHandler.getPlayerSocial(offlineData.uuid)
         updateFriends()
         updateCurrentFriends()
         if (hasOwner) {
-            setup(ConfigManager.socialMainMenuConfig.settings)
+            setup(ConfigSS.socialMainMenuConfig.settings)
         } else {
-            setup(ConfigManager.socialMainMenuConfig.settings.copy(background = ConfigManager.socialMainMenuConfig.backgroundFriend))
+            setup(ConfigSS.socialMainMenuConfig.settings.copy(background = ConfigSS.socialMainMenuConfig.backgroundFriend))
         }
         val inv = createInv(player)
 
@@ -67,7 +66,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
     }
 
     override fun updateTitle(player: Player): String {
-        val smmConfig = ConfigManager.socialMainMenuConfig
+        val smmConfig = ConfigSS.socialMainMenuConfig
         val icons = mutableListOf<IaIcon>()
 
         icons.addAll(smmConfig.prevSlot.iaIcon())
@@ -88,6 +87,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         if (!hasOwner) {
             icons.addAll(smmConfig.tpSlot.iaIcon())
             icons.addAll(smmConfig.tpIsland.iaIcon())
+            icons.addAll(smmConfig.nickname.iaIcon())
         }
 
         return applyTitle(player, icons)
@@ -108,7 +108,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
     }
 
     private fun updateInv(player: Player, inv: Inventory) {
-        val smmConfig = ConfigManager.socialMainMenuConfig
+        val smmConfig = ConfigSS.socialMainMenuConfig
 
         inv.setIcon(smmConfig.prevSlot) {
             if (pageIndex > 1) {
@@ -129,7 +129,9 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
         inv.setIcon(
             smmConfig.headSlot.slot,
             smmConfig.headSlot.default()!!
-                .toItemStack(Heads.getPlayerHead(offlineData.name).clone()).tvar("player", offlineData.name)
+                .toItemStack(Heads.getPlayerHead(offlineData.name).clone()).tvar("player", offlineData.name).apply {
+                    setPlaceholder(offlinePlayer)
+                }
         )
 
         arrayOf(
@@ -151,6 +153,25 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                 FriendHandler.setAllowRepair(targetSocial, !targetSocial.allowRepair)
                 updateInv(player, inv)
             }
+            inv.setIcon(smmConfig.nickname, itemBlock = {
+                tvar("visible", if (StorageSS.hasVisibleNickname(player.uuid)) "显示" else "隐藏")
+            }, rightClickBlock = {
+                if (!it.hasPermission(ConfigSS.nicknameConfig.permission)) {
+                    it.sendLang("nicknameOfMenuNoPerm")
+                    return@setIcon
+                }
+                NicknameConversation.join(it)
+                it.closeInventory()
+            }, leftClickBlock = {
+                if (StorageSS.hasVisibleNickname(player.uuid)) {
+                    StorageSS.setVisibleNickname(player.uuid, false)
+                    it.sendLang("hideNickname")
+                } else {
+                    StorageSS.setVisibleNickname(player.uuid, true)
+                    it.sendLang("showNickname")
+                }
+                updateInv(player, inv)
+            })
         } else {
             inv.setIcon(smmConfig.deleteSlot) {
                 if (FriendHandler.isFriend(player, offlineData.uuid)) {
@@ -171,7 +192,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     p.sendLang("tpTargetOffline")
                     return@setIcon
                 }
-                sendTPRequestCooldown.invoke(p.uuid, ConfigManager.tpRequestCooldown * 1000L, {
+                sendTPRequestCooldown.invoke(p.uuid, ConfigSS.tpRequestCooldown * 1000L, {
                     FriendTPRequests.sendTPRequest(p, offlineData)
                 }, {
                     p.sendLang("tpRequestCooldown", "{eTime}", it.timestampConvertTime())
@@ -181,7 +202,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     p.sendLang("tpTargetOffline")
                     return@setIcon
                 }
-                sendTPRequestCooldown.invoke(p.uuid, ConfigManager.tpRequestCooldown * 1000L, {
+                sendTPRequestCooldown.invoke(p.uuid, ConfigSS.tpRequestCooldown * 1000L, {
                     FriendInvites.sendInviteTP(p, offlineData)
                 }, {
                     p.sendLang("tpRequestCooldown", "{eTime}", it.timestampConvertTime())
@@ -195,7 +216,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
     }
 
     private fun updateFriends(player: Player, inv: Inventory) {
-        val smmConfig = ConfigManager.socialMainMenuConfig
+        val smmConfig = ConfigSS.socialMainMenuConfig
         val friendsSlot = smmConfig.friendsSlot.slot
         inv.setIcon(friendsSlot, smmConfig.friendsSlot["empty"]!!.toItemStack().tvar("player", player.name))
         currentFriends.forEachIndexed { index, offlinePlayerData ->
@@ -203,6 +224,11 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
             skullItem.setDisplayName(offlinePlayerData.name)
             inv.setIcon(friendsSlot[index], smmConfig.friendsSlot.default()!!.toItemStack(skullItem) {
                 tvar("player", offlinePlayerData.name)
+                val profile = Bukkit.getServer().createProfile(offlinePlayerData.uuid, offlinePlayerData.name)
+                val offlinePlayer = Bukkit.getServer().toReflect().call<OfflinePlayer>("getOfflinePlayer", profile)
+                if (offlinePlayer != null) {
+                    setPlaceholder(offlinePlayer)
+                }
             }) {
                 smmConfig.friendsSlot.default()!!.execAction(it)
                 SocialMainMenu(offlinePlayerData).apply {

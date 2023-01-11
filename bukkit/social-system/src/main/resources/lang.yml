@@ -84,3 +84,9 @@ refuseTPInvToReceiver:
   - "minimessage: <color:#FF5555>你拒绝了 {friend} 的邀请传送</color>"
 friendNonOwnIsland:
   - "mini: 好友 {friend} 没有岛屿或设置了不允许访问，你无法传送"
+nicknameOfMenuNoPerm:
+  - "mini: 你没有权限，无法修改昵称"
+showNickname:
+  - "mini: 昵称已切换为显示"
+hideNickname:
+  - "mini: 昵称已切换为隐藏"
