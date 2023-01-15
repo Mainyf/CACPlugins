@@ -182,7 +182,7 @@ class IslandsSettingsMenu(
             }
             IslandsChooseMenu(false, { chooseMenu, player, schematicConfig ->
                 if (!ConfigMI.tryPayMyIslandCost(p, ConfigMI.myislandCost.reset, "reset")) {
-                    return@IslandsChooseMenu
+                    return@IslandsChooseMenu false
                 }
                 onlinePlayers().forEach {
                     if (it.uuid == p.uuid) return@forEach
@@ -200,6 +200,7 @@ class IslandsSettingsMenu(
                         }
                     }
                 }
+                return@IslandsChooseMenu true
             }, {
                 IslandsSettingsMenu(this.island, this.plot).open(it)
             }).open(p)

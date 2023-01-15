@@ -88,32 +88,32 @@ object CrossServerManager {
             }
         }
         BungeeSettingsBukkit.INSTANCE.events {
-            event<PlayerJoinEvent> {
-                joinPlayers.add(player.uniqueId)
-                BungeeSettingsBukkit.INSTANCE.submitTask(
-                    delay = 20
-                ) {
-                    handleTP(player)
-                }
-            }
-            event<CMIPlayerTeleportEvent> {
-                if (joinPlayers.contains(player.uuid)) {
-                    joinPlayers.remove(player.uuid)
-                    handleTP(player, this)
-                }
-            }
-            event<PlayerTeleportEvent> {
-                if (joinPlayers.contains(player.uuid)) {
-                    joinPlayers.remove(player.uuid)
-                    handleTP(player, this)
-                }
-                if (tpMap.containsKey(player.uuid)) {
-                    val pTime = tpMap[player.uuid]!!
-                    if (currentTime() - pTime <= 3000L) {
-                        isCancelled = true
-                    }
-                }
-            }
+//            event<PlayerJoinEvent> {
+//                joinPlayers.add(player.uniqueId)
+//                BungeeSettingsBukkit.INSTANCE.submitTask(
+//                    delay = 20
+//                ) {
+//                    handleTP(player)
+//                }
+//            }
+//            event<CMIPlayerTeleportEvent> {
+//                if (joinPlayers.contains(player.uuid)) {
+//                    joinPlayers.remove(player.uuid)
+//                    handleTP(player, this)
+//                }
+//            }
+//            event<PlayerTeleportEvent> {
+//                if (joinPlayers.contains(player.uuid)) {
+//                    joinPlayers.remove(player.uuid)
+//                    handleTP(player, this)
+//                }
+//                if (tpMap.containsKey(player.uuid)) {
+//                    val pTime = tpMap[player.uuid]!!
+//                    if (currentTime() - pTime <= 3000L) {
+//                        isCancelled = true
+//                    }
+//                }
+//            }
         }
 //        BungeeSettingsBukkit.INSTANCE.submitTask(period = 3 * 20L) {
 //            updatePlayers()

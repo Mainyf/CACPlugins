@@ -28,6 +28,10 @@ object ConfigTP {
     var iaItemAutoUpdateInfo: MultiAction? = null
     val iaItemAutoUpdateItems = mutableSetOf<String>()
 
+    var saturdayNightVisionEnable = true
+    var saturdayNightVisionMvpPerm = "nightvision.use"
+    var saturdayNightVisionToggleAction: MultiAction? = null
+
     fun load() {
         ToolsPlugin.INSTANCE.saveDefaultConfig()
         ToolsPlugin.INSTANCE.reloadConfig()
@@ -60,6 +64,9 @@ object ConfigTP {
         iaItemAutoUpdateInfo = config.getAction("iaItemAutoUpdate.info")
         iaItemAutoUpdateItems.clear()
         iaItemAutoUpdateItems.addAll(config.getStringList("iaItemAutoUpdate.item"))
+        saturdayNightVisionEnable = config.getBoolean("saturdayNightVision.enable", saturdayNightVisionEnable)
+        saturdayNightVisionMvpPerm = config.getString("saturdayNightVision.mvp", saturdayNightVisionMvpPerm)!!
+        saturdayNightVisionToggleAction = config.getAction("saturdayNightVision.toggleAction")
     }
 
     class CheckPlayerInvItem(

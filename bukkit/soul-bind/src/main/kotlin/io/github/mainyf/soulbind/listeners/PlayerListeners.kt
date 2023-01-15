@@ -1,6 +1,8 @@
 package io.github.mainyf.soulbind.listeners
 
-import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.exts.AIR_ITEM
+import io.github.mainyf.newmclib.exts.isEmpty
+import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.menu.MenuHolder
 import io.github.mainyf.newmclib.nms.asNmsPlayer
 import io.github.mainyf.newmclib.utils.Cooldown
@@ -8,18 +10,16 @@ import io.github.mainyf.soulbind.RecallSBManager
 import io.github.mainyf.soulbind.SBManager
 import io.github.mainyf.soulbind.config.sendLang
 import io.github.mainyf.soulbind.menu.RecallItemMenu
-import org.bukkit.Material
 import org.bukkit.entity.ItemFrame
-import org.bukkit.entity.Painting
 import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
-import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
@@ -108,9 +108,9 @@ object PlayerListeners : Listener {
                 event.isCancelled = true
                 event.itemDrop.remove()
             }
-            if(!event.isCancelled) {
+            if (!event.isCancelled) {
                 val data = SBManager.getBindItemData(itemStack)
-                if(data != null && data.ownerUUID == player.uuid) {
+                if (data != null && data.ownerUUID == player.uuid) {
                     player.sendLang("antiDropBindItem")
                     event.isCancelled = true
                 }
@@ -176,6 +176,21 @@ object PlayerListeners : Listener {
             tryHandleInvalidItem(player, itemStack) {
                 event.isCancelled = true
                 player.inventory.setItemInMainHand(AIR_ITEM)
+            }
+        }
+    }
+
+    @EventHandler
+    fun onInvOpen(event: InventoryOpenEvent) {
+        val player = event.player as? Player ?: return
+        if (player.isOp) return
+        val inv = player.inventory
+        val nmsPlayer = player.asNmsPlayer()
+        inv.forEachIndexed { index, itemStack ->
+            val itemData = SBManager.getBindItemData(itemStack) ?: return@forEachIndexed
+            if (itemData.ownerUUID != player.uuid) {
+                inv.setItem(index, AIR_ITEM)
+                nmsPlayer.dropItemNaturally(itemStack)
             }
         }
     }

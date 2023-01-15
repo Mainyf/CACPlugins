@@ -27,6 +27,7 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Entity
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import kotlin.math.max
 
 class ItemEnchantPlus : JavaPlugin(), Listener {
 
@@ -52,10 +53,10 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
         RecallSBManager.addRecallSBItemPredicate(this.name) { itemStack ->
             EnchantManager.hasEnchantItem(itemStack)
         }
-//        RecallSBManager.addRecallSBItemIDProvider(this.name) { itemStack ->
-//            val enchantData = EnchantManager.getItemEnchant(itemStack)
-//            enchantData?.itemUID ?: -1L
-//        }
+        //        RecallSBManager.addRecallSBItemIDProvider(this.name) { itemStack ->
+        //            val enchantData = EnchantManager.getItemEnchant(itemStack)
+        //            enchantData?.itemUID ?: -1L
+        //        }
         addPlaceholderExpansion("itemenchantplus") papi@{ offlinePlayer, params ->
             val player = offlinePlayer?.player ?: return@papi null
             val paramType = params?.substringBefore("_") ?: return@papi null
@@ -154,6 +155,32 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                         return@executeOP
                     }
                     data.stage = stage
+                    val startLevels = listOf(1, *ConfigIEP.stageLevel)
+                    if (stage < 3) {
+                        data.level = startLevels[data.stage]
+                        data.exp = 0.0
+                    } else if (stage == 3) {
+                        data.level = startLevels[data.stage]
+                        data.exp = 0.0
+                    }
+                    EnchantManager.setItemEnchantData(item, data)
+                    EnchantManager.updateItemMeta(item, data)
+                    player.msg("&6设置成功")
+                }
+            }
+            "level" {
+                withArguments(playerArguments("玩家"), IntegerArgument("等级"))
+                executeOP {
+                    val player = player()
+                    val level = max(1, int())
+                    val item = player.inventory.itemInMainHand
+                    if (item.isEmpty()) return@executeOP
+                    val data = EnchantManager.getItemEnchant(item)
+                    if (data == null) {
+                        player.errorMsg("该物品无进阶附魔数据")
+                        return@executeOP
+                    }
+                    data.level = level
                     EnchantManager.setItemEnchantData(item, data)
                     EnchantManager.updateItemMeta(item, data)
                     player.msg("&6设置成功")
@@ -171,7 +198,6 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                         player.errorMsg("该物品无进阶附魔数据")
                         return@executeOP
                     }
-
                     EnchantManager.addExpToItem(data.enchantType, item, exp)
                     EnchantManager.updateItemMeta(item, data)
                     player.msg("获得经验 $exp, 阶段: ${data.stage} 等级: ${data.level} 当前经验: ${data.exp}/${data.maxExp}")

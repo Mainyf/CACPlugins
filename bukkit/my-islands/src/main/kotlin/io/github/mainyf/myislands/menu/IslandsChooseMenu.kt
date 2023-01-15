@@ -15,7 +15,7 @@ import kotlin.math.ceil
 
 class IslandsChooseMenu(
     var antiClose: Boolean = true,
-    val block: (IslandsChooseMenu, Player, ConfigMI.PlotSchematicConfig) -> Unit,
+    val block: (IslandsChooseMenu, Player, ConfigMI.PlotSchematicConfig) -> Boolean,
     val backBlock: ((Player) -> Unit)? = null
 ) :
     AbstractMenuHandler() {
@@ -84,8 +84,9 @@ class IslandsChooseMenu(
                     antiClose = false
                     ConfirmMenu(
                         { p ->
-                            p.sendLang("islandIniting")
-                            block.invoke(this, it, islandSchematic)
+                            if(block.invoke(this, it, islandSchematic)) {
+                                p.sendLang("islandIniting")
+                            }
                             p.closeInventory()
                         },
                         { p ->

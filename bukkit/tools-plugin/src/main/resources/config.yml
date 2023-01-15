@@ -1,5 +1,9 @@
 recycleEnderDragonEgg: true
 saturdayFly: true
+saturdayNightVision:
+  enable: true
+  mvp: nightvision.use
+  toggleAction: "夜视模式模式已<{status}>"
 iaRecipe:
   debug: true
   coinName: "token_1"

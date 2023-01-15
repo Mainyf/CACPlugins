@@ -207,7 +207,7 @@ object IslandsManager {
             if (plots.isNotEmpty()) {
                 Log.debugP(player, "检测到玩家已领取地皮")
                 if (join) {
-                    joinPlayers[player.uuid] = plots.first()
+//                    joinPlayers[player.uuid] = plots.first()
                 }
                 Log.debugP(player, "准备传送玩家前往地皮")
                 MyIslands.INSTANCE.submitTask(delay = 10L) {
@@ -236,17 +236,17 @@ object IslandsManager {
         chooseMenu: IslandsChooseMenu,
         player: Player,
         plotSchematic: ConfigMI.PlotSchematicConfig
-    ) {
+    ): Boolean {
         val plotPlayer = MyIslands.plotAPI.wrapPlayer(player.uniqueId)
         if (plotPlayer == null) {
             player.sendLang("plotPluginPlayerCacheError")
 //            player.errorMsg("未知错误，请重试")
-            return
+            return false
         }
         if (MyIslands.plotAPI.getPlayerPlots(plotPlayer).isNotEmpty()) {
             player.sendLang("alreadyOwnIsland")
 //            player.errorMsg("你的已经拥有了自己的私人岛屿")
-            return
+            return false
         }
         resetingIslands.add(player.uuid)
 
@@ -267,6 +267,7 @@ object IslandsManager {
                 }
             }
         }
+        return true
     }
 
     fun createPlayerIsland(player: Player, plot: Plot, plotSchematic: ConfigMI.PlotSchematicConfig) {

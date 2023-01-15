@@ -29,7 +29,7 @@ dependencies {
 
 val itemsAdderPath = "./plugins/ItemsAdder_3.3.0b-r2.jar"
 val cmiPath = "./plugins/CMI-9.3.0.2.jar"
-val plotPath = "./plugins/PlotSquared-Bukkit-6.10.5-Premium.jar"
+val plotPath = "./plugins/PlotSquared-Bukkit-6.10.1-Premium.jar"
 val mmPath = "./plugins/MythicMobs-5.2.1.jar"
 val miraiMCPath = "./libs/MiraiMC-Bukkit.jar"
 val authmePath = "./libs/AuthMe-5.6.0-beta2.jar"
@@ -42,6 +42,7 @@ val modelEngine = "./plugins/Model-Engine-R3.1.2.jar"
 val lpPath = "./plugins/LuckPerms-Bukkit-5.4.40.jar"
 val matrixPath = "./plugins/Matrix_7.0.0_alpha06.jar"
 val citizensPath = "./plugins/Citizens.jar"
+val trMenuPath = "./plugins/TrMenu-3.1.17.jar"
 
 subprojects {
 
@@ -222,6 +223,7 @@ subprojects {
                 "tools-plugin" -> {
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(lpPath))
+//                    compileOnly("me.arasple.mc.trmenu:trmenu-plugin:3.1.17")
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                     compileOnly(rootProject.files("./libs/luckperms-bukkit-implement.jar"))
                     compileOnly(rootProject.project(":bukkit:custom-economy"))

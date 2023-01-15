@@ -106,7 +106,7 @@ object PlayerListeners : Listener {
         if (entity is Player) {
             val plot = MyIslands.plotUtils.getPlotByPLoc(entity)
             if (plot != null) {
-                if (!IslandsManager.hasPermission(entity, plot)) {
+                if (!entity.isOp && !IslandsManager.hasPermission(entity, plot)) {
                     cooldown.invoke(entity.uuid, 1000L, {
                         entity.sendLang("pickupByNonHelperIsland")
                     })

@@ -23,15 +23,35 @@ object FriendHandler {
     fun getFriends(player: Player): List<OfflinePlayerData> {
         return StorageSS.getFriends(player.uuid).map { it to it.friend.asOfflineData() }
             .sortedWith { (a, offlineDataA), (b, offlineDataB) ->
+                val aOnline = isOnline(a.friend)
+                val bOnline = isOnline(b.friend)
                 when {
-                    a.intimacy > b.intimacy -> -1
-                    a.intimacy < b.intimacy -> 1
-                    a.intimacy == b.intimacy -> {
-                        (offlineDataA?.name ?: "").compareTo(offlineDataB?.name ?: "")
-                    }
-                    else -> -1
+                    aOnline && !bOnline -> -1
+                    !aOnline && bOnline -> 1
+                    else -> comparator(a, offlineDataA, b, offlineDataB)
                 }
             }.mapNotNull { it.second }
+    }
+
+    private fun comparator(
+        a: PlayerFriend,
+        offlineDataA: OfflinePlayerData?,
+        b: PlayerFriend,
+        offlineDataB: OfflinePlayerData?
+    ): Int {
+        return when {
+            a.intimacy > b.intimacy -> -1
+            a.intimacy < b.intimacy -> 1
+            a.intimacy == b.intimacy -> {
+                (offlineDataA?.name ?: "").compareTo(offlineDataB?.name ?: "")
+            }
+
+            else -> -1
+        }
+    }
+
+    private fun isOnline(uuid: UUID): Boolean {
+        return CrossServerManager.isOnline(uuid)
     }
 
     fun removeFriend(player: Player, target: UUID) {

@@ -76,7 +76,11 @@ class LoginSettings : BasePlugin() {
         pluginManager().registerEvents(AuthmeListeners, this)
         submitTask(period = 5L) {
             if(!ConfigLS.qqEnable) return@submitTask
-            val bot = MiraiBot.getBot(ConfigLS.qqBot)
+            val bot = kotlin.runCatching { MiraiBot.getBot(ConfigLS.qqBot) }.getOrNull()
+            if(bot == null) {
+//                LOGGER.info("机器人 ${ConfigLS.qqBot} 不存在")
+                return@submitTask
+            }
             if(bot.friendList.isEmpty()) {
                 return@submitTask
             }

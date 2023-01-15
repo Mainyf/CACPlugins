@@ -1,17 +1,17 @@
 package io.github.mainyf.bungeesettingsbukkit
 
+import com.Zrips.CMI.Modules.tp.SafeTeleport
+import com.Zrips.CMI.Modules.tp.Teleportations
+import com.Zrips.CMI.events.CMIPlayerTeleportEvent
 import dev.jorel.commandapi.arguments.DoubleArgument
 import dev.jorel.commandapi.arguments.GreedyStringArgument
-import io.github.mainyf.bungeesettingsbukkit.network.ClientSocketManager
 import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
-import io.github.mainyf.newmclib.exts.successMsg
-import io.github.mainyf.newmclib.exts.toComp
-import io.github.mainyf.newmclib.exts.writeString
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
-import io.github.mainyf.newmclib.serverId
 import org.bukkit.Location
+import org.bukkit.entity.Player
 
 object CommandHandler {
 
@@ -45,7 +45,9 @@ object CommandHandler {
             "stp-player" {
                 withArguments(
                     playerArguments("玩家名"),
-                    stringArguments("目标玩家名") { info -> CrossServerManager.playerMap.map { it.value }.toTypedArray() }
+                    stringArguments("目标玩家名") { info ->
+                        CrossServerManager.playerMap.map { it.value }.toTypedArray()
+                    }
                 )
                 executeOP {
                     val player = player()
@@ -89,6 +91,16 @@ object CommandHandler {
                 executeOP {
                     BungeeSettingsBukkit.INSTANCE.loadConfig()
                     sender.successMsg("[BungeeSettingsBukkit] 重载成功")
+                }
+            }
+            "test" {
+                executeOP {
+                    val player = sender as Player
+                    val loc = player.location.add(0.0, 1.0, 0.0)
+                    val safe = SafeTeleport(loc, loc, Teleportations.TpCondition.Good)
+                    val event = CMIPlayerTeleportEvent(sender, player, safe, Teleportations.TeleportType.TpPos)
+                    pluginManager().callEvent(event)
+                    println(event.isCancelled)
                 }
             }
         }.register()
