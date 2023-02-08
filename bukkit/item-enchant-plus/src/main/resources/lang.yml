@@ -43,3 +43,6 @@ updateEnchantDataConflictEnchant:
   - "mini: &6更新附灵数据，附灵 {enchantName} 与附魔 <enchant_text> 冲突，已删除"
 antiUseGrindstone:
   - "mini: &6氪金版附灵装备无法放入砂轮"
+
+nextStageCommandSuccess:
+  - "mini: &6设置成功"

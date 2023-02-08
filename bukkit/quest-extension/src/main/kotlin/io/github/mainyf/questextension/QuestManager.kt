@@ -15,16 +15,21 @@ import io.github.mainyf.questextension.storage.PlayerDailyQuest
 import io.github.mainyf.questextension.storage.StorageManager
 import org.bukkit.entity.Player
 import org.joda.time.DateTime
+import java.util.concurrent.CompletableFuture
 
 object QuestManager {
 
     fun getUserQC(player: Player): UserQC? {
-        val userQC = UserQC.cachedOrNull(player)
-        if (userQC == null) {
-            player.errorMsg("发生错误，请告知管理员: USERQC_NULL")
-            return null
+        val future = CompletableFuture<UserQC?>()
+        UserQC.processWithQuests(player.uuid) { userQC ->
+            if (userQC == null) {
+                player.errorMsg("发生错误，请告知管理员: USERQC_NULL")
+                future.complete(null)
+            } else {
+                future.complete(userQC)
+            }
         }
-        return userQC
+        return future.get()
     }
 
     private fun getPlayerDailyQuest(userQC: UserQC): List<Quest> {
@@ -41,8 +46,8 @@ object QuestManager {
             questData = addDailyQuestToPlayer(player)
         } else {
             if (questData.questStartTime.isBefore(currentTime)) {
-//                val quests = getPlayerDailyQuest(userQC)
-//                player.msg("任务 ${quests.joinToString(", ") { it.model.displayName.getRawValueLine(0) }} 已失效")
+                //                val quests = getPlayerDailyQuest(userQC)
+                //                player.msg("任务 ${quests.joinToString(", ") { it.model.displayName.getRawValueLine(0) }} 已失效")
                 cleanDailyQuestToPlayer(player)
                 questData = addDailyQuestToPlayer(player)
             }
@@ -70,8 +75,8 @@ object QuestManager {
             }
             rs.add(QuestUtilsFlowStart.doStartQuest(model.orNull(), player, QuestStartCause.PLUGIN))
         }
-//        player.msg("任务 ${rs.joinToString(", ") { it.model.displayName.getRawValueLine(0) }} 已接受")
-//        return rs
+        //        player.msg("任务 ${rs.joinToString(", ") { it.model.displayName.getRawValueLine(0) }} 已接受")
+        //        return rs
         return StorageManager.addDailyQuestData(player, rs.map { it.modelId })
     }
 

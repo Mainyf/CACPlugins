@@ -90,7 +90,8 @@ object CommandHandler : APICommand("cset") {
                     val player = args[0] as Player
                     val msg = args[1] as String
                     val action = if (!cacheMap.containsKey(msg)) {
-                        val parsedAction = ActionParser.parseAction(msg)
+                        val parsedAction =
+                            runCatching { ActionParser.parseAction(msg) }.onFailure { it.printStackTrace() }.getOrNull()
                         if (parsedAction == null) {
                             sender.msg("语法错误: $msg")
                             return@executeOP
@@ -130,6 +131,17 @@ object CommandHandler : APICommand("cset") {
                     val serverId = text()
                     val msg = text()
                     CommandSettings.INSTANCE.sendUnparseAction(serverId, msg)
+                }
+            }
+            "serverSendPlayerMsg" {
+                withArguments(
+                    stringArguments("类型") { _ -> arrayOf("all", *CrossServerManager.serverIds.toTypedArray()) },
+                    GreedyStringArgument("msg")
+                )
+                executeOP {
+                    val serverId = text()
+                    val msg = text()
+                    CommandSettings.INSTANCE.sendUnparseActionAll(serverId, msg)
                 }
             }
         }

@@ -106,7 +106,7 @@ class SoulBind : JavaPlugin() {
                 )
                 executeOP {
                     val player = player()
-                    RecallItemMenu().open(player)
+                    RecallItemMenu(player.uuid).open(player)
                 }
             }
             "test" {

@@ -121,7 +121,15 @@ class EnchantSkinMenu : AbstractMenuHandler() {
         kotlin.run {
             val itemKey =
                 if (currentEnchantItem == null) "default" else if (currentSkin!!.hasOwn) "haveSkin" else "select"
-            inv.setIcon(ekm.finishSlot, itemKey) {
+            inv.setIcon(ekm.finishSlot, itemKey, itemBlock = {
+                if(itemKey == "select" && currentSkin != null) {
+                    val skinEffect = currentSkin!!.skinConfig.getSkinEffect(currentSkin!!.stage)
+                    withMeta(
+                        displayName = skinEffect.selectItemName.deserialize(),
+                        lore = skinEffect.selectItemLore.mapToDeserialize()
+                    )
+                }
+            }) {
                 val currentItem = currentEnchantItem ?: return@setIcon
                 val skin = currentSkin ?: return@setIcon
                 val data = enchantData ?: return@setIcon
@@ -137,7 +145,7 @@ class EnchantSkinMenu : AbstractMenuHandler() {
 
         if (currentEnchantItem.isEmpty()) return
         inv.setIcon(ekm.largeSkinSlot.slot, itemStack = currentEnchantItem!!.toEquipItemSlot().apply {
-            val skinEffect = currentSkin!!.skinConfig.skinEffect[currentSkin!!.stage - 1]
+            val skinEffect = currentSkin!!.skinConfig.getSkinEffect(currentSkin!!.stage)
             val meta = itemMeta
             meta.enchants.forEach {
                 meta.removeEnchant(it.key)
@@ -155,7 +163,7 @@ class EnchantSkinMenu : AbstractMenuHandler() {
         })
 
         currentEnchantSkins.forEachIndexed { index, enchantSkin ->
-            val skinEffect = enchantSkin.skinConfig.skinEffect[enchantSkin.stage - 1]
+            val skinEffect = enchantSkin.skinConfig.getSkinEffect(enchantSkin.stage)
             inv.setIcon(enchantSkinSlots[index], itemStack = currentEnchantItem!!.toEquipItemSlot().apply {
                 val meta = itemMeta
                 meta.enchants.forEach {

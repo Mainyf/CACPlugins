@@ -224,7 +224,7 @@ class SocialMainMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
             skullItem.setDisplayName(offlinePlayerData.name)
             inv.setIcon(friendsSlot[index], smmConfig.friendsSlot.default()!!.toItemStack(skullItem) {
                 tvar("player", offlinePlayerData.name)
-                val offlinePlayer = Bukkit.getOfflinePlayer(offlinePlayerData.uuid)
+                val offlinePlayer = offlinePlayerData.uuid.asOfflinePlayer()
                 setPlaceholder(offlinePlayer)
 //                val profile = Bukkit.getServer().createProfile(offlinePlayerData.uuid, offlinePlayerData.name)
 //                val offlinePlayer = Bukkit.getServer().toReflect().call<OfflinePlayer>("getOfflinePlayer", profile)

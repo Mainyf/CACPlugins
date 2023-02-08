@@ -159,6 +159,19 @@ object StorageMI : AbstractStorageManager() {
         }
     }
 
+    fun addKudos(island: PlayerIsland, count: Int) {
+        transaction {
+            island.kudos += count
+            island.heats += count
+        }
+    }
+
+    fun removeHeat(island: PlayerIsland, count: Int) {
+        transaction {
+            island.heats -= count
+        }
+    }
+
     fun updateCoreLoc(uuid: UUID, coreLoc: Vector) {
         transaction {
             val data = getPlayerIsland(uuid) ?: return@transaction

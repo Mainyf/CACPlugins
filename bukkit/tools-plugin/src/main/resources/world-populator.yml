@@ -1,0 +1,32 @@
+custom_block:
+  block: DIAMOND_BLOCK
+  worlds:
+    - test
+  replaceable_blocks:
+    - STONE
+    - DIRT
+    - ANDESITE
+    - GRANITE
+    - COBBLESTONE
+    - GRAVEL
+  biomes:
+    - PLAINS
+  min_height: 25
+  max_height: 45
+  # 每个区块生成的几率
+  chunk_chance: 70.0
+  # 最多生成多少连在一起的方块
+  vein_blocks: 6
+  # 每个区块最多生成多少矿脉(连在一起)
+  chunk_veins: 1
+custom_block_2:
+  block: EMERALD_BLOCK
+  worlds:
+    - test
+  replaceable_blocks:
+    - DIRT
+  max_height: 64
+  min_height: 40
+  chunk_chance: 100.0
+  vein_blocks: 3
+  chunk_veins: 1

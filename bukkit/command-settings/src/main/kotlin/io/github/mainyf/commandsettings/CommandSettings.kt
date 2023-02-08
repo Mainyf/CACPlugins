@@ -23,6 +23,8 @@ class CommandSettings : BasePlugin(), Listener {
 
         val UNPARSE_ACTION_ID = ServerPacket.registerPacket("broadcast_unparse_action_id")
 
+        val UNPARSE_ACTION_ID_ALL = ServerPacket.registerPacket("broadcast_unparse_action_id_all")
+
         val ACTION_ID_PLAYER = ServerPacket.registerPacket("broadcast_action_id_player")
 
     }
@@ -90,6 +92,22 @@ class CommandSettings : BasePlugin(), Listener {
         }
     }
 
+    fun sendUnparseActionAll(serverId: String, msg: String) {
+        if (serverId == serverId()) {
+            val parsedAction = ActionParser.parseAction(msg)
+            parsedAction.execute(console())
+        } else {
+            //            if (serverId == "all") {
+            //                val parsedAction = ActionParser.parseAction(msg)
+            //                parsedAction.execute(console())
+            //            }
+            CrossServerManager.sendData(UNPARSE_ACTION_ID_ALL) {
+                writeString(serverId)
+                writeString(msg)
+            }
+        }
+    }
+
     @EventHandler
     fun onPacket(event: ServerPacketReceiveEvent) {
         val buf = event.buf
@@ -108,6 +126,15 @@ class CommandSettings : BasePlugin(), Listener {
                 val msg = buf.readString()
                 val parsedAction = ActionParser.parseAction(msg)
                 parsedAction.execute(console())
+            }
+            UNPARSE_ACTION_ID_ALL -> {
+                val type = buf.readString()
+                if (type != serverId() && type != "all") return
+                val msg = buf.readString()
+                val parsedAction = ActionParser.parseAction(msg)
+                onlinePlayers().forEach {
+                    parsedAction.execute(it)
+                }
             }
             ACTION_ID_PLAYER -> {
                 val type = buf.readString()

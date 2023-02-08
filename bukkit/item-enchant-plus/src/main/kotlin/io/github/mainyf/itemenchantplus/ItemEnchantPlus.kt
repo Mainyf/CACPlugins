@@ -5,6 +5,7 @@ import dev.jorel.commandapi.arguments.DoubleArgument
 import dev.jorel.commandapi.arguments.IntegerArgument
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
 import io.github.mainyf.itemenchantplus.config.ItemEnchantType
+import io.github.mainyf.itemenchantplus.config.sendLang
 import io.github.mainyf.itemenchantplus.enchants.ExpandEnchant
 import io.github.mainyf.itemenchantplus.enchants.LanRenEnchant
 import io.github.mainyf.itemenchantplus.enchants.LuckEnchant
@@ -71,6 +72,13 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                         }) {
                         "on"
                     } else "off"
+                }
+
+                "hand" -> {
+                    val item = player.inventory.itemInMainHand
+                    if (item.isEmpty()) return@papi "no"
+                    val data = EnchantManager.getItemEnchant(item)
+                    data?.stage?.toString() ?: "no"
                 }
 
                 else -> null
@@ -140,6 +148,36 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
                     player.msg("阶段: ${data.stage}")
                     player.msg("等级: ${data.level}")
                     player.msg("经验: ${data.exp}/${data.maxExp}")
+                }
+            }
+            "nextStage" {
+                withArguments(playerArguments("玩家"))
+                executeOP {
+                    val player = player()
+                    val item = player.inventory.itemInMainHand
+                    if (item.isEmpty()) return@executeOP
+                    val data = EnchantManager.getItemEnchant(item)
+                    if (data == null) {
+                        player.errorMsg("该物品无进阶附魔数据")
+                        return@executeOP
+                    }
+                    if (data.stage >= 3) {
+                        player.errorMsg("该附灵阶级已经达到最高")
+                        return@executeOP
+                    }
+                    val stage = data.stage + 1
+                    data.stage = stage
+                    val startLevels = listOf(1, *ConfigIEP.stageLevel)
+                    if (stage < 3) {
+                        data.level = startLevels[data.stage]
+                        data.exp = 0.0
+                    } else if (stage == 3) {
+                        data.level = startLevels[data.stage]
+                        data.exp = 0.0
+                    }
+                    EnchantManager.setItemEnchantData(item, data)
+                    EnchantManager.updateItemMeta(item, data)
+                    player.sendLang("nextStageCommandSuccess")
                 }
             }
             "stage" {
@@ -397,7 +435,3 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
     }
 
 }
-
-fun Block.getKey() = getKey(x, y, z)
-fun getKey(x: Int, y: Int, z: Int) =
-    x.toLong() and 0x7FFFFFF or (z.toLong() and 0x7FFFFFF shl 27) or (y.toLong() shl 54)

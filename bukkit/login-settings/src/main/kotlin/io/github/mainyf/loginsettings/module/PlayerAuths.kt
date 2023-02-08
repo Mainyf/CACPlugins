@@ -1,5 +1,9 @@
 package io.github.mainyf.loginsettings.module
 
+import com.comphenix.protocol.PacketType
+import com.comphenix.protocol.events.PacketAdapter
+import com.comphenix.protocol.events.PacketEvent
+import com.comphenix.protocol.wrappers.EnumWrappers
 import fr.xephi.authme.api.v3.AuthMeApi
 import fr.xephi.authme.events.LoginEvent
 import fr.xephi.authme.message.MessageKey
@@ -9,6 +13,7 @@ import io.github.mainyf.loginsettings.config.ConfigLS
 import io.github.mainyf.loginsettings.menu.TeachingMenu
 import io.github.mainyf.loginsettings.storage.StorageLS
 import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.protocolManager
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -69,6 +74,17 @@ object PlayerAuths : BukkitRunnable(), Listener {
                 }
             }
         }
+        protocolManager().addPacketListener(object : PacketAdapter(LoginSettings.INSTANCE, PacketType.Play.Client.BLOCK_DIG) {
+
+            override fun onPacketReceiving(event: PacketEvent) {
+                val player = event.player
+                val digType = event.packet.playerDigTypes.read(0)
+                if(digType == EnumWrappers.PlayerDigType.SWAP_HELD_ITEMS) {
+                    onSwap(player)
+                }
+            }
+
+        })
     }
 
     override fun run() {
@@ -101,18 +117,22 @@ object PlayerAuths : BukkitRunnable(), Listener {
         passwordWrongMap.remove(player.uuid)
     }
 
-    @EventHandler
-    fun onSwap(event: PlayerSwapHandItemsEvent) {
-        val player = event.player
+    private fun onSwap(player: Player) {
+        LoginSettings.LOGGER.info("1")
+        if(playerResetPasswding.contains(player.uuid)) return
         if (!unAuths.contains(player.uuid)) return
+        LoginSettings.LOGGER.info("2")
         if (!ConfigLS.qqEnable) {
+            LoginSettings.LOGGER.info("3")
             ConfigLS.emergencyAction?.execute(player)
             return
         }
+        LoginSettings.LOGGER.info("4")
         if (!StorageLS.hasLinkQQ(player.uuid)) {
             ConfigLS.playerLogin.noBindQQNum?.execute(player)
             return
         }
+        LoginSettings.LOGGER.info("6")
         playerResetPasswding.add(player.uuid)
         cleanup(player)
         ConfigLS.playerLogin.nextStage?.execute(player)

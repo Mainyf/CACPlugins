@@ -121,6 +121,10 @@ object ConfigIEP {
 
                     val menuItemName = skinEffectSect.getString("menuItemName")!!.colored()
                     val menuItemLore = skinEffectSect.getStringList("menuItemLore").map { it.colored() }
+                    val selectItemName = skinEffectSect.getString("selectItemName")?.colored() ?: menuItemName
+                    val selectItemLore =
+                        if (skinEffectSect.contains("selectItemLore")) skinEffectSect.getStringList("selectItemLore")
+                            .map { it.colored() } else menuItemLore
                     val effectSectList = skinEffectSect.getListAsConfigSection("effect")
                     val effects = mutableListOf<SkinEffectItem>()
                     effectSectList.forEach { effectSect ->
@@ -134,6 +138,8 @@ object ConfigIEP {
                             SkinMenuItem(menuCustomModelData, menuName, menuLore),
                             menuItemName,
                             menuItemLore,
+                            selectItemName,
+                            selectItemLore,
                             effects
                         )
                     )
@@ -249,7 +255,8 @@ object ConfigIEP {
             expandConfig.getStringList("menuItemInGiveMenu"),
             expandConfig.getStringList("menuItemInUpgradeMenu"),
             expandConfig.getStringList("allowBlocks").map { EnchantBlock(it) },
-            expandConfig.getStringList("conflictEnchant").mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
+            expandConfig.getStringList("conflictEnchant")
+                .mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
             itemSkins[expandConfig.getString("defaultSkin")]!!,
             expandConfig.getStringList("upgradeMaterials").map {
                 val pair = it.split(",")
@@ -286,7 +293,8 @@ object ConfigIEP {
                 )
             },
             luckConfig.getStringList("allowBlocks").map { EnchantBlock(it) },
-            luckConfig.getStringList("conflictEnchant").mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
+            luckConfig.getStringList("conflictEnchant")
+                .mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
             itemSkins[luckConfig.getString("defaultSkin")]!!,
             luckConfig.getStringList("upgradeMaterials").map {
                 val pair = it.split(",")
@@ -313,7 +321,8 @@ object ConfigIEP {
             lanrenConfig.getStringList("menuItemInListMenu"),
             lanrenConfig.getStringList("menuItemInGiveMenu"),
             lanrenConfig.getStringList("menuItemInUpgradeMenu"),
-            lanrenConfig.getStringList("conflictEnchant").mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
+            lanrenConfig.getStringList("conflictEnchant")
+                .mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
             itemSkins[lanrenConfig.getString("defaultSkin")]!!,
             lanrenConfig.getStringList("upgradeMaterials").map {
                 val pair = it.split(",")

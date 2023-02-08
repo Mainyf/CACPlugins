@@ -29,6 +29,9 @@ object CrossServerManager {
     private val CHANNEL_NAME = "cacserver:dispatcher"
     val serverIds = CopyOnWriteArraySet<String>()
     val playerMap = ConcurrentHashMap<UUID, String>()
+    val enableMyIsLands by lazy { isPluginEnabled("MyIslands") }
+
+    val playerTpMap = mutableMapOf<UUID, Long>()
 
     private fun handleTP(player: Player, event: Cancellable? = null) {
         if (pendingTPPosRequest.containsKey(player.uuid)) {
@@ -67,8 +70,10 @@ object CrossServerManager {
                     if (player == null) {
                         pendingTPPosRequest[playerUUID] = loc
                     } else {
+                        playerTpMap[playerUUID] = currentTime()
                         player.teleport(loc)
                     }
+//                    pendingTPPosRequest[playerUUID] = loc
                 }
                 ServerPacket.TP_PLAYER.name -> {
                     val playerUUID = buf.readUUID()
@@ -81,39 +86,57 @@ object CrossServerManager {
                         }
                     } else {
                         if (loc != null) {
+                            playerTpMap[playerUUID] = currentTime()
                             player.teleport(loc)
                         }
                     }
+//                    if (loc != null) {
+//                        pendingTPPlayerRequest[playerUUID] = loc
+//                    }
                 }
             }
         }
         BungeeSettingsBukkit.INSTANCE.events {
-//            event<PlayerJoinEvent> {
-//                joinPlayers.add(player.uniqueId)
+            event<PlayerJoinEvent> {
+                joinPlayers.add(player.uniqueId)
 //                BungeeSettingsBukkit.INSTANCE.submitTask(
 //                    delay = 20
 //                ) {
 //                    handleTP(player)
 //                }
-//            }
-//            event<CMIPlayerTeleportEvent> {
-//                if (joinPlayers.contains(player.uuid)) {
-//                    joinPlayers.remove(player.uuid)
-//                    handleTP(player, this)
-//                }
-//            }
-//            event<PlayerTeleportEvent> {
-//                if (joinPlayers.contains(player.uuid)) {
-//                    joinPlayers.remove(player.uuid)
-//                    handleTP(player, this)
-//                }
-//                if (tpMap.containsKey(player.uuid)) {
-//                    val pTime = tpMap[player.uuid]!!
-//                    if (currentTime() - pTime <= 3000L) {
-//                        isCancelled = true
-//                    }
-//                }
-//            }
+            }
+            event<CMIPlayerTeleportEvent> {
+                if (joinPlayers.contains(player.uuid)) {
+                    joinPlayers.remove(player.uuid)
+                    handleTP(player, this)
+                } else {
+                    if(playerTpMap.containsKey(player.uuid)) {
+                        val pTime = playerTpMap[player.uuid]!!
+                        if (currentTime() - pTime <= 3000L) {
+                            isCancelled = true
+                        }
+                    }
+                }
+            }
+            event<PlayerTeleportEvent> {
+                if (joinPlayers.contains(player.uuid)) {
+                    joinPlayers.remove(player.uuid)
+                    handleTP(player, this)
+                } else {
+                    if(playerTpMap.containsKey(player.uuid)) {
+                        val pTime = playerTpMap[player.uuid]!!
+                        if (currentTime() - pTime <= 3000L) {
+                            isCancelled = true
+                        }
+                    }
+                }
+                if (tpMap.containsKey(player.uuid)) {
+                    val pTime = tpMap[player.uuid]!!
+                    if (currentTime() - pTime <= 3000L) {
+                        isCancelled = true
+                    }
+                }
+            }
         }
 //        BungeeSettingsBukkit.INSTANCE.submitTask(period = 3 * 20L) {
 //            updatePlayers()

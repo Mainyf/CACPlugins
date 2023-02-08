@@ -68,6 +68,7 @@ class LoginSettings : BasePlugin() {
         CommandHandler.register()
         PlayerAuths.init()
         PlayerAuths.runTaskTimer(this, 10, 10)
+        LOGGER.info("初始化登录设置")
         pluginManager().registerEvents(PlayerAuths, this)
         pluginManager().registerEvents(BindQQs, this)
         BindQQs.init()

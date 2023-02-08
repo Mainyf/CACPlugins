@@ -206,8 +206,6 @@ object EnchantManager {
             data.enchantType.plusExtraDataName()
         )
         if (!meta.hasDisplayName()) {
-            //            val itemName = data.enchantType
-            //                .let { if (hasExtra) it.plusDisplayName() else it.displayName() }
             val itemName = data.enchantSkin.skinConfig.skinEffect[0].menuItemName
             meta.displayName(
                 itemName
@@ -270,7 +268,7 @@ object EnchantManager {
             }
         }
         val skin = data.enchantSkin.skinConfig
-        val skinEffect = skin.skinEffect[data.enchantSkin.stage - 1]
+        val skinEffect = skin.getSkinEffect(data.enchantSkin.stage)
         meta.setCustomModelData(skinEffect.customModelData)
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
 
@@ -334,7 +332,7 @@ object EnchantManager {
         val enchantSkin = data.enchantSkin
         val skin = enchantSkin.skinConfig
         if (!skin.enable || !enchantSkin.hasOwn) return
-        val skinEffect = skin.skinEffect.getOrNull(enchantSkin.stage) ?: return
+        val skinEffect = skin.getSkinEffect(enchantSkin.stage)
         skinEffect.effects.filter { it.type == type }.forEach {
             it.value?.execute(player.location)
         }

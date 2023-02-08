@@ -64,6 +64,7 @@ class SocialSystem : BasePlugin() {
                 "tab" -> ConfigSS.getPlayerTabCard(player).tvar("player", player.name).placeholders(player)
                 "chat" -> ConfigSS.getPlayerChatCard(player).tvar("player", player.name).placeholders(player)
                 "tag" -> ConfigSS.getPlayerTagCard(player).tvar("player", player.name).placeholders(player)
+                "color" -> ConfigSS.getPlayerColorCard(player).tvar("player", player.name).placeholders(player)
                 else -> null
             }
         }

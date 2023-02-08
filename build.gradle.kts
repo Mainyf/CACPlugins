@@ -29,6 +29,7 @@ dependencies {
 
 val itemsAdderPath = "./plugins/ItemsAdder_3.3.0b-r2.jar"
 val cmiPath = "./plugins/CMI-9.3.0.2.jar"
+val cmiLibPath = "./plugins/CMILib1.2.4.1.jar"
 val plotPath = "./plugins/PlotSquared-Bukkit-6.10.1-Premium.jar"
 val mmPath = "./plugins/MythicMobs-5.2.1.jar"
 val miraiMCPath = "./libs/MiraiMC-Bukkit.jar"
@@ -153,6 +154,10 @@ subprojects {
                     compileOnly(rootProject.project(":bukkit:quest-extension"))
                 }
 
+                "mining-check" -> {
+                    compileOnly(rootProject.project(":bukkit:item-enchant-plus"))
+                }
+
                 "login-settings" -> {
                     implementation("io.github.dreamvoid:MiraiMC-Integration:1.7")
                     implementation(rootProject.files(miraiMCPath))
@@ -163,6 +168,7 @@ subprojects {
 
                 "bungee-settings-bukkit" -> {
                     compileOnly(rootProject.files(cmiPath))
+                    compileOnly(rootProject.files(cmiLibPath))
                 }
 
                 "player-account" -> {
@@ -326,6 +332,10 @@ subprojects {
                     dd.addAll(listOf("Mcrmb"))
                 }
 
+                "mining-check" -> {
+                    dd.addAll(listOf("ItemEnchantPlus"))
+                }
+
                 "login-settings" -> {
                     dd.addAll(listOf("AuthMe", "MiraiMC", "BungeeSettingsBukkit"))
                 }
@@ -344,7 +354,7 @@ subprojects {
                 }
 
                 "cs-dungeon" -> {
-                    dd.addAll(listOf("CustomStructures", "ItemsAdder", "MythicMobs", "WorldSettings"))
+                    dd.addAll(listOf("CustomStructures", "sAdder", "MythicMobs", "WorldSettings"))
                 }
 
                 "tools-plugin" -> {
@@ -480,9 +490,9 @@ class $pluginName : JavaPlugin() {
     if (hasBungeeCord(project)) {
         tasks.register<Copy>("copyPlugin") {
             group = "bukkit"
-            rootProject.file("./server/bungeecord/plugins/").listFiles()?.find {
-                it.name.startsWith(project.name) && it.name.endsWith(".jar")
-            }?.delete()
+//            rootProject.file("./server/bungeecord/plugins/").listFiles()?.find {
+//                it.name.startsWith(project.name) && it.name.endsWith(".jar")
+//            }?.delete()
             from(tasks.jar)
             into(rootProject.file("./server/bungeecord/plugins/").absolutePath)
         }

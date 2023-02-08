@@ -9,4 +9,8 @@ object SocialManager {
         return StorageSS.getPlayerQQNum(uuid)
     }
 
+    fun getQQNumPlayer(qqnum: Long): UUID? {
+        return StorageSS.getQQNumPlayer(qqnum)
+    }
+
 }

@@ -20,6 +20,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockFromToEvent
+import org.bukkit.event.block.BlockSpreadEvent
 import org.bukkit.event.entity.CreatureSpawnEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
@@ -168,6 +170,25 @@ object DungeonListeners : Listener {
         if (dungeon != null && event.spawnReason != CreatureSpawnEvent.SpawnReason.CUSTOM) {
             event.isCancelled = true
         }
+    }
+
+    @EventHandler
+    fun onSpread(event: BlockSpreadEvent) {
+        //        println("block: ${event.block.type}, source: ${event.source.type}")
+        //        val sLoc = event.source.location
+        //        val bLoc = event.block.location
+    }
+
+    @EventHandler
+    fun onBlockFromTo(event: BlockFromToEvent) {
+        if (event.block.type == Material.WATER || event.block.type == Material.LAVA) {
+            val loc = event.block.location.add(event.face.direction)
+            var dungeon = StorageCSD.findDungeonByLoc(loc)
+            if (dungeon != null) {
+                event.isCancelled = true
+            }
+        }
+        //        println("BlockFromToEvent")
     }
 
     fun isCore(armorStand: ArmorStand): Boolean {

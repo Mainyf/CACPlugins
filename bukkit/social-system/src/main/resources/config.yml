@@ -53,28 +53,50 @@ card:
     svip:
       priority: 1
       value: '#bebebe[&e安#bebebe] {player}'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
     mvp:
       priority: 0
       value: '&f[&c安&f] {player}'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
   chat:
     default: '#808080[#bebebe安#808080] {player}：'
     vip:
       priority: 2
       value: ':tag_vip: &7{player}：'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
     svip:
       priority: 1
       value: ':tag_svip: &7{player}：'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
     mvp:
       priority: 0
       value: ':tag_mvp: &7{player}：'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
   tag:
     default: '#808080[#bebebe安#808080] {player}：'
     vip:
       priority: 2
       value: ':tag_vip: &7{player}：'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
     svip:
       priority: 1
       value: ':tag_svip: &7{player}：'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
     mvp:
       priority: 0
       value: ':tag_mvp: &7{player}：'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
+  color:
+    default: '#808080[#bebebe安#808080] {player}：'
+    vip:
+      priority: 2
+      value: ':tag_vip: &7{player}：'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
+    svip:
+      priority: 1
+      value: ':tag_svip: &7{player}：'
+      hasNick: '#bebebe[&e安#bebebe] {player}'
+    mvp:
+      priority: 0
+      value: ':tag_mvp: &7{player}：'
+      hasNick: '#bebebe[&e安#bebebe] {player}'

@@ -28,3 +28,11 @@ iaItemAutoUpdate:
     - "mini: 物品 {itemName} 已经被更新"
   item:
     - "itemsadder:xxx"
+placeholder:
+  test:
+    target: '%player_name%'
+    change:
+      MokierTea: "技术"
+      Mainyf: "插件"
+      not: "没有"
+    other: "%player_name%"

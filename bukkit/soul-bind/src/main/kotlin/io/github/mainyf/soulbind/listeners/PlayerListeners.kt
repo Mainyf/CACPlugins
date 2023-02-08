@@ -5,6 +5,7 @@ import io.github.mainyf.newmclib.exts.isEmpty
 import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.menu.MenuHolder
 import io.github.mainyf.newmclib.nms.asNmsPlayer
+import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.newmclib.utils.Cooldown
 import io.github.mainyf.soulbind.RecallSBManager
 import io.github.mainyf.soulbind.SBManager
@@ -233,7 +234,7 @@ object PlayerListeners : Listener {
         val itemData = SBManager.getBindItemData(itemStack) ?: return false
         if (itemData.ownerUUID != player.uuid) {
             cancellable.isCancelled = true
-            player.sendLang("noBindItemOwnerInteract", "{owner}", player.name)
+            player.sendLang("noBindItemOwnerInteract", "{owner}", itemData.ownerUUID.asOfflineData()?.name ?: "未知")
             return true
         }
         return false

@@ -1,5 +1,6 @@
 package io.github.mainyf.socialsystem
 
+import dev.jorel.commandapi.arguments.LongArgument
 import io.github.mainyf.newmclib.command.APICommand
 import io.github.mainyf.newmclib.command.offlinePlayerArguments
 import io.github.mainyf.newmclib.command.playerArguments
@@ -31,12 +32,24 @@ object CommandHandler : APICommand("social") {
                 SocialCardMenu(target.asOfflineData()).open(target)
             }
         }
-        "qqnum" {
+        "player-qqnum" {
             withArguments(offlinePlayerArguments("玩家名"))
             executeOP {
                 val player = offlinePlayer()
                 val qqNum = SocialManager.getPlayerQQNum(player.uuid)
                 sender.msg("玩家 ${player.name}: $qqNum")
+            }
+        }
+        "qqnum-player" {
+            withArguments(LongArgument("qq号"))
+            executeOP {
+                val qqnum = value<Long>()
+                val player = SocialManager.getQQNumPlayer(qqnum)?.asOfflineData()
+                if(player == null) {
+                    sender.msg("没有查询到绑定了该账号的玩家")
+                } else {
+                    sender.msg("玩家 ${player.name}: $qqnum")
+                }
             }
         }
         "menu" {

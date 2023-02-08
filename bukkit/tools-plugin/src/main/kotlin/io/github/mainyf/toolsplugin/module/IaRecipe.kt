@@ -10,11 +10,17 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.CraftItemEvent
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ShapedRecipe
 
 object IaRecipe : Listener {
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
+    fun onClick(event: InventoryClickEvent) {
+
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onCraft(event: CraftItemEvent) {
         val player = event.viewers.firstOrNull() as? Player ?: return
         val key = (event.recipe as? ShapedRecipe)?.key?.toString() ?: return

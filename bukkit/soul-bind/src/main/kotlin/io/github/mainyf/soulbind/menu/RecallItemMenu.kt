@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack
 import java.util.UUID
 import kotlin.math.ceil
 
-class RecallItemMenu : AbstractMenuHandler() {
+class RecallItemMenu(val uuid: UUID) : AbstractMenuHandler() {
 
     private var pageIndex = 1
     private var pageSize = 0
@@ -38,7 +38,7 @@ class RecallItemMenu : AbstractMenuHandler() {
 
     private fun updateItems(player: Player) {
         this.items.clear()
-        this.items.addAll(StorageSB.getPlayerRecallItems(player.uuid).map { it.key to it.value })
+        this.items.addAll(StorageSB.getPlayerRecallItems(uuid).map { it.key to it.value })
         this.maxPageIndex = ceil(
             items.size.toDouble() / pageSize.toDouble()
         ).toInt()
@@ -152,10 +152,10 @@ class RecallItemMenu : AbstractMenuHandler() {
                             }
                         }
                         player.updateInventory()
-                        RecallItemMenu().open(p)
+                        RecallItemMenu(uuid).open(p)
                     },
                     { p ->
-                        RecallItemMenu().open(p)
+                        RecallItemMenu(uuid).open(p)
                     },
 
                     ).open(it)

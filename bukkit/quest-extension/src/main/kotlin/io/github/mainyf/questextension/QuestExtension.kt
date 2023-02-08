@@ -12,6 +12,7 @@ import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.pluginManager
 import io.github.mainyf.newmclib.exts.successMsg
+import io.github.mainyf.newmclib.exts.toReflect
 import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
 import io.github.mainyf.questextension.config.ConfigQE
 import io.github.mainyf.questextension.events.ManualCompleteQuestEvent
@@ -160,6 +161,7 @@ class QuestExtension : JavaPlugin(), Listener {
                 else -> "no"
             }
         }
+        QuestCreator.inst().configuration.toReflect().call("loadElements")
     }
 
     fun hasInTutorialQuest(player: Player): Boolean {

@@ -80,9 +80,9 @@ class IslandsMainMenu : AbstractMenuHandler() {
             icons.addAll(menuConfig.upgradeAndBackIslandSlot.iaIcon("back"))
         }
         if (hasPermission) {
-            icons.add(menuConfig.islandSettingsSlot.default()!!.iaIcons["permission"]!!)
+            icons.add(menuConfig.islandSettingsSlot.default()!!.iaIcons["permission"]!!.toPlaceholders(player))
         } else {
-            icons.add(menuConfig.islandSettingsSlot.default()!!.iaIcons["unfamiliar"]!!)
+            icons.add(menuConfig.islandSettingsSlot.default()!!.iaIcons["unfamiliar"]!!.toPlaceholders(player))
         }
         return applyTitle(player, icons)
     }

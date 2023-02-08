@@ -25,6 +25,16 @@ import kotlin.collections.any
 object ExpandEnchant : Listener {
 
     private val playerHeldItem = mutableSetOf<UUID>()
+    private val useStage3EnchantMap = mutableMapOf<UUID, Long>()
+    private val usePlusEnchantMap = mutableMapOf<UUID, Long>()
+
+    fun getUseStage3EnchantTime(uuid: UUID): Long {
+        return useStage3EnchantMap[uuid] ?: -1L
+    }
+
+    fun getUsePlusEnchantTime(uuid: UUID): Long {
+        return usePlusEnchantMap[uuid] ?: -1L
+    }
 
     fun init() {
         ItemEnchantPlus.INSTANCE.submitTask(period = 2 * 20L) {
@@ -178,11 +188,15 @@ object ExpandEnchant : Listener {
                 //                bList.first().breakNaturally()
             } else if (data.stage >= 3) {
                 blockBreakRecursiveFixer.mark(player)
+                useStage3EnchantMap[player.uuid] = currentTime()
                 bList.forEach {
                     playerBreakBlock(player, it)
                     //                    it.breakNaturally()
                 }
             }
+        }
+        if (EnchantManager.hasExtraData(ItemEnchantType.EXPAND, item, ItemEnchantType.EXPAND.plusExtraDataName())) {
+            usePlusEnchantMap[player.uuid] = currentTime()
         }
 
         //        EnchantManager.updateItemMeta(item, ItemEnchantType.EXPAND, data)
@@ -194,12 +208,12 @@ object ExpandEnchant : Listener {
 
     private fun playerBreakBlock(player: Player, block: Block) {
         player.breakBlock(block)
-//        val event = BlockBreakEvent(block, player)
-//        pluginManager().callEvent(event)
-//        if (!event.isCancelled) {
-//            player.breakBlock(block)
-////            block.breakNaturally()
-//        }
+        //        val event = BlockBreakEvent(block, player)
+        //        pluginManager().callEvent(event)
+        //        if (!event.isCancelled) {
+        //            player.breakBlock(block)
+        ////            block.breakNaturally()
+        //        }
     }
 
     private fun hasValid(block: Block): Boolean {

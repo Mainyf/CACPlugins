@@ -1,0 +1,55 @@
+enable: true
+debug: false
+worlds:
+  zy:
+    # 重置时间 单位 天
+    actionResetTime: 1
+    # 计数时间 秒
+    countingTime: 60
+    # 最大计数
+    countMax: 100
+    # expand 附灵的效果时间(秒)
+    expandIgnoreSecound: 10
+    # expand 附灵阶段3的倍率
+    expandStage3Ratio: 2
+    # expand 附灵plus版本的倍率
+    expandPlusRatio: 0
+    countActions:
+      a:
+        num: 1
+        action:
+          - "message: {player} 第一次触发"
+      b:
+        num: 2
+        action:
+          - "message: {player} 第一次触发"
+      c:
+        num: 3
+        action:
+          - "message: {player} 第一次触发"
+    blocks:
+      DIAMOND_BLOCK: 10
+      STONE: 1
+  zy2:
+    # 重置时间 单位 天
+    actionResetTime: 1
+    # 计数时间 秒
+    countingTime: 60
+    # 最大计数
+    countMax: 100
+    countActions:
+      a:
+        num: 1
+        action:
+          - "message: {player} 第一次触发"
+      b:
+        num: 2
+        action:
+          - "message: {player} 第一次触发"
+      c:
+        num: 3
+        action:
+          - "message: {player} 第一次触发"
+    blocks:
+      DIAMOND_BLOCK: 10
+      STONE: 1

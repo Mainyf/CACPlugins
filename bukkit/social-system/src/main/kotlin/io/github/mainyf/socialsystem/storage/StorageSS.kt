@@ -199,4 +199,16 @@ object StorageSS : AbstractStorageManager() {
         }
     }
 
+    fun getQQNumPlayer(qqnum: Long): UUID? {
+        return transaction {
+            PlayerLinkQQs
+                .select { PlayerLinkQQs.qqNum eq qqnum }
+                .firstOrNull()
+                ?.let {
+                    it[PlayerLinkQQs.id]
+                }
+                ?.value
+        }
+    }
+
 }

@@ -14,7 +14,13 @@ data class EnchantSkinConfig(
     val menuBackground: IaIcon,
     val skinEffect: List<SkinEffect>,
     val data: EnchantSkinData?
-)
+) {
+
+    fun getSkinEffect(stage: Int): SkinEffect {
+        return skinEffect.getOrNull(stage - 1) ?: skinEffect.last()
+    }
+
+}
 
 interface EnchantSkinData
 
@@ -33,6 +39,8 @@ data class SkinEffect(
     val menuLarge: SkinMenuItem,
     val menuItemName: String,
     val menuItemLore: List<String>,
+    val selectItemName: String,
+    val selectItemLore: List<String>,
     val effects: List<SkinEffectItem>
 )
 

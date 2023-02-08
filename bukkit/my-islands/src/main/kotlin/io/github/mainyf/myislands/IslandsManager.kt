@@ -296,6 +296,7 @@ object IslandsManager {
                 player.teleport(homeLoc)
                 StorageMI.createPlayerIsland(player.uniqueId, loc.let { Vector(it.x, it.y, it.z) })
                 player.sendLang("islandClaimSuccess")
+                player.sendLang("backIsland")
 //                player.successMsg("成功领取你的私人岛屿")
             }
         }

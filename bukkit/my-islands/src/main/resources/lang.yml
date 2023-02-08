@@ -55,6 +55,8 @@ initIslandCore: [ ]
 islandClaimSuccess:
   - "title: ,&e成功领取私人岛屿,10,30,10"
   # - "minimessage: 恭喜 <hover:show_text:'<color:#FF5555>玩家</color:#FF5555>'><player></hover> 成功领取私人岛屿"
+backIsland:
+  - "message: &c&l！&4玩家 &c{player} 你已返回了自己的岛屿。"
 
 resetIslandBackTourist:
   - "sound: ENTITY_PUFFER_FISH_BLOW_UP,1,2"

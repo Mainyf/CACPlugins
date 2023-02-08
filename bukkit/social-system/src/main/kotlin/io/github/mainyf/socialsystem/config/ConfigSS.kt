@@ -4,16 +4,23 @@ package io.github.mainyf.socialsystem.config
 
 import io.github.mainyf.newmclib.config.asDefaultSlotConfig
 import io.github.mainyf.newmclib.config.asMenuSettingsConfig
-import io.github.mainyf.newmclib.exts.colored
-import io.github.mainyf.newmclib.exts.getAction
-import io.github.mainyf.newmclib.exts.getSection
-import io.github.mainyf.newmclib.exts.saveResourceToFileAsConfiguration
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.socialsystem.SocialSystem
+import io.github.mainyf.socialsystem.storage.StorageSS
+import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.permissions.Permissible
+import java.util.UUID
+import kotlin.math.floor
 
 object ConfigSS {
+
+    class CardItem(
+        val priority: Int,
+        val value: String,
+        val hasNick: String
+    )
 
     private lateinit var mainConfigFile: FileConfiguration
     private lateinit var menuConfigFile: FileConfiguration
@@ -32,13 +39,17 @@ object ConfigSS {
 
     private var cardPermission = "social.card"
     private var tabCardDefault = ""
-    private var tabCardMap = mutableMapOf<String, Pair<Int, String>>()
+    private var tabCardMap = mutableMapOf<String, CardItem>()
     private var chatCardDefault = ""
-    private var chatCardMap = mutableMapOf<String, Pair<Int, String>>()
+    private var chatCardMap = mutableMapOf<String, CardItem>()
     private var tagCardDefault = ""
-    private var tagCardMap = mutableMapOf<String, Pair<Int, String>>()
+    private var tagCardMap = mutableMapOf<String, CardItem>()
+    private var colorCardDefault = ""
+    private var colorCardMap = mutableMapOf<String, CardItem>()
 
     lateinit var nicknameConfig: NicknameConfig
+
+    private val cardTimeMap = mutableMapOf<UUID, MutableMap<String, Long>>()
 
     fun load() {
         kotlin.runCatching {
@@ -114,29 +125,16 @@ object ConfigSS {
         tabCardDefault = mainConfigFile.getString("card.tab.default", "")!!.colored()
         chatCardDefault = mainConfigFile.getString("card.chat.default", "")!!.colored()
         tagCardDefault = mainConfigFile.getString("card.tag.default", "")!!.colored()
+        colorCardDefault = mainConfigFile.getString("card.color.default", "")!!.colored()
 
         tabCardMap.clear()
-        val tabSect = mainConfigFile.getConfigurationSection("card.tab")!!
-        tabSect.getKeys(false).forEach {
-            if (it == "default") return@forEach
-            val priority = tabSect.getInt("${it}.priority")
-            val value = tabSect.getString("${it}.value")!!.colored()
-            tabCardMap[it] = priority to value
-        }
-        val chatSect = mainConfigFile.getConfigurationSection("card.chat")!!
-        chatSect.getKeys(false).forEach {
-            if (it == "default") return@forEach
-            val priority = chatSect.getInt("${it}.priority")
-            val value = chatSect.getString("${it}.value")!!.colored()
-            chatCardMap[it] = priority to value
-        }
-        val tagSect = mainConfigFile.getConfigurationSection("card.tag")!!
-        tagSect.getKeys(false).forEach {
-            if (it == "default") return@forEach
-            val priority = tagSect.getInt("${it}.priority")
-            val value = tagSect.getString("${it}.value")!!.colored()
-            tagCardMap[it] = priority to value
-        }
+        tabCardMap.putAll(mainConfigFile.getConfigurationSection("card.tab")!!.getCardMap())
+        chatCardMap.clear()
+        chatCardMap.putAll(mainConfigFile.getConfigurationSection("card.chat")!!.getCardMap())
+        tagCardMap.clear()
+        tagCardMap.putAll(mainConfigFile.getConfigurationSection("card.tag")!!.getCardMap())
+        colorCardMap.clear()
+        colorCardMap.putAll(mainConfigFile.getConfigurationSection("card.color")!!.getCardMap())
         val nicknameSect = mainConfigFile.getSection("nickname")
         nicknameConfig = NicknameConfig(
             nicknameSect.getString("permission")!!,
@@ -159,34 +157,56 @@ object ConfigSS {
         )
     }
 
-    fun getPlayerTabCard(player: Player): String {
-        val cards = tabCardMap.filter { hasCardPermission(player, it.key) }
-        if (cards.isEmpty()) {
-            return tabCardDefault
+    private fun ConfigurationSection.getCardMap(): Map<String, CardItem> {
+        val rs = mutableMapOf<String, CardItem>()
+        getKeys(false).forEach {
+            if (it == "default") return@forEach
+            val priority = getInt("${it}.priority")
+            val value = getString("${it}.value")!!.colored()
+            val hasNick = getString("${it}.hasNick", "")!!.colored()
+            rs[it] = CardItem(priority, value, hasNick)
         }
-        return cards.values.minByOrNull {
-            it.first
-        }!!.second
+        return rs
+    }
+
+    private fun getPlayerCard(player: Player, key: String, cardMap: Map<String, CardItem>, default: String): String {
+        val cards = cardMap.filter { hasCardPermission(player, it.key) }
+        if (cards.isEmpty()) {
+            return default
+        }
+        val cItem = cards.values.minByOrNull {
+            it.priority
+        }!!
+        val nickname = StorageSS.getNickname(player.uuid)
+        return if (cItem.hasNick.isNotBlank() && nickname != null && StorageSS.hasVisibleNickname(player.uuid)) {
+            val timeMap = cardTimeMap.getOrPut(player.uuid) { mutableMapOf() }
+            val curTime = currentTime()
+            val prevTime = timeMap.getOrPut(key) { curTime }
+            val elapsedTime = curTime - prevTime
+            if ((elapsedTime / 1000).toInt() % 2 == 1) {
+                cItem.hasNick
+            } else {
+                cItem.value
+            }
+        } else {
+            cItem.value
+        }
+    }
+
+    fun getPlayerTabCard(player: Player): String {
+        return getPlayerCard(player, "tab", tabCardMap, tabCardDefault)
     }
 
     fun getPlayerChatCard(player: Player): String {
-        val cards = chatCardMap.filter { hasCardPermission(player, it.key) }
-        if (cards.isEmpty()) {
-            return chatCardDefault
-        }
-        return cards.values.minByOrNull {
-            it.first
-        }!!.second
+        return getPlayerCard(player, "chat", chatCardMap, chatCardDefault)
     }
 
     fun getPlayerTagCard(player: Player): String {
-        val cards = tagCardMap.filter { hasCardPermission(player, it.key) }
-        if (cards.isEmpty()) {
-            return tagCardDefault
-        }
-        return cards.values.minByOrNull {
-            it.first
-        }!!.second
+        return getPlayerCard(player, "tag", tagCardMap, tagCardDefault)
+    }
+
+    fun getPlayerColorCard(player: Player): String {
+        return getPlayerCard(player, "color", colorCardMap, colorCardDefault)
     }
 
     fun hasCardPermission(permissible: Permissible, cardName: String): Boolean {

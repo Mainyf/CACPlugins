@@ -27,7 +27,7 @@ class TeachingMenu : AbstractMenuHandler() {
         slotAIndex = Random.nextInt(slotAList.size)
         slotA = slotAList.elementAt(slotAIndex)
         val slotBConfig = ConfigLS.teachingMenuConfig.slotB
-        val slotBList = (slotBConfig.slotMin..slotBConfig.slotMax).toList().toMutableList()
+        val slotBList = (slotBConfig.slotMin .. slotBConfig.slotMax).toList().toMutableList()
         if (slotBList.contains(slotA)) {
             slotBList.remove(slotA)
         }
@@ -51,19 +51,19 @@ class TeachingMenu : AbstractMenuHandler() {
     private fun updateInv(inv: Inventory) {
         val teachingMenuConfig = ConfigLS.teachingMenuConfig
         val slotAConfig = teachingMenuConfig.slotA
-        inv.setRightIcon(slotA, slotAConfig.itemSlot.toItemStack()) {
+        inv.setIcon(slotA, slotAConfig.itemSlot.toItemStack(), leftClickBlock = {
             ok = true
             if (ConfigLS.qqEnable && !BindQQs.hasLinkQQ(it.uuid)) {
                 it.closeInventory()
                 BindQQs.startLinkQQ(it, true) {}
-                return@setRightIcon
+                return@setIcon
             }
             if (!StorageLS.hasAgreePlayRuleInWeek(it)) {
                 ConfigLS.teachingMenuSlotA?.execute(it)
             } else {
                 slotAConfig.itemSlot.execAction(it)
             }
-        }
+        })
         val slotBConfig = teachingMenuConfig.slotB
         inv.setIcon(slotB, slotBConfig.itemSlot.toItemStack()) {
             ok = true

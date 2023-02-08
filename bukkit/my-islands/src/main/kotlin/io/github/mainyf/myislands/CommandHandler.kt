@@ -1,6 +1,7 @@
 package io.github.mainyf.myislands
 
 import dev.jorel.commandapi.arguments.DoubleArgument
+import dev.jorel.commandapi.arguments.IntegerArgument
 import io.github.mainyf.myislands.config.ConfigMI
 import io.github.mainyf.myislands.features.MoveIsLandCore
 import io.github.mainyf.myislands.menu.IslandsChooseMenu
@@ -159,6 +160,34 @@ object CommandHandler : APICommand("myislands") {
                         plot.getHome {
                             sender.msg("home: $it")
                         }
+                    }
+                }
+            }
+            "addKudo" {
+                withArguments(
+                    playerArguments("玩家名"),
+                    IntegerArgument("数量")
+                )
+                executeOP {
+                    val target = player()
+                    val count = int()
+                    val islandAbs = IslandsManager.getIslandAbs(target)
+                    if (islandAbs != null) {
+                        StorageMI.addKudos(islandAbs, count)
+                    }
+                }
+            }
+            "removeHeat" {
+                withArguments(
+                    playerArguments("玩家名"),
+                    IntegerArgument("数量")
+                )
+                executeOP {
+                    val target = player()
+                    val count = int()
+                    val islandAbs = IslandsManager.getIslandAbs(target)
+                    if (islandAbs != null) {
+                        StorageMI.removeHeat(islandAbs, count)
                     }
                 }
             }

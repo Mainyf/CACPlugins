@@ -7,9 +7,11 @@ import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.*
+import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
 import io.github.mainyf.toolsplugin.config.ConfigTP
 import io.github.mainyf.toolsplugin.module.*
 import io.papermc.paper.configuration.GlobalConfiguration
+import me.clip.placeholderapi.PlaceholderAPI
 import net.luckperms.api.LuckPermsProvider
 import org.apache.logging.log4j.LogManager
 import org.bukkit.event.Listener
@@ -45,6 +47,7 @@ class ToolsPlugin : BasePlugin(), Listener {
         CheckPlayerInventory.init()
         IaItemAutoUpdate.init()
         ExportPlayerData.init()
+        MineralSpawns.init()
         apiCommand("toolsPlugin") {
             withAliases("tools", "toolsp")
             "reload" {
@@ -144,6 +147,11 @@ class ToolsPlugin : BasePlugin(), Listener {
                     }
                 }
             }
+        }
+        addPlaceholderExpansion("toolsplugin") { p, params ->
+            val placeholder = ConfigTP.placeholders[params] ?: return@addPlaceholderExpansion null
+            val targetText = PlaceholderAPI.setPlaceholders(p, placeholder.target)
+            PlaceholderAPI.setPlaceholders(p, placeholder.change[targetText] ?: placeholder.other)
         }
     }
 

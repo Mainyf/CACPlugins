@@ -8,10 +8,7 @@ import io.github.mainyf.itemenchantplus.blockBreakRecursiveFixer
 import io.github.mainyf.itemenchantplus.config.ConfigIEP
 import io.github.mainyf.itemenchantplus.config.EffectTriggerType
 import io.github.mainyf.itemenchantplus.config.ItemEnchantType
-import io.github.mainyf.itemenchantplus.getKey
-import io.github.mainyf.newmclib.exts.any
-import io.github.mainyf.newmclib.exts.isEmpty
-import io.github.mainyf.newmclib.exts.uuid
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.random.Percentage
 import io.github.mainyf.soulbind.SBManager
 import org.bukkit.Location
@@ -26,6 +23,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
+import java.util.UUID
 
 object LuckEnchant : Listener {
 
@@ -125,8 +123,14 @@ object LuckEnchant : Listener {
 
                         else -> 1
                     }
-                    player.breakBlock(it)
-                    dropBlockLoot(amount, block.location, item, it)
+                    if (block.location == it.location) {
+                        dropBlockLoot(amount, block.location, item, it)
+                    } else {
+                        val result = player.breakBlock(it)
+                        if (result) {
+                            dropBlockLoot(amount, block.location, item, it)
+                        }
+                    }
                 }
             }
         }

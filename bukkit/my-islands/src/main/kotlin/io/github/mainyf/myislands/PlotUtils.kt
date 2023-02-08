@@ -184,6 +184,7 @@ class PlotUtils @Inject constructor(
         val coreLoc = IslandsManager.getIslandCoreLoc(islandData)
         val homeLoc = IslandsManager.getHomeLoc(coreLoc)
         teleportPlayerToLoc(player, homeLoc, coreLoc)
+        player.sendLang("backIsland")
     }
 
     fun findSafeLoc(sender: CommandSender?, loc: Location, coreLoc: Location, msg: Boolean = true): Location {
