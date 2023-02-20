@@ -40,6 +40,7 @@ object ConfigIEP {
     private lateinit var expandConfig: FileConfiguration
     private lateinit var luckConfig: FileConfiguration
     private lateinit var lanrenConfig: FileConfiguration
+    private lateinit var volleyConfig: FileConfiguration
 
     private lateinit var levelExpression: String
     val enchantIntensifyMaterials = mutableMapOf<ItemTypeWrapper, Double>()
@@ -69,11 +70,13 @@ object ConfigIEP {
             if (!ItemEnchantPlus.INSTANCE.dataFolder.resolve("skins").exists()) {
                 ItemEnchantPlus.INSTANCE.saveResourceToFileAsConfiguration("skins/pickaxe_skin.yml")
                 ItemEnchantPlus.INSTANCE.saveResourceToFileAsConfiguration("skins/sword_skin.yml")
+                ItemEnchantPlus.INSTANCE.saveResourceToFileAsConfiguration("skins/bow_skin.yml")
             }
             menuConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("menu.yml")
             expandConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/expand.yml")
             luckConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/luck.yml")
             lanrenConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/lan_ren.yml")
+            volleyConfig = ItemEnchantPlus.INSTANCE.createFileConfiguration("enchants/volley.yml")
 
             lang = BaseLang()
             lang.load(langConfig)

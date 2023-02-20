@@ -139,16 +139,16 @@ object ConfigWS {
                     }
                 }
 
-                configKey == "commandWhite" -> {
+                configKey == "commandWhite" || configKey == "completeCommandList" -> {
                     if (config.contains(configKey, true)) {
-                        wsc.setValue(configKey, config.getStringList("commandWhite").mapNotNull { line ->
+                        wsc.setValue(configKey, config.getStringList(configKey).mapNotNull { line ->
                             val pair = line.split(":")
                             if (pair.size < 2) {
                                 return@mapNotNull null
                             }
                             return@mapNotNull when (pair[0]) {
-                                "start" -> CommandMatchType.START to pair[1].trim()
-                                "like" -> CommandMatchType.LIKE to pair[1].trim()
+                                "start" -> MatchType.START to pair[1].trim()
+                                "like" -> MatchType.LIKE to pair[1].trim()
                                 else -> null
                             }
                         })
@@ -242,7 +242,7 @@ data class WorldSettingConfig(
     val antiFly: Boolean = true,
     val flyBlockAction: MultiAction? = null,
     val antiDamageFriendEntityLiving: Boolean = true,
-    val commandWhite: List<Pair<CommandMatchType, String>> = listOf(),
+    val commandWhite: List<Pair<MatchType, String>> = listOf(),
     val commandBlockAction: MultiAction? = null,
     val antiCursorNoEmptyPickupItem: Boolean = true,
     val antiBreakBlock: Boolean = true,
@@ -255,6 +255,7 @@ data class WorldSettingConfig(
     val antiNoPlayerPickupItem: Boolean = true,
     val pvp: Boolean = true,
     val tabComplete: Boolean = true,
+    val completeCommandList: List<Pair<MatchType, String>> = listOf(),
     val antiVoidDamage: Boolean = true,
     val respawnAction: MultiAction? = null,
     val joinServerAction: MultiAction? = null,
@@ -272,6 +273,6 @@ data class WorldSettingConfig(
     val antiBlockExplode: Boolean = false
 )
 
-enum class CommandMatchType {
+enum class MatchType {
     LIKE, START
 }

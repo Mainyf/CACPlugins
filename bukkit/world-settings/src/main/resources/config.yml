@@ -55,6 +55,10 @@ gloablServer:
     pvp: true
     # 是否开启tab补全
     tabComplete: true
+    # 玩家可用补全命令列表
+    completeCommandList:
+      - "pay"
+      - "xconomy:pay"
     # 阻止虚空伤害
     antiVoidDamage: true
     # 重生时的动作

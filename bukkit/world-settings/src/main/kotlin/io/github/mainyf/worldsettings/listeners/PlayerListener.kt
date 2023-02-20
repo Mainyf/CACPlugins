@@ -1,10 +1,11 @@
 package io.github.mainyf.worldsettings.listeners
 
+import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.worldsettings.PlayerDropItemStorage
-import io.github.mainyf.worldsettings.config.CommandMatchType.LIKE
-import io.github.mainyf.worldsettings.config.CommandMatchType.START
+import io.github.mainyf.worldsettings.config.MatchType.LIKE
+import io.github.mainyf.worldsettings.config.MatchType.START
 import io.github.mainyf.worldsettings.config.ConfigWS
 import io.github.mainyf.worldsettings.getWorldSettings
 import io.github.mainyf.worldsettings.ignorePermAndGetWorldSettings
@@ -157,18 +158,13 @@ object PlayerListener : Listener {
         }
     }
 
-    //    @EventHandler
-    //    fun onRespawn(event: PlayerRespawnEvent) {
-    //
-    //    }
-
     @EventHandler
-    fun onTabComplete(event: TabCompleteEvent) {
+    fun onSU(event: AsyncTabCompleteEvent) {
         val player = event.sender as? Player ?: return
-        ignorePermAndGetWorldSettings(player) { settings ->
-            if (!settings.tabComplete) {
-                event.completions.clear()
-            }
+        val settings = ConfigWS.getSetting(player.location) ?: return
+        if (player.hasPermission(ConfigWS.ignorePermission)) return
+        if (!settings.tabComplete) {
+            event.isCancelled = true
         }
     }
 
@@ -178,17 +174,21 @@ object PlayerListener : Listener {
         ignorePermAndGetWorldSettings(player) { settings ->
             if (!settings.tabComplete) {
                 event.commands.clear()
+            } else {
+                settings.completeCommandList.forEach { (matchType, commandText) ->
+                    when (matchType) {
+                        LIKE -> {
+                            event.commands.removeAll { !it.contains(commandText) }
+                        }
+
+                        START -> {
+                            event.commands.removeAll { !it.startsWith(commandText) }
+                        }
+                    }
+                }
             }
         }
     }
-
-    //    @EventHandler(ignoreCancelled = true)
-    //    fun onTeleport(event: PlayerTeleportEvent) {
-    //        val settings = ConfigManager.getSetting(event.to?.world) ?: return
-    //        if (settings.autoDeOp && event.player.isOp) {
-    //            event.player.isOp = false
-    //        }
-    //    }
 
     @EventHandler
     fun noBreakFarm(event: PlayerInteractEvent) {

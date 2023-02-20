@@ -65,18 +65,18 @@ class DungeonBattle(val dungeon: DungeonStructure, var level: Int) {
             }
             checkPlayers()
         }
-//        checkMobValidTask = CsDungeon.INSTANCE.submitTask(period = 10L) {
-//            val world = dungeon.worldName.asWorld() ?: return@submitTask
-//            val entities = world.livingEntities
-//            val iter = mobList.iterator()
-//            while (iter.hasNext()) {
-//                val mob = iter.next()
-//                if (!entities.contains(mob.bukkitEntity)) {
-//                    mob.setDead()
+        checkMobValidTask = CsDungeon.INSTANCE.submitTask(period = 10L) {
+            val world = dungeon.worldName.asWorld() ?: return@submitTask
+            val entities = world.livingEntities
+            val iter = mobList.iterator()
+            while (iter.hasNext()) {
+                val mob = iter.next()
+                if (!entities.contains(mob.bukkitEntity)) {
+                    mob.setDead()
 //                    iter.remove()
-//                }
-//            }
-//        }
+                }
+            }
+        }
         //        flyCheckTask = CsDungeon.INSTANCE.submitTask(period = 10L) {
         //            if (!dungeonConfig!!.noFly) return@submitTask
         //            players.forEach {

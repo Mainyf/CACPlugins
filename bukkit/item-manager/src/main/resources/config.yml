@@ -1,0 +1,18 @@
+iaItems:
+  test:
+    # 对应的ia物品
+    namespaceID: itemsadder:testItem
+    # 是否更新物品
+    update: true
+    # 物品的能力
+    trigger:
+      # 当物品成功进行攻击时
+      ATTACK:
+        # 让玩家触发mm技能
+        mmSkill: testKill
+      # 左键点击时（空气或实体都行）
+      LEFT_CLICK:
+        mmSkill: testKill
+      # 右键点击时（空气或实体都行）
+      RIGHT_CLICK:
+        mmSkill: testKill

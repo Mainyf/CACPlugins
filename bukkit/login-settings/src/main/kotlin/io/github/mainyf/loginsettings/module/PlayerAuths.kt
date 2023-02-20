@@ -11,11 +11,13 @@ import io.github.mainyf.loginsettings.AuthMeUtils
 import io.github.mainyf.loginsettings.LoginSettings
 import io.github.mainyf.loginsettings.config.ConfigLS
 import io.github.mainyf.loginsettings.menu.TeachingMenu
+import io.github.mainyf.loginsettings.module.PlayerAuths.getIP
 import io.github.mainyf.loginsettings.storage.StorageLS
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.protocolManager
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -35,6 +37,7 @@ object PlayerAuths : BukkitRunnable(), Listener {
     private val playerBindings = mutableSetOf<UUID>()
     private val playerResetPasswding = mutableSetOf<UUID>()
 
+    private val passwordWrongTimeMap = mutableMapOf<UUID, Long>()
     private val passwordWrongMap = mutableMapOf<UUID, Int>()
     private val ipBlackMap = mutableMapOf<String, Long>()
 
@@ -74,17 +77,18 @@ object PlayerAuths : BukkitRunnable(), Listener {
                 }
             }
         }
-        protocolManager().addPacketListener(object : PacketAdapter(LoginSettings.INSTANCE, PacketType.Play.Client.BLOCK_DIG) {
-
-            override fun onPacketReceiving(event: PacketEvent) {
-                val player = event.player
-                val digType = event.packet.playerDigTypes.read(0)
-                if(digType == EnumWrappers.PlayerDigType.SWAP_HELD_ITEMS) {
-                    onSwap(player)
-                }
-            }
-
-        })
+//        protocolManager().addPacketListener(object :
+//            PacketAdapter(LoginSettings.INSTANCE, PacketType.Play.Client.BLOCK_DIG) {
+//
+//            override fun onPacketReceiving(event: PacketEvent) {
+//                val player = event.player
+//                val digType = event.packet.playerDigTypes.read(0)
+//                if (digType == EnumWrappers.PlayerDigType.SWAP_HELD_ITEMS) {
+//                    onSwap(player)
+//                }
+//            }
+//
+//        })
     }
 
     override fun run() {
@@ -114,25 +118,25 @@ object PlayerAuths : BukkitRunnable(), Listener {
         registeredStage2Set.remove(player.uuid)
 
         unAuths.remove(player.uuid)
-        passwordWrongMap.remove(player.uuid)
+//        passwordWrongMap.remove(player.uuid)
+    }
+
+    @EventHandler
+    fun onSwap(event: PlayerSwapHandItemsEvent) {
+        onSwap(event.player)
     }
 
     private fun onSwap(player: Player) {
-        LoginSettings.LOGGER.info("1")
-        if(playerResetPasswding.contains(player.uuid)) return
+        if (playerResetPasswding.contains(player.uuid)) return
         if (!unAuths.contains(player.uuid)) return
-        LoginSettings.LOGGER.info("2")
         if (!ConfigLS.qqEnable) {
-            LoginSettings.LOGGER.info("3")
             ConfigLS.emergencyAction?.execute(player)
             return
         }
-        LoginSettings.LOGGER.info("4")
         if (!StorageLS.hasLinkQQ(player.uuid)) {
             ConfigLS.playerLogin.noBindQQNum?.execute(player)
             return
         }
-        LoginSettings.LOGGER.info("6")
         playerResetPasswding.add(player.uuid)
         cleanup(player)
         ConfigLS.playerLogin.nextStage?.execute(player)
@@ -142,9 +146,14 @@ object PlayerAuths : BukkitRunnable(), Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onCommand(event: PlayerCommandPreprocessEvent) {
         val authMeAPI = AuthMeApi.getInstance()
-        if (!authMeAPI.isAuthenticated(event.player)) {
-            ConfigLS.noUsageCommand?.execute(event.player)
+        val msg = event.message.replace("/", "")
+        if (handleMessage(event.player, msg, event)) {
             event.isCancelled = true
+        } else {
+            if (!authMeAPI.isAuthenticated(event.player)) {
+                ConfigLS.noUsageCommand?.execute(event.player)
+                event.isCancelled = true
+            }
         }
     }
 
@@ -152,6 +161,13 @@ object PlayerAuths : BukkitRunnable(), Listener {
     fun onChat(event: AsyncChatEvent) {
         val player = event.player
         val text = event.message().text()
+        if (handleMessage(player, text, event)) {
+            event.isCancelled = true
+        }
+    }
+
+    private fun handleMessage(player: Player, text: String, event: Event?): Boolean {
+        var isCancelled = false
         when {
             registeredStage1Set.contains(player.uuid) -> {
                 kotlin.run {
@@ -163,8 +179,9 @@ object PlayerAuths : BukkitRunnable(), Listener {
                     ConfigLS.playerRegister.nextStage?.execute(player)
                     registeredStage2Set.add(player.uuid)
                 }
-                event.isCancelled = true
+                isCancelled = true
             }
+
             registeredStage2Set.contains(player.uuid) && prevPasswordMap.containsKey(player.uuid) -> {
                 val password = prevPasswordMap[player.uuid]!!
                 kotlin.run {
@@ -195,16 +212,24 @@ object PlayerAuths : BukkitRunnable(), Listener {
                         ConfigLS.playerRegister.registerSuccess?.execute(player)
                     }
                 }
-                event.isCancelled = true
+                isCancelled = true
             }
+
             unAuths.contains(player.uuid) -> {
                 kotlin.run {
                     if (!AuthMeApi.getInstance().checkPassword(player.name, text)) {
                         ConfigLS.playerLogin.passwordWrong?.execute(player)
+                        val prevTime = passwordWrongTimeMap.getOrPut(player.uuid) { currentTime() }
+                        val elapsedTime = currentTime() - prevTime
                         var count = passwordWrongMap.getOrDefault(player.uuid, 0)
-                        count++
+                        if (elapsedTime >= ConfigLS.playerLogin.passwordAttemptsMaxTime * 60 * 60 * 1000L) {
+                            count = 1
+                        } else {
+                            count++
+                        }
                         if (count >= ConfigLS.playerLogin.passwordAttempts) {
                             passwordWrongMap[player.uuid] = 0
+                            passwordWrongTimeMap.remove(player.uuid)
                             val ip = player.getIP()
                             ipBlackMap[ip] = currentTime()
                             onlinePlayers().forEach {
@@ -212,7 +237,7 @@ object PlayerAuths : BukkitRunnable(), Listener {
                                     kickPlayer(it, ConfigLS.playerLogin.passwordWrongBlackListTime * 60 * 1000L)
                                 }
                             }
-//                        kickPlayer(player, ConfigManager.playerLogin.passwordWrongBlackListTime * 60 * 1000L)
+                            //                        kickPlayer(player, ConfigManager.playerLogin.passwordWrongBlackListTime * 60 * 1000L)
                             cleanup(player)
                             return@run
                         }
@@ -221,11 +246,13 @@ object PlayerAuths : BukkitRunnable(), Listener {
                     }
                     cleanup(player)
                     ConfigLS.playerLogin.loginSuccess?.execute(player)
+                    passwordWrongTimeMap.remove(player.uuid)
                     AuthMeApi.getInstance().forceLogin(player)
                 }
-                event.isCancelled = true
+                isCancelled = true
             }
         }
+        return isCancelled
     }
 
     private fun Player.getIP(): String {
@@ -282,13 +309,16 @@ object PlayerAuths : BukkitRunnable(), Listener {
                 ConfigLS.resourcePack.successLoad?.execute(player)
                 TeachingMenu().open(player)
             }
+
             DECLINED -> {
                 ConfigLS.resourcePack.declined?.execute(player)
             }
+
             FAILED_DOWNLOAD -> {
                 ConfigLS.resourcePack.failDownload?.execute(player)
                 event.player.setResourcePack(ConfigLS.resourcePack.url, null)
             }
+
             else -> {}
         }
     }

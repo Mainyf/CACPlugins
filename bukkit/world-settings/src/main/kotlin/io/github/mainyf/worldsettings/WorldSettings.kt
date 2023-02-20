@@ -5,7 +5,12 @@ import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketAdapter
 import com.comphenix.protocol.events.PacketEvent
 import dev.jorel.commandapi.CommandAPI
+import dev.jorel.commandapi.executors.ExecutorType
 import io.github.mainyf.newmclib.BasePlugin
+import io.github.mainyf.newmclib.command.apiCommand
+import io.github.mainyf.newmclib.command.offlinePlayerArguments
+import io.github.mainyf.newmclib.command.playerArguments
+import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.submitTask
 import io.github.mainyf.newmclib.protocolManager
 import io.github.mainyf.worldsettings.config.ConfigWS
@@ -34,7 +39,7 @@ class WorldSettings : BasePlugin() {
         INSTANCE = this
         ConfigWS.load()
         PlayerDropItemStorage.init(this)
-        //        server.pluginManager.getPlugin("AuthMe")
+//        //        server.pluginManager.getPlugin("AuthMe")
         CommandHandler.init()
         CommandHandler.register()
         Bukkit.getServer().pluginManager.registerEvents(EntityListener, this)
@@ -92,19 +97,6 @@ class WorldSettings : BasePlugin() {
                 }
             }
         }
-        packetListener = object : PacketAdapter(this, PacketType.Play.Client.TAB_COMPLETE) {
-
-            override fun onPacketReceiving(event: PacketEvent) {
-                val player = event.player
-                val settings = ConfigWS.getSetting(player.location) ?: return
-                if (player.hasPermission(ConfigWS.ignorePermission)) return
-                if (!settings.tabComplete) {
-                    event.isCancelled = true
-                }
-            }
-
-        }
-        protocolManager().addPacketListener(packetListener)
         protocolManager().addPacketListener(object : PacketAdapter(this, PacketType.Play.Server.ENTITY_SOUND) {
 
             override fun onPacketSending(event: PacketEvent) {
@@ -117,6 +109,14 @@ class WorldSettings : BasePlugin() {
             }
 
         })
+//        apiCommand("demo") {
+//            "aaa" {
+//                withArguments(offlinePlayerArguments("玩家"))
+//                executePlayer {
+//                    sender.msg("信息")
+//                }
+//            }
+//        }
     }
 
     override fun onDisable() {
@@ -133,8 +133,8 @@ fun ignorePermAndGetWorldSettings(
     block: (WorldSettingConfig) -> Unit
 ) {
     if (entity?.hasPermission(ConfigWS.ignorePermission) == true) return
-//    val settings =
-//        (if (entity == null) ConfigWS.getSetting(world) else ConfigWS.getSetting(location!!)) ?: return
+    //    val settings =
+    //        (if (entity == null) ConfigWS.getSetting(world) else ConfigWS.getSetting(location!!)) ?: return
     val settings = getWorldSetting(location!!) ?: return
     //    val settings = ConfigManager.getSetting(world) ?: return
     block.invoke(settings)

@@ -31,8 +31,7 @@ object ConfigTP {
     var checkPlayerInventoryInfo = "&c玩家: {player} 持有物品({status}) {itemText}，超出限制"
     val checkPlayerInventoryItems = mutableListOf<CheckPlayerInvItem>()
 
-    var iaItemAutoUpdateInfo: MultiAction? = null
-    val iaItemAutoUpdateItems = mutableSetOf<String>()
+    val iaItemAutoUpdateItems = mutableMapOf<String, IaItemAutoUpdate>()
 
     var saturdayNightVisionEnable = true
     var saturdayNightVisionMvpPerm = "nightvision.use"
@@ -78,9 +77,29 @@ object ConfigTP {
                 pair[1].toInt()
             )
         })
-        iaItemAutoUpdateInfo = mainConfig.getAction("iaItemAutoUpdate.info")
+
         iaItemAutoUpdateItems.clear()
-        iaItemAutoUpdateItems.addAll(mainConfig.getStringList("iaItemAutoUpdate.item"))
+        val iaItemAutoUpdatesSect = mainConfig.getSection("iaItemAutoUpdate")
+        iaItemAutoUpdatesSect.getKeys(false).forEach loop1@{ iaItemName ->
+            val iaItemAutoUpdateSect = iaItemAutoUpdatesSect.getSection(iaItemName)
+            val namespaceID = iaItemAutoUpdateSect.getString("namespaceID")!!
+            val update = iaItemAutoUpdateSect.getBoolean("update", true)
+            val triggersSect = iaItemAutoUpdateSect.getSection("trigger")
+            val map = mutableMapOf<ItemTrigger, String>()
+            triggersSect.getKeys(false).forEach {
+                val itemTrigger = EnumUtils.getEnumIgnoreCase(ItemTrigger::class.java, it)
+                if (itemTrigger == null) {
+                    ToolsPlugin.LOGGER.warn("触发器 $it 不存在，检查配置")
+                    return@forEach
+                }
+                map[itemTrigger] = triggersSect.getString("${it}.mmSkill")!!
+            }
+            iaItemAutoUpdateItems[namespaceID] = IaItemAutoUpdate(
+                namespaceID,
+                update,
+                map
+            )
+        }
         saturdayNightVisionEnable = mainConfig.getBoolean("saturdayNightVision.enable", saturdayNightVisionEnable)
         saturdayNightVisionMvpPerm = mainConfig.getString("saturdayNightVision.mvp", saturdayNightVisionMvpPerm)!!
         saturdayNightVisionToggleAction = mainConfig.getAction("saturdayNightVision.toggleAction")
@@ -156,5 +175,17 @@ object ConfigTP {
         val veinBlocks: Int,
         val chunkVeins: Int
     )
+
+    class IaItemAutoUpdate(
+        val namespaceID: String,
+        val update: Boolean,
+        val triggers: Map<ItemTrigger, String>
+    )
+
+    enum class ItemTrigger {
+        ATTACK,
+        LEFT_CLICK,
+        RIGHT_CLICK
+    }
 
 }

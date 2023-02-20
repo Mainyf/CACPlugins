@@ -9,10 +9,7 @@ import dev.jorel.commandapi.arguments.GreedyStringArgument
 import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.command.stringArguments
-import io.github.mainyf.newmclib.exts.msg
-import io.github.mainyf.newmclib.exts.pluginManager
-import io.github.mainyf.newmclib.exts.successMsg
-import io.github.mainyf.newmclib.exts.toReflect
+import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
 import io.github.mainyf.questextension.config.ConfigQE
 import io.github.mainyf.questextension.events.ManualCompleteQuestEvent
@@ -24,6 +21,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import kotlin.collections.find
 
 
 class QuestExtension : JavaPlugin(), Listener {
@@ -161,6 +159,16 @@ class QuestExtension : JavaPlugin(), Listener {
                 else -> "no"
             }
         }
+        submitTask(period = 20) {
+            onlinePlayers().forEach {
+                val data = UserQC.cachedOrNull(it)
+                if (data == null) {
+                    submitTask(async = true) {
+                        UserQC.processWithQuests(it.uuid) {}
+                    }
+                }
+            }
+        }
         QuestCreator.inst().configuration.toReflect().call("loadElements")
     }
 
@@ -169,7 +177,7 @@ class QuestExtension : JavaPlugin(), Listener {
     }
 
     fun getTutorialQuest(player: Player): Quest? {
-        val userQC = QuestManager.getUserQC(player) ?: return null
+        val userQC = QuestManager.getUserQC(player, false) ?: return null
         val quests = userQC.cachedActiveQuests
         return quests.find {
             it.model.id == ConfigQE.tutorialQuest

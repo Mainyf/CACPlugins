@@ -9,6 +9,7 @@ import io.github.mainyf.itemenchantplus.config.sendLang
 import io.github.mainyf.itemenchantplus.enchants.ExpandEnchant
 import io.github.mainyf.itemenchantplus.enchants.LanRenEnchant
 import io.github.mainyf.itemenchantplus.enchants.LuckEnchant
+import io.github.mainyf.itemenchantplus.enchants.VolleyEnchant
 import io.github.mainyf.itemenchantplus.hook.MyIsLandHooks
 import io.github.mainyf.itemenchantplus.listeners.PlayerListeners
 import io.github.mainyf.itemenchantplus.menu.DashboardMenu
@@ -47,9 +48,11 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
         StorageIEP.init()
         ExpandEnchant.init()
         LuckEnchant.init()
+        VolleyEnchant.init()
         Bukkit.getServer().pluginManager.registerEvents(ExpandEnchant, this)
         Bukkit.getServer().pluginManager.registerEvents(LuckEnchant, this)
         Bukkit.getServer().pluginManager.registerEvents(LanRenEnchant, this)
+        Bukkit.getServer().pluginManager.registerEvents(VolleyEnchant, this)
         Bukkit.getServer().pluginManager.registerEvents(PlayerListeners, this)
         RecallSBManager.addRecallSBItemPredicate(this.name) { itemStack ->
             EnchantManager.hasEnchantItem(itemStack)

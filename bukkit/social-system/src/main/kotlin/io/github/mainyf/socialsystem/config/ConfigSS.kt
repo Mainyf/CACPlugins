@@ -38,6 +38,7 @@ object ConfigSS {
     lateinit var socialIslandTPMenuConfig: SocialIslandTPMenuConfig
 
     private var cardPermission = "social.card"
+    private var toggleInterval = 20L
     private var tabCardDefault = ""
     private var tabCardMap = mutableMapOf<String, CardItem>()
     private var chatCardDefault = ""
@@ -122,6 +123,7 @@ object ConfigSS {
         inviteTpExpired = mainConfigFile.getLong("inviteTpExpired", inviteTpExpired)
 
         cardPermission = mainConfigFile.getString("card.permission", "social.card")!!
+        toggleInterval = mainConfigFile.getLong("card.toggleInterval", 20)
         tabCardDefault = mainConfigFile.getString("card.tab.default", "")!!.colored()
         chatCardDefault = mainConfigFile.getString("card.chat.default", "")!!.colored()
         tagCardDefault = mainConfigFile.getString("card.tag.default", "")!!.colored()
@@ -183,7 +185,7 @@ object ConfigSS {
             val curTime = currentTime()
             val prevTime = timeMap.getOrPut(key) { curTime }
             val elapsedTime = curTime - prevTime
-            if ((elapsedTime / 1000).toInt() % 2 == 1) {
+            if ((elapsedTime / (toggleInterval * 50)).toInt() % 2 == 1) {
                 cItem.hasNick
             } else {
                 cItem.value

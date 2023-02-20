@@ -8,8 +8,11 @@ import io.papermc.paper.event.player.AsyncChatEvent
 import me.dreamvoid.miraimc.bukkit.event.message.passive.MiraiGroupMessageEvent
 import org.apache.commons.lang3.RandomStringUtils
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
 object ResetPasswords : Listener {
@@ -27,7 +30,7 @@ object ResetPasswords : Listener {
     fun init() {
         LoginSettings.INSTANCE.submitTask(period = 20L) {
             unVerityPlayers.keys.forEach {
-                if(!it.isOnline) {
+                if (!it.isOnline) {
                     clean(it)
                 }
             }
@@ -40,7 +43,7 @@ object ResetPasswords : Listener {
                 )
             }
             resetPasswordStage1.forEach {
-                if(!it.isOnline) {
+                if (!it.isOnline) {
                     clean(it)
                 }
             }
@@ -48,7 +51,7 @@ object ResetPasswords : Listener {
                 ConfigLS.resetPasswdConfig.sendNewPasswd?.execute(it)
             }
             resetPasswordStage2.keys.forEach {
-                if(!it.isOnline) {
+                if (!it.isOnline) {
                     clean(it)
                 }
             }
@@ -79,35 +82,51 @@ object ResetPasswords : Listener {
             val msg = veritySuccessMsg.tvar("player", p.name)
             event.group.sendMessageMirai("[mirai:at:$senderId] $msg")
         }
-//        ConfigManager.resetPasswdConfig.veritySuccess?.let { veritySuccessMsg ->
-//            val msg = veritySuccessMsg.tvar("player", p.name)
-//            event.reply(msg)
-//        }
+        //        ConfigManager.resetPasswdConfig.veritySuccess?.let { veritySuccessMsg ->
+        //            val msg = veritySuccessMsg.tvar("player", p.name)
+        //            event.reply(msg)
+        //        }
         unVerityPlayers.remove(p)
         ConfigLS.resetPasswdConfig.nextStage?.execute(p)
         resetPasswordStage1.add(p)
         ConfigLS.resetPasswdConfig.sendNewPasswd?.execute(p)
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onCommand(event: PlayerCommandPreprocessEvent) {
+        val msg = event.message.replace("/", "")
+        if (handleMessage(event.player, msg)) {
+            event.isCancelled = true
+        }
+    }
+
     @EventHandler(ignoreCancelled = false)
     fun onChat(event: AsyncChatEvent) {
         val player = event.player
         val text = event.message().text()
+        if (handleMessage(player, text)) {
+            event.isCancelled = true
+        }
+    }
+
+    private fun handleMessage(player: Player, text: String): Boolean {
+        var isCancelled = false
         when {
             resetPasswordStage1.contains(player) -> {
-                event.isCancelled = true
+                isCancelled = true
                 val passwordValidation = LoginSettings.validationService.validatePassword(text, player.name)
                 if (passwordValidation.hasError()) {
                     LoginSettings.commonService.send(player, passwordValidation.messageKey, *passwordValidation.args)
-                    return
+                    return isCancelled
                 }
                 resetPasswordStage1.remove(player)
                 ConfigLS.resetPasswdConfig.nextStage?.execute(player)
                 resetPasswordStage2[player] = text
                 ConfigLS.resetPasswdConfig.confirmNewPasswd?.execute(player)
             }
+
             resetPasswordStage2.contains(player) -> {
-                event.isCancelled = true
+                isCancelled = true
                 val prevPasswd = resetPasswordStage2[player]!!
                 if (text != prevPasswd) {
                     resetPasswordStage2.remove(player)
@@ -115,13 +134,14 @@ object ResetPasswords : Listener {
                     ConfigLS.resetPasswdConfig.nextStage?.execute(player)
                     resetPasswordStage1.add(player)
                     ConfigLS.resetPasswdConfig.sendNewPasswd?.execute(player)
-                    return
+                    return isCancelled
                 }
                 resetPasswordStage2.remove(player)
                 LoginSettings.asyncChangePassword.changePasswordAsAdmin(console(), player.name, prevPasswd)
                 ConfigLS.resetPasswdConfig.finish?.execute(player)
             }
         }
+        return isCancelled
     }
 
     @EventHandler

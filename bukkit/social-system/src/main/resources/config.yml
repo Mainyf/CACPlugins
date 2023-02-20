@@ -48,6 +48,7 @@ nickname:
     - "message: 当前已经存在"
 card:
   permission: "social.card"
+  toggleInterval: 20
   tab:
     default: '#808080[#bebebe安#808080] {player}'
     svip:

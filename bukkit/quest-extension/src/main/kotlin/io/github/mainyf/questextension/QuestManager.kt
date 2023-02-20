@@ -19,17 +19,25 @@ import java.util.concurrent.CompletableFuture
 
 object QuestManager {
 
-    fun getUserQC(player: Player): UserQC? {
-        val future = CompletableFuture<UserQC?>()
-        UserQC.processWithQuests(player.uuid) { userQC ->
-            if (userQC == null) {
+    fun getUserQC(player: Player, msg: Boolean = true): UserQC? {
+        //        val future = CompletableFuture<UserQC?>()
+        //        UserQC.processWithQuests(player.uuid) { userQC ->
+        //            if (userQC == null) {
+        //                player.errorMsg("发生错误，请告知管理员: USERQC_NULL")
+        //                future.complete(null)
+        //            } else {
+        //                future.complete(userQC)
+        //            }
+        //        }
+        //        return future
+        val userQC = UserQC.cachedOrNull(player)
+        if (userQC == null) {
+            if (msg) {
                 player.errorMsg("发生错误，请告知管理员: USERQC_NULL")
-                future.complete(null)
-            } else {
-                future.complete(userQC)
             }
+            return null
         }
-        return future.get()
+        return userQC
     }
 
     private fun getPlayerDailyQuest(userQC: UserQC): List<Quest> {

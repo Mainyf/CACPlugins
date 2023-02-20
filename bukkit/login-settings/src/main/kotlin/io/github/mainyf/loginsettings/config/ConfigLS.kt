@@ -78,6 +78,7 @@ object ConfigLS {
             ActionParser.parseAction(mainConfigFile, "login.stage1.loginSuccess", false),
             ActionParser.parseAction(mainConfigFile, "login.stage1.passwordWrong", false),
 
+            mainConfigFile.getLong("passwordAttemptsMaxTime", 6),
             mainConfigFile.getInt("login.stage1.passwordAttempts", 5),
             mainConfigFile.getLong("login.stage1.passwordWrongBlackListTime", 5L),
             mainConfigFile.getStringList("login.stage1.blackListKickFormat").let { list ->
@@ -187,6 +188,7 @@ object ConfigLS {
         val loginSuccess: MultiAction?,
         val passwordWrong: MultiAction?,
 
+        val passwordAttemptsMaxTime: Long,
         val passwordAttempts: Int,
         val passwordWrongBlackListTime: Long,
         val blackListKickFormat: Component

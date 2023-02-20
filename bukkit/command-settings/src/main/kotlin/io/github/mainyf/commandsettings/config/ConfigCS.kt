@@ -6,20 +6,23 @@ import io.github.mainyf.newmclib.config.PlayParser
 import io.github.mainyf.newmclib.config.action.MultiAction
 import io.github.mainyf.newmclib.config.play.MultiPlay
 import io.github.mainyf.newmclib.exts.colored
+import io.github.mainyf.newmclib.exts.getAction
 import io.github.mainyf.newmclib.exts.saveResourceToFileAsConfiguration
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 
 object ConfigManager {
 
+    var startServerAction: MultiAction? = null
     private val actionMap = mutableMapOf<String, ItemAction>()
 
     fun load() {
         kotlin.runCatching {
-            if(!CommandSettings.INSTANCE.dataFolder.resolve("commands").exists()) {
+            val mainFile = CommandSettings.INSTANCE.saveResourceToFileAsConfiguration("config.yml")
+            if (!CommandSettings.INSTANCE.dataFolder.resolve("commands").exists()) {
                 CommandSettings.INSTANCE.saveResourceToFileAsConfiguration("commands/config.yml")
             }
-
+            startServerAction = mainFile.getAction("startServer.actions")
             actionMap.clear()
             CommandSettings.INSTANCE.dataFolder
                 .resolve("commands")

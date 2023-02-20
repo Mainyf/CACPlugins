@@ -23,11 +23,11 @@ checkPlayerInventory:
   info: "&c玩家: {player} 持有物品({status}) {itemText}，超出限制"
   item:
     - "itemsadder:xxx|10"
-iaItemAutoUpdate:
-  info:
-    - "mini: 物品 {itemName} 已经被更新"
-  item:
-    - "itemsadder:xxx"
+#iaItemAutoUpdate:
+#  info:
+#    - "mini: 物品 {itemName} 已经被更新"
+#  item:
+#    - "itemsadder:xxx"
 placeholder:
   test:
     target: '%player_name%'

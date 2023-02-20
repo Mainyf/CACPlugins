@@ -40,8 +40,8 @@ object ConfigMC {
                 val countingTime = worldSect.getLong("countingTime")
                 val countMax = worldSect.getInt("countMax")
                 val expandIgnoreSecound = worldSect.getLong("expandIgnoreSecound")
-                val expandStage3Ratio = worldSect.getInt("expandStage3Ratio")
-                val expandPlusRatio = worldSect.getInt("expandPlusRatio")
+                val expandStage3Ratio = worldSect.getDouble("expandStage3Ratio")
+                val expandPlusRatio = worldSect.getDouble("expandPlusRatio")
                 val countActions = worldSect.getSection("countActions").let { countActionsSect ->
                     countActionsSect.getKeys(false).associateWith {
                         val num = countActionsSect.getInt("${it}.num")
@@ -79,8 +79,8 @@ object ConfigMC {
         val countingTime: Long,
         val countMax: Int,
         val expandIgnoreSecound: Long,
-        val expandStage3Ratio: Int,
-        val expandPlusRatio: Int,
+        val expandStage3Ratio: Double,
+        val expandPlusRatio: Double,
         val countActions: Map<String, CountAction>,
         val blocks: Map<Material, Int>
     )

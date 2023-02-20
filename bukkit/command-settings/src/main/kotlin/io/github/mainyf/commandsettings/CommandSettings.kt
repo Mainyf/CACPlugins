@@ -35,6 +35,7 @@ class CommandSettings : BasePlugin(), Listener {
         CommandHandler.init()
         CommandHandler.register()
         pluginManager().registerEvents(this, this)
+        ConfigManager.startServerAction?.execute(console())
     }
 
     fun sendAction(serverId: String, id: String) {

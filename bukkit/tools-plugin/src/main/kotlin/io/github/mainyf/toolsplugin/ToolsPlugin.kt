@@ -1,5 +1,6 @@
 package io.github.mainyf.toolsplugin
 
+import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
 import dev.jorel.commandapi.arguments.BooleanArgument
 import io.github.mainyf.bungeesettingsbukkit.ServerPacket
 import io.github.mainyf.newmclib.BasePlugin
@@ -14,9 +15,11 @@ import io.papermc.paper.configuration.GlobalConfiguration
 import me.clip.placeholderapi.PlaceholderAPI
 import net.luckperms.api.LuckPermsProvider
 import org.apache.logging.log4j.LogManager
+import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import java.math.RoundingMode
 import java.util.*
 import kotlin.math.ceil
 
@@ -43,11 +46,10 @@ class ToolsPlugin : BasePlugin(), Listener {
         pluginManager().registerEvents(IaRecipe, this)
         pluginManager().registerEvents(ChunkLogger, this)
         pluginManager().registerEvents(CheckPlayerInventory, this)
-        pluginManager().registerEvents(IaItemAutoUpdate, this)
+//        pluginManager().registerEvents(IaItemAutoUpdate, this)
         CheckPlayerInventory.init()
-        IaItemAutoUpdate.init()
+//        IaItemAutoUpdate.init()
         ExportPlayerData.init()
-        MineralSpawns.init()
         apiCommand("toolsPlugin") {
             withAliases("tools", "toolsp")
             "reload" {
@@ -152,6 +154,10 @@ class ToolsPlugin : BasePlugin(), Listener {
             val placeholder = ConfigTP.placeholders[params] ?: return@addPlaceholderExpansion null
             val targetText = PlaceholderAPI.setPlaceholders(p, placeholder.target)
             PlaceholderAPI.setPlaceholders(p, placeholder.change[targetText] ?: placeholder.other)
+        }
+        addPlaceholderExpansion("attackcooldown") { p, params ->
+            val player = p?.player ?: return@addPlaceholderExpansion "no"
+            player.attackCooldown.toBigDecimal().setScale(2, RoundingMode.HALF_UP).toString()
         }
     }
 

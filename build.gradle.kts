@@ -229,11 +229,16 @@ subprojects {
                 "tools-plugin" -> {
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(lpPath))
-//                    compileOnly("me.arasple.mc.trmenu:trmenu-plugin:3.1.17")
+                    //                    compileOnly("me.arasple.mc.trmenu:trmenu-plugin:3.1.17")
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                     compileOnly(rootProject.files("./libs/luckperms-bukkit-implement.jar"))
                     compileOnly(rootProject.project(":bukkit:custom-economy"))
                     compileOnly(rootProject.project(":bukkit:social-system"))
+                }
+
+                "item-manager" -> {
+                    compileOnly(rootProject.files(itemsAdderPath))
+                    compileOnly(rootProject.files(mmPath))
                 }
             }
         }
@@ -291,10 +296,12 @@ subprojects {
                             "Citizens"
                         )
                     )
-                    sd.addAll(listOf(
-                        "PlotSquared",
-                        "MyIslands"
-                    ))
+                    sd.addAll(
+                        listOf(
+                            "PlotSquared",
+                            "MyIslands"
+                        )
+                    )
                 }
 
                 "my-islands" -> {
@@ -316,7 +323,7 @@ subprojects {
 
                 "quest-extension" -> {
                     dd.addAll(listOf(/*"QuestCreator", */"CustomEconomy"))
-                    loadBefore.add("QuestCreator")
+                    //                    loadBefore.add("QuestCreator")
                 }
 
                 "command-settings" -> {
@@ -354,11 +361,23 @@ subprojects {
                 }
 
                 "cs-dungeon" -> {
-                    dd.addAll(listOf("CustomStructures", "sAdder", "MythicMobs", "WorldSettings"))
+                    dd.addAll(listOf("CustomStructures", "ItemsAdder", "MythicMobs", "WorldSettings"))
                 }
 
                 "tools-plugin" -> {
-                    dd.addAll(listOf("ItemsAdder", "CustomEconomy", "LuckPerms", "SocialSystem", "BungeeSettingsBukkit"))
+                    dd.addAll(
+                        listOf(
+                            "ItemsAdder",
+                            "CustomEconomy",
+                            "LuckPerms",
+                            "SocialSystem",
+                            "BungeeSettingsBukkit"
+                        )
+                    )
+                }
+
+                "item-manager" -> {
+                    dd.addAll(listOf("ItemsAdder", "MythicMobs"))
                 }
 
                 "soul-bind" -> {
@@ -484,15 +503,32 @@ class $pluginName : JavaPlugin() {
             group = "bukkit"
             description = "runs the bukkit server"
         }
+
+        tasks.register<JavaExec>("runEServer") {
+            //            dependsOn(tasks.findByName("copyPlugin"))
+            classpath = rootProject.files("F:\\登录服测试\\paper-1.19.2-211.jar")
+            mainClass.set("io.papermc.paperclip.Paperclip")
+            val jvmArgsText =
+                "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
+            //            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
+            jvmArgs = jvmArgsText.split(" ")
+            args = listOf("nogui")
+            workingDir = rootProject.file("F:\\登录服测试")
+            standardOutput = System.out
+            standardInput = System.`in`
+            errorOutput = System.err
+            group = "bukkit"
+            description = "runs the bukkit server"
+        }
     }
 
 
     if (hasBungeeCord(project)) {
         tasks.register<Copy>("copyPlugin") {
             group = "bukkit"
-//            rootProject.file("./server/bungeecord/plugins/").listFiles()?.find {
-//                it.name.startsWith(project.name) && it.name.endsWith(".jar")
-//            }?.delete()
+            //            rootProject.file("./server/bungeecord/plugins/").listFiles()?.find {
+            //                it.name.startsWith(project.name) && it.name.endsWith(".jar")
+            //            }?.delete()
             from(tasks.jar)
             into(rootProject.file("./server/bungeecord/plugins/").absolutePath)
         }

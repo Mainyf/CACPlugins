@@ -34,6 +34,7 @@ object PlayerListeners : Listener {
 
     @EventHandler
     fun onClose(event: InventoryCloseEvent) {
+        if (event.player.isOp) return
         val topInv = event.player.openInventory.topInventory
         val topInvHolder = topInv.holder
         val items = event.player.openInventory.topInventory.toMutableList()

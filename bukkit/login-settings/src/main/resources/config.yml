@@ -43,6 +43,8 @@ login:
     passwordWrong:
       - "message: &c&l！&4密码错误。（错误5次将半小时不能登陆）"
       - "sound: BLOCK_NOTE_BLOCK_BELL,1,0"
+    # 密码错误尝试的最长时间，超出这个时间则错误次数重新计算
+    passwordAttemptsMaxTime: 6
     # 错误密码的尝试次数
     passwordAttempts: 5
     # 密码错误后不能进入服务器的时间

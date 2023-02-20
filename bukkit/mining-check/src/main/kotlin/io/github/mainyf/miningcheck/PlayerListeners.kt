@@ -88,7 +88,7 @@ object PlayerListeners : Listener {
         val usePlusExpand =
             currentTime - ExpandEnchant.getUsePlusEnchantTime(player.uuid) <= config.expandIgnoreSecound * 1000
         if (usePlusExpand) {
-            score *= config.expandPlusRatio
+            score = (score.toDouble() * config.expandPlusRatio).toInt()
             debug(
                 player,
                 "玩家: ${player.name} 触发了 expand plus 检测"
@@ -97,7 +97,7 @@ object PlayerListeners : Listener {
             val useStage3Expand =
                 currentTime - ExpandEnchant.getUseStage3EnchantTime(player.uuid) <= config.expandIgnoreSecound * 1000
             if (useStage3Expand) {
-                score *= config.expandStage3Ratio
+                score = (score.toDouble() * config.expandStage3Ratio).toInt()
                 debug(
                     player,
                     "玩家: ${player.name} 触发了 expand stage3 检测"
