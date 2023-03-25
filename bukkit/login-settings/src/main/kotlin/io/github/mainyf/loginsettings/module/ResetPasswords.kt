@@ -92,13 +92,13 @@ object ResetPasswords : Listener {
         ConfigLS.resetPasswdConfig.sendNewPasswd?.execute(p)
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    fun onCommand(event: PlayerCommandPreprocessEvent) {
-        val msg = event.message.replace("/", "")
-        if (handleMessage(event.player, msg)) {
-            event.isCancelled = true
-        }
-    }
+//    @EventHandler(priority = EventPriority.HIGHEST)
+//    fun onCommand(event: PlayerCommandPreprocessEvent) {
+//        val msg = event.message.replace("/", "")
+//        if (handleMessage(event.player, msg)) {
+//            event.isCancelled = true
+//        }
+//    }
 
     @EventHandler(ignoreCancelled = false)
     fun onChat(event: AsyncChatEvent) {

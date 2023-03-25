@@ -31,8 +31,6 @@ object ConfigTP {
     var checkPlayerInventoryInfo = "&c玩家: {player} 持有物品({status}) {itemText}，超出限制"
     val checkPlayerInventoryItems = mutableListOf<CheckPlayerInvItem>()
 
-    val iaItemAutoUpdateItems = mutableMapOf<String, IaItemAutoUpdate>()
-
     var saturdayNightVisionEnable = true
     var saturdayNightVisionMvpPerm = "nightvision.use"
     var saturdayNightVisionToggleAction: MultiAction? = null
@@ -41,14 +39,16 @@ object ConfigTP {
 
     val customBlockGenerators = mutableMapOf<String, CustomBlockGenerator>()
 
+    var forwardMythicMobSummonDamage = false
+
     lateinit var mainConfig: ConfigurationSection
     lateinit var worldPopulatorConfig: ConfigurationSection
 
     fun load() {
         mainConfig = ToolsPlugin.INSTANCE.saveResourceToFileAsConfiguration("config.yml")
-        worldPopulatorConfig = ToolsPlugin.INSTANCE.saveResourceToFileAsConfiguration("world-populator.yml")
+//        worldPopulatorConfig = ToolsPlugin.INSTANCE.saveResourceToFileAsConfiguration("world-populator.yml")
         loadMainConfig()
-        loadWorldPopulator()
+//        loadWorldPopulator()
     }
 
     private fun loadMainConfig() {
@@ -78,28 +78,6 @@ object ConfigTP {
             )
         })
 
-        iaItemAutoUpdateItems.clear()
-        val iaItemAutoUpdatesSect = mainConfig.getSection("iaItemAutoUpdate")
-        iaItemAutoUpdatesSect.getKeys(false).forEach loop1@{ iaItemName ->
-            val iaItemAutoUpdateSect = iaItemAutoUpdatesSect.getSection(iaItemName)
-            val namespaceID = iaItemAutoUpdateSect.getString("namespaceID")!!
-            val update = iaItemAutoUpdateSect.getBoolean("update", true)
-            val triggersSect = iaItemAutoUpdateSect.getSection("trigger")
-            val map = mutableMapOf<ItemTrigger, String>()
-            triggersSect.getKeys(false).forEach {
-                val itemTrigger = EnumUtils.getEnumIgnoreCase(ItemTrigger::class.java, it)
-                if (itemTrigger == null) {
-                    ToolsPlugin.LOGGER.warn("触发器 $it 不存在，检查配置")
-                    return@forEach
-                }
-                map[itemTrigger] = triggersSect.getString("${it}.mmSkill")!!
-            }
-            iaItemAutoUpdateItems[namespaceID] = IaItemAutoUpdate(
-                namespaceID,
-                update,
-                map
-            )
-        }
         saturdayNightVisionEnable = mainConfig.getBoolean("saturdayNightVision.enable", saturdayNightVisionEnable)
         saturdayNightVisionMvpPerm = mainConfig.getString("saturdayNightVision.mvp", saturdayNightVisionMvpPerm)!!
         saturdayNightVisionToggleAction = mainConfig.getAction("saturdayNightVision.toggleAction")
@@ -120,6 +98,7 @@ object ConfigTP {
                 other
             )
         }
+        forwardMythicMobSummonDamage = mainConfig.getBoolean("forwardMythicMobSummonDamage", forwardMythicMobSummonDamage)
     }
 
     private fun loadWorldPopulator() {
@@ -175,17 +154,5 @@ object ConfigTP {
         val veinBlocks: Int,
         val chunkVeins: Int
     )
-
-    class IaItemAutoUpdate(
-        val namespaceID: String,
-        val update: Boolean,
-        val triggers: Map<ItemTrigger, String>
-    )
-
-    enum class ItemTrigger {
-        ATTACK,
-        LEFT_CLICK,
-        RIGHT_CLICK
-    }
 
 }

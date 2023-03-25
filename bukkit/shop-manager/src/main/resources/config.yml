@@ -18,3 +18,9 @@ buyShop:
   CACTUS: "1,5000"
   SWEET_BERRIES: "1.5,5000"
   GLOW_BERRIES: "3,5000"
+shopPrice:
+  # 最低,最高    如果为 ~,100 则无最低价    为 1,~ 则无最高价
+  DIAMOND: "0.5,1000"
+  "itemsadder:stone": "0.5,1000"
+shopTax:
+  DIAMOND: 0.6

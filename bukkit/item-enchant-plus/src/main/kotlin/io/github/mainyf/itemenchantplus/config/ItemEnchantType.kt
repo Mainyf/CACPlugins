@@ -11,7 +11,8 @@ enum class ItemEnchantType(val namespacedKey: NamespacedKey) {
 
     EXPAND(NamespacedKey(ItemEnchantPlus.INSTANCE, "expand")),
     LUCK(NamespacedKey(ItemEnchantPlus.INSTANCE, "luck")),
-    LAN_REN(NamespacedKey(ItemEnchantPlus.INSTANCE, "lan_ren"));
+    LAN_REN(NamespacedKey(ItemEnchantPlus.INSTANCE, "lan_ren")),
+    VOLLEY(NamespacedKey(ItemEnchantPlus.INSTANCE, "volley"));
 
     companion object {
 

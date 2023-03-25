@@ -25,7 +25,6 @@ import io.github.mainyf.soulbind.storage.StorageSB
 import org.apache.commons.lang3.EnumUtils
 import org.apache.logging.log4j.LogManager
 import org.bukkit.Bukkit
-import org.bukkit.block.Block
 import org.bukkit.entity.Entity
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
@@ -39,10 +38,13 @@ class ItemEnchantPlus : JavaPlugin(), Listener {
 
         lateinit var INSTANCE: ItemEnchantPlus
 
+        lateinit var iepLog: IEPLog
+
     }
 
     override fun onEnable() {
         INSTANCE = this
+        iepLog = IEPLog(dataFolder.resolve("附灵日志.log"))
         MyIsLandHooks.init()
         ConfigIEP.init()
         StorageIEP.init()

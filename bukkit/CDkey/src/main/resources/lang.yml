@@ -1,0 +1,10 @@
+ordinaryCdkeyAlreadyClaimed:
+  - "message: &c该cdkey你已经领取过了"
+consumeCdkeyAlreadyClaimed:
+  - "message: &c该cdkey已经被领取过了"
+prpagandistTimeout:
+  - "message: &c已超时"
+prpagandistSecondTime:
+  - "message: &c你只能同时领取一个主播的兑换码"
+invalidCDKey:
+  - "message: &c该兑换码是无效的"

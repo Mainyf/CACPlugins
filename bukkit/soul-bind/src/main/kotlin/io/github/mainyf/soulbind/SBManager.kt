@@ -17,6 +17,20 @@ object SBManager {
     val ownerUUIDMostTag = NamespacedKey(SoulBind.INSTANCE, "ownerUUIDMost")
     val ownerUUIDLeastTag = NamespacedKey(SoulBind.INSTANCE, "ownerUUIDLeast")
     val ownerNameTag = NamespacedKey(SoulBind.INSTANCE, "soulBindOwnerName")
+    val bindableTag = NamespacedKey(SoulBind.INSTANCE, "soulBindBindable")
+
+    fun markBindableTag(itemStack: ItemStack) {
+        val meta = itemStack.itemMeta
+        val dataContainer = meta.persistentDataContainer
+        dataContainer.set(bindableTag, PersistentDataType.INTEGER, 1)
+        itemStack.itemMeta = meta
+    }
+
+    fun hasMarkBindableTag(itemStack: ItemStack): Boolean {
+        val meta = itemStack.itemMeta ?: return false
+        val dataContainer = meta.persistentDataContainer
+        return dataContainer.has(bindableTag)
+    }
 
     fun hasBindable(itemStack: ItemStack): Boolean {
         for (iaId in ConfigSB.autoBindIAList) {
@@ -24,16 +38,24 @@ object SBManager {
                 return true
             }
         }
+        val meta = itemStack.itemMeta
+        val dataContainer = meta.persistentDataContainer
+        if (dataContainer.has(bindableTag)) {
+            return true
+        }
         return false
     }
 
     fun handleItemBind(player: Player, itemStack: ItemStack): ItemStack {
-        for (iaId in ConfigSB.autoBindIAList) {
-            if (itemStack.equalsByIaNamespaceID(iaId)) {
-                bindItem(itemStack, player.uuid, player.name)
-                break
-            }
+        if(hasBindable(itemStack)) {
+            bindItem(itemStack, player.uuid, player.name)
         }
+//        for (iaId in ConfigSB.autoBindIAList) {
+//            if (itemStack.equalsByIaNamespaceID(iaId)) {
+//                bindItem(itemStack, player.uuid, player.name)
+//                break
+//            }
+//        }
         return itemStack
     }
 
@@ -71,7 +93,11 @@ object SBManager {
         val ownerUUIDMost = rootTag.get(ownerUUIDMostTag, PersistentDataType.LONG)!!
         val ownerUUIDLeast = rootTag.get(ownerUUIDLeastTag, PersistentDataType.LONG)!!
         val ownerName = rootTag.get(ownerNameTag, PersistentDataType.STRING)!!
-        return BindItemData(UUID(ownerUUIDMost, ownerUUIDLeast), ownerName, RecallSBManager.getBindItemRecallCount(itemStack))
+        return BindItemData(
+            UUID(ownerUUIDMost, ownerUUIDLeast),
+            ownerName,
+            RecallSBManager.getBindItemRecallCount(itemStack)
+        )
     }
 
     data class BindItemData(

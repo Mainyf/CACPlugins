@@ -1,9 +1,5 @@
 package io.github.mainyf.loginsettings.module
 
-import com.comphenix.protocol.PacketType
-import com.comphenix.protocol.events.PacketAdapter
-import com.comphenix.protocol.events.PacketEvent
-import com.comphenix.protocol.wrappers.EnumWrappers
 import fr.xephi.authme.api.v3.AuthMeApi
 import fr.xephi.authme.events.LoginEvent
 import fr.xephi.authme.message.MessageKey
@@ -11,10 +7,8 @@ import io.github.mainyf.loginsettings.AuthMeUtils
 import io.github.mainyf.loginsettings.LoginSettings
 import io.github.mainyf.loginsettings.config.ConfigLS
 import io.github.mainyf.loginsettings.menu.TeachingMenu
-import io.github.mainyf.loginsettings.module.PlayerAuths.getIP
 import io.github.mainyf.loginsettings.storage.StorageLS
 import io.github.mainyf.newmclib.exts.*
-import io.github.mainyf.newmclib.protocolManager
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
@@ -77,18 +71,18 @@ object PlayerAuths : BukkitRunnable(), Listener {
                 }
             }
         }
-//        protocolManager().addPacketListener(object :
-//            PacketAdapter(LoginSettings.INSTANCE, PacketType.Play.Client.BLOCK_DIG) {
-//
-//            override fun onPacketReceiving(event: PacketEvent) {
-//                val player = event.player
-//                val digType = event.packet.playerDigTypes.read(0)
-//                if (digType == EnumWrappers.PlayerDigType.SWAP_HELD_ITEMS) {
-//                    onSwap(player)
-//                }
-//            }
-//
-//        })
+        //        protocolManager().addPacketListener(object :
+        //            PacketAdapter(LoginSettings.INSTANCE, PacketType.Play.Client.BLOCK_DIG) {
+        //
+        //            override fun onPacketReceiving(event: PacketEvent) {
+        //                val player = event.player
+        //                val digType = event.packet.playerDigTypes.read(0)
+        //                if (digType == EnumWrappers.PlayerDigType.SWAP_HELD_ITEMS) {
+        //                    onSwap(player)
+        //                }
+        //            }
+        //
+        //        })
     }
 
     override fun run() {
@@ -118,7 +112,7 @@ object PlayerAuths : BukkitRunnable(), Listener {
         registeredStage2Set.remove(player.uuid)
 
         unAuths.remove(player.uuid)
-//        passwordWrongMap.remove(player.uuid)
+        //        passwordWrongMap.remove(player.uuid)
     }
 
     @EventHandler
@@ -146,14 +140,10 @@ object PlayerAuths : BukkitRunnable(), Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onCommand(event: PlayerCommandPreprocessEvent) {
         val authMeAPI = AuthMeApi.getInstance()
-        val msg = event.message.replace("/", "")
-        if (handleMessage(event.player, msg, event)) {
+//        val msg = event.message.replace("/", "")
+        if (!authMeAPI.isAuthenticated(event.player)) {
+            ConfigLS.noUsageCommand?.execute(event.player)
             event.isCancelled = true
-        } else {
-            if (!authMeAPI.isAuthenticated(event.player)) {
-                ConfigLS.noUsageCommand?.execute(event.player)
-                event.isCancelled = true
-            }
         }
     }
 
@@ -218,11 +208,10 @@ object PlayerAuths : BukkitRunnable(), Listener {
             unAuths.contains(player.uuid) -> {
                 kotlin.run {
                     if (!AuthMeApi.getInstance().checkPassword(player.name, text)) {
-                        ConfigLS.playerLogin.passwordWrong?.execute(player)
                         val prevTime = passwordWrongTimeMap.getOrPut(player.uuid) { currentTime() }
                         val elapsedTime = currentTime() - prevTime
                         var count = passwordWrongMap.getOrDefault(player.uuid, 0)
-                        if (elapsedTime >= ConfigLS.playerLogin.passwordAttemptsMaxTime * 60 * 60 * 1000L) {
+                        if (elapsedTime >= ConfigLS.playerLogin.passwordAttemptsMaxTime * 1000L) {
                             count = 1
                         } else {
                             count++
@@ -241,12 +230,20 @@ object PlayerAuths : BukkitRunnable(), Listener {
                             cleanup(player)
                             return@run
                         }
+                        ConfigLS.playerLogin.passwordWrong?.execute(
+                            player,
+                            "{player}",
+                            player.name,
+                            "{count}",
+                            (ConfigLS.playerLogin.passwordAttempts - count).toString()
+                        )
                         passwordWrongMap[player.uuid] = count
                         return@run
                     }
                     cleanup(player)
                     ConfigLS.playerLogin.loginSuccess?.execute(player)
                     passwordWrongTimeMap.remove(player.uuid)
+                    passwordWrongMap[player.uuid] = 0
                     AuthMeApi.getInstance().forceLogin(player)
                 }
                 isCancelled = true
@@ -303,9 +300,17 @@ object PlayerAuths : BukkitRunnable(), Listener {
     @EventHandler
     fun onPack(event: PlayerResourcePackStatusEvent) {
         val player = event.player
+        val authMeAPI = AuthMeApi.getInstance()
+        if(!authMeAPI.isAuthenticated(player)) {
+            return
+        }
         playerResStatus[player.uuid] = event.status
         when (event.status) {
             SUCCESSFULLY_LOADED -> {
+                if(authMeAPI.isAuthenticated(player)) {
+                    passwordWrongTimeMap.remove(player.uuid)
+                    cleanup(player)
+                }
                 ConfigLS.resourcePack.successLoad?.execute(player)
                 TeachingMenu().open(player)
             }

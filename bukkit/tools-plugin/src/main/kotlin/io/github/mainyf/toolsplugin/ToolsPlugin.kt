@@ -1,7 +1,8 @@
 package io.github.mainyf.toolsplugin
 
-import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
 import dev.jorel.commandapi.arguments.BooleanArgument
+import dev.jorel.commandapi.arguments.IntegerArgument
+import dev.lone.itemsadder.api.CustomStack
 import io.github.mainyf.bungeesettingsbukkit.ServerPacket
 import io.github.mainyf.newmclib.BasePlugin
 import io.github.mainyf.newmclib.command.apiCommand
@@ -11,16 +12,18 @@ import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
 import io.github.mainyf.toolsplugin.config.ConfigTP
 import io.github.mainyf.toolsplugin.module.*
+import io.lumine.mythic.api.MythicProvider
+import io.lumine.mythic.core.mobs.MobExecutor
 import io.papermc.paper.configuration.GlobalConfiguration
 import me.clip.placeholderapi.PlaceholderAPI
 import net.luckperms.api.LuckPermsProvider
 import org.apache.logging.log4j.LogManager
-import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.math.RoundingMode
 import java.util.*
+import kotlin.jvm.optionals.getOrNull
 import kotlin.math.ceil
 
 class ToolsPlugin : BasePlugin(), Listener {
@@ -38,6 +41,7 @@ class ToolsPlugin : BasePlugin(), Listener {
     private val luckPerms by lazy { LuckPermsProvider.get() }
     private val playerNVSet = mutableSetOf<UUID>()
 
+    @OptIn(ExperimentalStdlibApi::class)
     override fun enable() {
         INSTANCE = this
         ConfigTP.load()
@@ -46,10 +50,12 @@ class ToolsPlugin : BasePlugin(), Listener {
         pluginManager().registerEvents(IaRecipe, this)
         pluginManager().registerEvents(ChunkLogger, this)
         pluginManager().registerEvents(CheckPlayerInventory, this)
+        pluginManager().registerEvents(ForwardMythicMobSummonDamage, this)
 //        pluginManager().registerEvents(IaItemAutoUpdate, this)
         CheckPlayerInventory.init()
 //        IaItemAutoUpdate.init()
         ExportPlayerData.init()
+        ForwardMythicMobSummonDamage.init()
         apiCommand("toolsPlugin") {
             withAliases("tools", "toolsp")
             "reload" {
@@ -97,6 +103,45 @@ class ToolsPlugin : BasePlugin(), Listener {
                     } else {
                         playerNVSet.add(player.uuid)
                         ConfigTP.saturdayNightVisionToggleAction?.execute(player, "{status}", "开启")
+                    }
+                }
+            }
+            "durability" {
+                withArguments(playerArguments("玩家名"), IntegerArgument("耐久"))
+                executeOP {
+                    val player = player()
+                    val durability = int()
+                    val itemStack = player.inventory.itemInMainHand
+                    if(itemStack.isEmpty()) return@executeOP
+                    val cStack = CustomStack.byItemStack(itemStack) ?: return@executeOP
+                    cStack.durability = durability
+                    sender.successMsg("设置成功")
+                }
+            }
+
+            "view-durability" {
+                withArguments(playerArguments("玩家名"))
+                executeOP {
+                    val player = player()
+                    val itemStack = player.inventory.itemInMainHand
+                    if(itemStack.isEmpty()) return@executeOP
+                    val cStack = CustomStack.byItemStack(itemStack) ?: return@executeOP
+                    CustomStack.getInstance("curse:agate_axe")
+                    sender.msg("${cStack.durability}/${cStack.maxDurability}")
+                }
+            }
+
+            "range" {
+                withArguments(playerArguments("玩家名"))
+                executeOP {
+                    val player = player()
+                    val entities = player.getNearbyEntities(5.0, 5.0, 5.0)
+                    entities.forEach {
+                        val mobExecutor = MythicProvider.get().mobManager as MobExecutor
+                        val activeMob = mobExecutor.getActiveMob(it.uuid).getOrNull()
+                        if (activeMob != null) {
+                            println(activeMob.owner.get()?.asPlayer()?.name)
+                        }
                     }
                 }
             }

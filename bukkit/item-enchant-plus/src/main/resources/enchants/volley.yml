@@ -29,10 +29,45 @@ upgradeMaterials:
   - "itemenchants:eqMaterial1|32,itemenchants:eqMaterial2|32,itemenchants:eqMaterial3|32,itemenchants:eqMaterial4|32,itemenchants:eqMaterial5|32"
   - "itemenchants:eqMaterial1|64,itemenchants:eqMaterial2|64,itemenchants:eqMaterial3|64,itemenchants:eqMaterial4|64,itemenchants:eqMaterial5|64"
   - "itemenchants:eqMaterial1|128,itemenchants:eqMaterial2|128,itemenchants:eqMaterial3|128,itemenchants:eqMaterial4|128,itemenchants:eqMaterial5|128"
-# 最大凌空时间
-maxVolleyTime: 100
-# 凌空的时候获得的buff
-volleyBuff:
-  SPEED: "20,2"
-# 射箭击退的强度
-knockbackPower: 2
+debug: true
+stage1:
+  # 凌空的时候获得的buff
+  volleyBuff:
+    - "SPEED,20,0"
+  # 射箭击退的强度
+  knockbackPower: 2
+stage2:
+  blackHole:
+    # 黑洞的模型
+    modelName: "blackHole"
+    # 黑洞持续时间(tick)
+    time: 100
+    # 黑洞牵引间隔(tick)
+    tractionInterval: 2
+    # 黑洞牵引半径
+    tractionRadius: 5
+    # 黑洞牵引伤害
+    tractionDamage: 5
+    # 黑洞牵引的动量
+    tractionMotion: 0.2
+    # 黑洞牵引时播放的play
+    tractionPlays:
+      - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
+stage3:
+  arrowRain:
+    # 箭雨模型
+    modelName: "arrowRain"
+    # 箭雨持续时间(tick)
+    time: 100
+    # 箭雨落下间隔(tick)
+    interval: 2
+    # 箭雨半径
+    radius: 5
+    # 箭雨伤害
+    damage: 5
+    # 箭雨给被攻击者增加的buff
+    buff:
+      - "SPEED,20,0"
+    # 箭雨播放的play
+    plays:
+      - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"

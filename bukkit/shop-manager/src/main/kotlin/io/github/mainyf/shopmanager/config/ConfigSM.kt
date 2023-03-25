@@ -5,6 +5,8 @@ package io.github.mainyf.shopmanager.config
 import io.github.mainyf.newmclib.config.BaseLang
 import io.github.mainyf.newmclib.config.asDefaultSlotConfig
 import io.github.mainyf.newmclib.config.asMenuSettingsConfig
+import io.github.mainyf.newmclib.exts.getSection
+import io.github.mainyf.newmclib.utils.ItemTypeWrapper
 import io.github.mainyf.shopmanager.ShopManager
 import net.kyori.adventure.text.Component
 import org.apache.commons.lang3.EnumUtils
@@ -13,14 +15,15 @@ import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 
 fun CommandSender.sendLang(key: String, vararg data: Any) {
-    ConfigManager.lang.apply {
+    ConfigSM.lang.apply {
         sendLang(key, *data)
     }
 }
 
-object ConfigManager {
+object ConfigSM {
 
     var debug = false
 
@@ -32,6 +35,8 @@ object ConfigManager {
 
     var addPermission = "shopmanager.add"
     private val sellShopLimitMap = mutableMapOf<Material, SellShopLimit>()
+    private val shopPriceLimits = mutableListOf<ShopPriceLimit>()
+    private val shopTaxs = mutableListOf<ShopTax>()
     lateinit var lang: BaseLang
 
     private val addPermissionLevels = listOf(
@@ -109,6 +114,24 @@ object ConfigManager {
                 it.printStackTrace()
             }
         }
+
+        shopPriceLimits.clear()
+        val shopPriceLimitsSect = mainConfigFile.getSection("shopPrice")
+        shopPriceLimitsSect.getKeys(false).forEach { key ->
+            val pair = shopPriceLimitsSect.getString(key)!!.split(",")
+            shopPriceLimits.add(
+                ShopPriceLimit(
+                    ItemTypeWrapper(key),
+                    pair[0],
+                    pair[1]
+                )
+            )
+        }
+        shopTaxs.clear()
+        val shopTaxSect = mainConfigFile.getSection("shopTax")
+        shopTaxSect.getKeys(false).forEach {
+            shopTaxs.add(ShopTax(ItemTypeWrapper(it), shopTaxSect.getDouble(it)))
+        }
     }
 
     fun hasSellable(material: Material): Boolean {
@@ -122,6 +145,18 @@ object ConfigManager {
     fun getMaxHarvest(player: Player, sellShop: SellShopLimit): Double {
         val value = addPermissionLevels.find { player.hasPermission("${addPermission}.${it}") }?.toDouble() ?: 0.0
         return sellShop.maxHarvest + (sellShop.maxHarvest * (value / 100.0))
+    }
+
+    fun getShopPriceLimitByItem(itemStack: ItemStack): ShopPriceLimit? {
+        return shopPriceLimits.find {
+            it.itemType.equalsItem(itemStack)
+        }
+    }
+
+    fun getShopTaxByItem(itemStack: ItemStack): ShopTax? {
+        return shopTaxs.find {
+            it.itemType.equalsItem(itemStack)
+        }
     }
 
     class SellShopLimit(
@@ -138,5 +173,29 @@ object ConfigManager {
         }
 
     }
+
+    class ShopPriceLimit(
+        val itemType: ItemTypeWrapper,
+        val min: String,
+        val max: String
+    ) {
+
+        fun contains(value: Double): Boolean {
+            if (min == "~" && max == "~") return true
+            if (min == "~" && max != "~") {
+                return value <= max.toDouble()
+            }
+            if (min != "~" && max == "~") {
+                return value >= min.toDouble()
+            }
+            return value in min.toDouble() .. max.toDouble()
+        }
+
+    }
+
+    class ShopTax(
+        val itemType: ItemTypeWrapper,
+        val taxValue: Double
+    )
 
 }

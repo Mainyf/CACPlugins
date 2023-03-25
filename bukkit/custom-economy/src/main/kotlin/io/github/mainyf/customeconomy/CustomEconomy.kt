@@ -7,7 +7,9 @@ import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.offlinePlayerArguments
 import io.github.mainyf.newmclib.command.stringArguments
 import io.github.mainyf.newmclib.exts.msg
+import io.github.mainyf.newmclib.hooks.PluginHooks
 import io.github.mainyf.newmclib.hooks.addPlaceholderExpansion
+import io.github.mainyf.newmclib.hooks.money
 import org.apache.logging.log4j.LogManager
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -105,10 +107,9 @@ class CustomEconomy : JavaPlugin() {
             StorageManager.getMoney(uuid, params!!).toInt().toString()
         }
         addPlaceholderExpansion("playermoney") papi@{ offlinePlayer, params ->
-            val uuid = offlinePlayer?.uniqueId ?: return@papi null
+//            val uuid = offlinePlayer?.uniqueId ?: return@papi null
             //            val player = offlinePlayer?.player ?: return@papi null
-
-            StorageManager.getMoney(uuid, params!!).toInt().toString()
+            PluginHooks.economy!!.getBalance(offlinePlayer).toString()
         }
     }
 

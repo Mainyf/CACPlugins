@@ -1,5 +1,6 @@
 package io.github.mainyf.itemenchantplus.config
 
+import io.github.mainyf.newmclib.config.play.MultiPlay
 import io.github.mainyf.newmclib.utils.ItemTypeWrapper
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
@@ -89,6 +90,48 @@ class LanRenCombo4Config(
     val distance: Double,
     val size: ModelSizeConfig,
     val throughDamage: Double
+)
+
+
+class VolleyEnchantConfig(
+    val enable: Boolean,
+    val name: String,
+    val plusName: String,
+    val description: List<String>,
+    val plusDescription: List<String>,
+    val allowGiveItem: List<Material>,
+    val menuItemInListMenu: List<String>,
+    val menuItemInGiveMenu: List<String>,
+    val menuItemInUpgradeMenu: List<String>,
+    val conflictEnchant: List<Enchantment>,
+    val defaultSkin: EnchantSkinConfig,
+    val upgradeMaterials: List<List<EnchantMaterial>>,
+    val debug: Boolean,
+    val maxVolleyTime: Long,
+    val volleyBuff: List<PotionEffect>,
+    val knockbackPower: Double,
+    val blackHole: VolleyBlackHole,
+    val arrowRain: VolleyArrowRain
+)
+
+class VolleyBlackHole(
+    val modelName: String,
+    val time: Long,
+    val tractionInterval: Long,
+    val tractionRadius: Int,
+    val tractionDamage: Double,
+    val tractionMotion: Double,
+    val tractionPlays: MultiPlay
+)
+
+class VolleyArrowRain(
+    val modelName: String,
+    val time: Long,
+    val interval: Long,
+    val radius: Int,
+    val damage: Double,
+    val buff: List<PotionEffect>,
+    val tractionPlays: MultiPlay
 )
 
 class ModelSizeConfig(

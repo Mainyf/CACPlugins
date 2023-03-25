@@ -181,15 +181,15 @@ object MoveIsLandCore : Listener {
         if (!checkPlayerLoc(player)) {
             return false
         }
-        if (playerToBlock.containsKey(player.uuid) && !playerToBlock[player.uuid]!!.invoke()) {
-            return false
-        }
         event.isCancelled = true
 
         val (newLoc, entityID) = playerTempCoreLoc[player.uniqueId]!!
         val homeLoc = IslandsManager.getHomeLoc(newLoc)
         if (MyIslands.plotUtils.hasDanger(homeLoc, -1.0)) {
             player.sendLang("setupIslandCoreDanger")
+            return false
+        }
+        if (playerToBlock.containsKey(player.uuid) && !playerToBlock[player.uuid]!!.invoke()) {
             return false
         }
         val entities = IslandsManager.getIslandCoreEntity(islandData)

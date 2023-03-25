@@ -8,6 +8,8 @@ worlds:
     countingTime: 60
     # 最大计数
     countMax: 100
+    # 挖到矿洞矿物时，忽略计数，单位: 秒
+    caveIgnoreCountTime: 2
     # expand 附灵的效果时间(秒)
     expandIgnoreSecound: 10
     # expand 附灵阶段3的倍率

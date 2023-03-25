@@ -1,18 +1,39 @@
+debug: false
+iaItemAutoUpdate:
+  info: []
+  item:
+    - ""
+repair:
+  repairSuccess:
+    - "message: 修理成功"
+  repairAllSuccess:
+    - "message: 全身修理成功"
+  notAllowedRepairMsg:
+    - "message: 被禁止修理"
+  notAllowedRenameMsg:
+    - "message: 此装备被禁止修改名字"
 iaItems:
   test:
     # 对应的ia物品
     namespaceID: itemsadder:testItem
-    # 是否更新物品
-    update: true
+    # 是否允许修理
+    allowRepair: true
+    # 是否允许命名
+    allowRename: true
+    pveDamage: 5
     # 物品的能力
     trigger:
       # 当物品成功进行攻击时
       ATTACK:
         # 让玩家触发mm技能
         mmSkill: testKill
+        # 耐久损耗
+        itemDurabilityDamage: 2
       # 左键点击时（空气或实体都行）
       LEFT_CLICK:
         mmSkill: testKill
+        itemDurabilityDamage: 2
       # 右键点击时（空气或实体都行）
       RIGHT_CLICK:
         mmSkill: testKill
+        itemDurabilityDamage: 2

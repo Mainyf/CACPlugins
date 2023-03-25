@@ -105,17 +105,16 @@ object PlayerListeners : Listener {
                 event.itemDrop.itemStack = it
             }
         } else {
-            //            handleItemInteract(player, itemStack, event)
             tryHandleInvalidItem(player, itemStack) {
                 event.isCancelled = true
                 event.itemDrop.remove()
             }
-            if (!event.isCancelled) {
-                val data = SBManager.getBindItemData(itemStack)
-                if (data != null && data.ownerUUID == player.uuid) {
-                    player.sendLang("antiDropBindItem")
-                    event.isCancelled = true
-                }
+        }
+        if (!event.isCancelled) {
+            val data = SBManager.getBindItemData(itemStack)
+            if (data != null && data.ownerUUID == player.uuid) {
+                player.sendLang("antiDropBindItem")
+                event.isCancelled = true
             }
         }
     }

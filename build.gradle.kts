@@ -229,6 +229,8 @@ subprojects {
                 "tools-plugin" -> {
                     compileOnly(rootProject.files(itemsAdderPath))
                     compileOnly(rootProject.files(lpPath))
+                    compileOnly(rootProject.files(mmPath))
+                    compileOnly(rootProject.files(matrixPath))
                     //                    compileOnly("me.arasple.mc.trmenu:trmenu-plugin:3.1.17")
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
                     compileOnly(rootProject.files("./libs/luckperms-bukkit-implement.jar"))
@@ -238,6 +240,10 @@ subprojects {
 
                 "item-manager" -> {
                     compileOnly(rootProject.files(itemsAdderPath))
+                    compileOnly(rootProject.files(mmPath))
+                }
+
+                "world-settings" -> {
                     compileOnly(rootProject.files(mmPath))
                 }
             }
@@ -270,7 +276,7 @@ subprojects {
             val pluginName = lineToUpper(project.name)
             val packageName = lineToLower(project.name)
             name = pluginName
-            main = "io.github.mainyf.${packageName}.${pluginName}"
+            main = "io.github.mainyf.${packageName.toLowerCase()}.${pluginName}"
             version = project.version.toString()
             apiVersion = "1.13"
 
@@ -311,6 +317,7 @@ subprojects {
 
                 "world-settings" -> {
                     dd.addAll(listOf("ProtocolLib"))
+                    sd.addAll(listOf("MythicMobs"))
                 }
 
                 "bungee-settings-bukkit" -> {
@@ -371,7 +378,9 @@ subprojects {
                             "CustomEconomy",
                             "LuckPerms",
                             "SocialSystem",
-                            "BungeeSettingsBukkit"
+                            "BungeeSettingsBukkit",
+                            "MythicMobs",
+                            "Matrix"
                         )
                     )
                 }
@@ -506,14 +515,14 @@ class $pluginName : JavaPlugin() {
 
         tasks.register<JavaExec>("runEServer") {
             //            dependsOn(tasks.findByName("copyPlugin"))
-            classpath = rootProject.files("F:\\登录服测试\\paper-1.19.2-211.jar")
+            classpath = rootProject.files("G:\\长安城测试\\paper-1.19.2-211.jar")
             mainClass.set("io.papermc.paperclip.Paperclip")
             val jvmArgsText =
                 "-Xmx4g -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.access=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED"
             //            jvmArgs = listOf("-Xmx4g", "-Dfile.encoding=UTF-8")
             jvmArgs = jvmArgsText.split(" ")
             args = listOf("nogui")
-            workingDir = rootProject.file("F:\\登录服测试")
+            workingDir = rootProject.file("G:\\长安城测试")
             standardOutput = System.out
             standardInput = System.`in`
             errorOutput = System.err

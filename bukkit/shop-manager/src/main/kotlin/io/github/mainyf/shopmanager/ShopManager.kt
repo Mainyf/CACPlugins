@@ -6,7 +6,7 @@ import io.github.mainyf.newmclib.command.apiCommand
 import io.github.mainyf.newmclib.command.offlinePlayerArguments
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.exts.*
-import io.github.mainyf.shopmanager.config.ConfigManager
+import io.github.mainyf.shopmanager.config.ConfigSM
 import io.github.mainyf.shopmanager.listener.PlayerListeners
 import io.github.mainyf.shopmanager.menu.SellMenu
 import io.github.mainyf.shopmanager.storage.StorageManager
@@ -28,14 +28,14 @@ class ShopManager : BasePlugin() {
 
     override fun enable() {
         INSTANCE = this
-        ConfigManager.load()
+        ConfigSM.load()
         StorageManager.init()
         pluginManager().registerEvents(PlayerListeners, this)
         apiCommand("shopManager") {
             withAliases("shopM", "shm", "sm")
             "reload" {
                 executeOP {
-                    ConfigManager.load()
+                    ConfigSM.load()
                     sender.successMsg("[ShopManager] 重载成功")
                 }
             }
@@ -75,10 +75,10 @@ class ShopManager : BasePlugin() {
     fun getSellItemCount(
         player: Player,
         material: Material,
-        sellShop: ConfigManager.SellShopLimit
+        sellShop: ConfigSM.SellShopLimit
     ): Int {
         val currentHarvest = StorageManager.getCurrentHarvest(player.uuid, material)
-        val maxHarvest = ConfigManager.getMaxHarvest(player, sellShop)
+        val maxHarvest = ConfigSM.getMaxHarvest(player, sellShop)
         if (currentHarvest >= maxHarvest) {
             return 0
         }

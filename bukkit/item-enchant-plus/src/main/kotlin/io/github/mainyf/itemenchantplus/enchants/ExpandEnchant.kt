@@ -70,13 +70,23 @@ object ExpandEnchant : Listener {
         if (blockBreakRecursiveFixer.has(player)) {
             return
         }
+        var t = currentTime()
         val bindData = SBManager.getBindItemData(item)
         if (!player.isOp && bindData != null && bindData.ownerUUID != player.uuid) {
             return
         }
-        EnchantManager.updateItemMeta(item, player)
-        val data = EnchantManager.getItemEnchant(ItemEnchantType.EXPAND, item) ?: return
+        log("[expand] 获取附灵物品绑定数据", t)
 
+        t = currentTime()
+        EnchantManager.updateItemMeta(item, player)
+
+        log("[expand] 更新附灵物品数据", t)
+
+        t = currentTime()
+        val data = EnchantManager.getItemEnchant(ItemEnchantType.EXPAND, item) ?: return
+        log("[expand] 获取附灵物品数据", t)
+
+        t = currentTime()
         val world = player.world
         val loc = player.location
 
@@ -179,6 +189,9 @@ object ExpandEnchant : Listener {
                 clockwiseBlockList = northList
             }
         }
+        log("[expand] 计算周围方块", t)
+
+        t = currentTime()
         val bList = clockwiseBlockList.filter { hasValid(it) }
         if (bList.isNotEmpty()) {
             if (data.stage == 1 || data.stage == 2) {
@@ -195,6 +208,9 @@ object ExpandEnchant : Listener {
                 }
             }
         }
+        log("[expand] 破坏周围方块", t)
+
+        t = currentTime()
         if (EnchantManager.hasExtraData(ItemEnchantType.EXPAND, item, ItemEnchantType.EXPAND.plusExtraDataName())) {
             usePlusEnchantMap[player.uuid] = currentTime()
         }
@@ -203,6 +219,7 @@ object ExpandEnchant : Listener {
         EnchantManager.triggerItemSkinEffect(
             player, data, EffectTriggerType.BREAK_BLOCK
         )
+        log("[expand] 触发皮肤效果", t)
         blockBreakRecursiveFixer.unMark(player)
     }
 
@@ -227,6 +244,10 @@ object ExpandEnchant : Listener {
             return false
         }
         return true
+    }
+
+    private fun log(text: String, t: Long) {
+        ItemEnchantPlus.iepLog.info("${text}: ${currentTime() - t}ms")
     }
 
 }

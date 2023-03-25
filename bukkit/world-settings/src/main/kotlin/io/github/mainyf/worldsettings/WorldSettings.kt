@@ -12,9 +12,11 @@ import io.github.mainyf.newmclib.command.offlinePlayerArguments
 import io.github.mainyf.newmclib.command.playerArguments
 import io.github.mainyf.newmclib.exts.msg
 import io.github.mainyf.newmclib.exts.submitTask
+import io.github.mainyf.newmclib.exts.uuid
 import io.github.mainyf.newmclib.protocolManager
 import io.github.mainyf.worldsettings.config.ConfigWS
 import io.github.mainyf.worldsettings.config.WorldSettingConfig
+import io.github.mainyf.worldsettings.hooks.MythicHooks
 import io.github.mainyf.worldsettings.listeners.BlockListener
 import io.github.mainyf.worldsettings.listeners.EntityListener
 import io.github.mainyf.worldsettings.listeners.PlayerListener
@@ -22,8 +24,10 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
+import org.bukkit.craftbukkit.v1_19_R1.CraftServer
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import java.util.UUID
 
 class WorldSettings : BasePlugin() {
 
@@ -34,17 +38,19 @@ class WorldSettings : BasePlugin() {
     }
 
     private var packetListener: PacketAdapter? = null
+    private val ignoreFlys = mutableSetOf<UUID>()
 
     override fun enable() {
         INSTANCE = this
         ConfigWS.load()
         PlayerDropItemStorage.init(this)
-//        //        server.pluginManager.getPlugin("AuthMe")
+        //        //        server.pluginManager.getPlugin("AuthMe")
         CommandHandler.init()
         CommandHandler.register()
         Bukkit.getServer().pluginManager.registerEvents(EntityListener, this)
         Bukkit.getServer().pluginManager.registerEvents(BlockListener, this)
         Bukkit.getServer().pluginManager.registerEvents(PlayerListener, this)
+        MythicHooks.init()
         submitTask(delay = 20L, period = 5L) {
             Bukkit.getWorlds().filter { it.environment == World.Environment.THE_END }.forEach { world ->
                 val settings = ConfigWS.getSetting(world) ?: return@submitTask
@@ -70,10 +76,12 @@ class WorldSettings : BasePlugin() {
             Bukkit.getOnlinePlayers().forEach { player ->
                 if (player.hasPermission(ConfigWS.ignorePermission)) return@forEach
                 val settings = ConfigWS.getSetting(player.location) ?: return@forEach
-                if (settings.antiFly && player.isFlying) {
-                    player.allowFlight = false
-                    player.isFlying = false
-                    settings.flyBlockAction?.execute(player)
+                if (!hasIgnoreFly(player.uuid)) {
+                    if (settings.antiFly && player.isFlying) {
+                        player.allowFlight = false
+                        player.isFlying = false
+                        settings.flyBlockAction?.execute(player)
+                    }
                 }
                 if (player.gameMode != settings.gameMode) {
                     player.gameMode = settings.gameMode
@@ -109,20 +117,44 @@ class WorldSettings : BasePlugin() {
             }
 
         })
-//        apiCommand("demo") {
-//            "aaa" {
-//                withArguments(offlinePlayerArguments("玩家"))
-//                executePlayer {
-//                    sender.msg("信息")
-//                }
+//        val packetType = PacketType.findCurrent(PacketType.Protocol.PLAY, PacketType.Sender.SERVER, 0x0D)
+//        protocolManager().addPacketListener(object : PacketAdapter(this, PacketType.Play.Server.TAB_COMPLETE) {
+//
+//            override fun onPacketSending(event: PacketEvent?) {
+//                println("onPacketSending")
 //            }
-//        }
+//
+//            override fun onPacketReceiving(event: PacketEvent?) {
+//                println("onPacketReceiving")
+//            }
+//
+//        })
+        //        apiCommand("demo") {
+        //            "aaa" {
+        //                withArguments(offlinePlayerArguments("玩家"))
+        //                executePlayer {
+        //                    sender.msg("信息")
+        //                }
+        //            }
+        //        }
     }
 
     override fun onDisable() {
         CommandAPI.unregister(CommandHandler.name)
         ProtocolLibrary.getProtocolManager().removePacketListener(packetListener)
         PlayerDropItemStorage.close()
+    }
+
+    fun hasIgnoreFly(uuid: UUID): Boolean {
+        return ignoreFlys.contains(uuid)
+    }
+
+    fun ignoreFly(uuid: UUID) {
+        ignoreFlys.add(uuid)
+    }
+
+    fun unIgnoreFly(uuid: UUID) {
+        ignoreFlys.remove(uuid)
     }
 
 }

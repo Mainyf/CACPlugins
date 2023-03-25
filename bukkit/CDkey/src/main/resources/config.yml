@@ -1,0 +1,18 @@
+# 主播激活码在进入服务器后的有效时间(秒)
+propagandistCDKeyValidTime: 30
+# 尽量不要让define和主播兑换码和自动生成的兑换码长得一样
+propagandist:
+  bilibili_A:
+    code: "bilibiliA"
+    actions: []
+  bilibili_B:
+    code: "bilibiliB"
+    actions: []
+codes:
+  test:
+    type: define
+    code: "666"
+    actions: []
+  vip:
+    type: consume
+    actions: []

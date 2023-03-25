@@ -39,6 +39,7 @@ object ConfigMC {
                 val actionResetTime = worldSect.getLong("actionResetTime")
                 val countingTime = worldSect.getLong("countingTime")
                 val countMax = worldSect.getInt("countMax")
+                val caveIgnoreCountTime = worldSect.getLong("caveIgnoreCountTime", 2)
                 val expandIgnoreSecound = worldSect.getLong("expandIgnoreSecound")
                 val expandStage3Ratio = worldSect.getDouble("expandStage3Ratio")
                 val expandPlusRatio = worldSect.getDouble("expandPlusRatio")
@@ -61,6 +62,7 @@ object ConfigMC {
                     actionResetTime,
                     countingTime,
                     countMax,
+                    caveIgnoreCountTime,
                     expandIgnoreSecound,
                     expandStage3Ratio,
                     expandPlusRatio,
@@ -78,6 +80,7 @@ object ConfigMC {
         val actionResetTime: Long,
         val countingTime: Long,
         val countMax: Int,
+        val caveIgnoreCountTime: Long,
         val expandIgnoreSecound: Long,
         val expandStage3Ratio: Double,
         val expandPlusRatio: Double,

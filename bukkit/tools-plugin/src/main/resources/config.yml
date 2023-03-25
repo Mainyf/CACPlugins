@@ -36,3 +36,5 @@ placeholder:
       Mainyf: "插件"
       not: "没有"
     other: "%player_name%"
+# 转发玩家召唤的mm怪物的攻击到召唤者
+forwardMythicMobSummonDamage: true

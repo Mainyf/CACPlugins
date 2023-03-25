@@ -10,3 +10,11 @@ fullItemSuccess:
   - "mini: <green>出售完毕 总计: $<totalPrice></green>"
 fullItemSell:
   - "closeInv"
+shopCreatePriceLimit:
+  - "message: &c商店创建失败，价格必须在 {minPrice}-{maxPrice}"
+shopPriceChangePriceLimit:
+  - "message: &c商店价格更改失败，价格必须在 {minPrice}-{maxPrice}"
+shopBuyingPriceLimit:
+  - "message: &c出售失败，该商店价格非法"
+shopSellingPriceLimit:
+  - "message: &c购买失败，该商店价格非法"

@@ -2,6 +2,7 @@ package io.github.mainyf.itemenchantplus.config
 
 import com.udojava.evalex.Expression
 import io.github.mainyf.itemenchantplus.ItemEnchantPlus
+import io.github.mainyf.itemenchantplus.config.ConfigIEP.parserToPotionEffect
 import io.github.mainyf.newmclib.config.BaseLang
 import io.github.mainyf.newmclib.config.asDefaultSlotConfig
 import io.github.mainyf.newmclib.config.asIaIcon
@@ -51,6 +52,7 @@ object ConfigIEP {
     lateinit var expandEnchantConfig: ExpandEnchantConfig
     lateinit var luckEnchantConfig: LuckEnchantConfig
     lateinit var lanrenEnchantConfig: LanRenEnchantConfig
+    lateinit var volleyEnchantConfig: VolleyEnchantConfig
 
     //    val expandEnchant get() = enchants["expand"]!!
 
@@ -244,6 +246,7 @@ object ConfigIEP {
         loadExpandEnchantConfig()
         loadLuckEnchantConfig()
         loadLanRenEnchantConfig()
+        loadVolleyEnchantConfig()
     }
 
     private fun loadExpandEnchantConfig() {
@@ -376,6 +379,58 @@ object ConfigIEP {
             }
         )
         enchants[ItemEnchantType.LAN_REN] = lanrenEnchantConfig
+    }
+
+    private fun loadVolleyEnchantConfig() {
+        val blackHoleSect = volleyConfig.getSection("stage2.blackHole")
+        val arrowRainSect = volleyConfig.getSection("stage3.arrowRain")
+        volleyEnchantConfig = VolleyEnchantConfig(
+            volleyConfig.getBoolean("enable"),
+            volleyConfig.getString("name")!!,
+            volleyConfig.getString("plusName")!!,
+            volleyConfig.getStringList("description"),
+            volleyConfig.getStringList("plusDescription"),
+            volleyConfig.getStringList("allowGiveItem").map { Material.valueOf(it.uppercase()) },
+            volleyConfig.getStringList("menuItemInListMenu"),
+            volleyConfig.getStringList("menuItemInGiveMenu"),
+            volleyConfig.getStringList("menuItemInUpgradeMenu"),
+            volleyConfig.getStringList("conflictEnchant")
+                .mapNotNull { Enchantment.getByKey(NamespacedKey.minecraft(it)) },
+            itemSkins[volleyConfig.getString("defaultSkin")]!!,
+            volleyConfig.getStringList("upgradeMaterials").map {
+                val pair = it.split(",")
+                pair.map { it2 ->
+                    val pair2 = it2.split("|")
+                    EnchantMaterial(
+                        ItemTypeWrapper(pair2[0]),
+                        pair2[1].toInt()
+                    )
+                }
+            },
+            volleyConfig.getBoolean("debug", false),
+            volleyConfig.getLong("stage1.maxVolleyTime"),
+            volleyConfig.getStringList("stage1.volleyBuff").mapNotNull { it.parserToPotionEffect() },
+            volleyConfig.getDouble("stage1.knockbackPower"),
+            VolleyBlackHole(
+                blackHoleSect.getString("modelName")!!,
+                blackHoleSect.getLong("time"),
+                blackHoleSect.getLong("tractionInterval"),
+                blackHoleSect.getInt("tractionRadius"),
+                blackHoleSect.getDouble("tractionDamage"),
+                blackHoleSect.getDouble("tractionMotion"),
+                blackHoleSect.getPlay("tractionPlays")!!
+            ),
+            VolleyArrowRain(
+                arrowRainSect.getString("modelName")!!,
+                arrowRainSect.getLong("time"),
+                arrowRainSect.getLong("interval"),
+                arrowRainSect.getInt("radius"),
+                arrowRainSect.getDouble("damage"),
+                arrowRainSect.getStringList("buff").mapNotNull { it.parserToPotionEffect() },
+                arrowRainSect.getPlay("plays")!!
+            )
+        )
+        enchants[ItemEnchantType.VOLLEY] = volleyEnchantConfig
     }
 
     private fun ConfigurationSection.getPotionEffect(key: String): PotionEffect? {

@@ -6,7 +6,7 @@ import io.github.mainyf.newmclib.hooks.giveMoney
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
 import io.github.mainyf.newmclib.nms.asNmsPlayer
 import io.github.mainyf.shopmanager.ShopManager
-import io.github.mainyf.shopmanager.config.ConfigManager
+import io.github.mainyf.shopmanager.config.ConfigSM
 import io.github.mainyf.shopmanager.config.sendLang
 import io.github.mainyf.shopmanager.storage.StorageManager
 import org.bukkit.Material
@@ -21,7 +21,7 @@ class SellMenu : AbstractMenuHandler() {
     private val items = newItemList(45)
 
     override fun open(player: Player) {
-        setup(ConfigManager.sellMenuConfig.settings)
+        setup(ConfigSM.sellMenuConfig.settings)
 
         val inv = createInv(player)
 
@@ -30,7 +30,7 @@ class SellMenu : AbstractMenuHandler() {
     }
 
     override fun updateTitle(player: Player): String {
-        val sellMenuConfig = ConfigManager.sellMenuConfig
+        val sellMenuConfig = ConfigSM.sellMenuConfig
         val icons = mutableListOf<IaIcon>()
         icons.addAll(sellMenuConfig.placeholderSlot.iaIcon())
         icons.addAll(sellMenuConfig.sellSlot.iaIcon())
@@ -40,9 +40,9 @@ class SellMenu : AbstractMenuHandler() {
 
     private fun updateInv(player: Player, inv: Inventory) {
         updateItems(inv)
-        val pSlot = ConfigManager.sellMenuConfig.placeholderSlot
+        val pSlot = ConfigSM.sellMenuConfig.placeholderSlot
         inv.setIcon(pSlot)
-        val sellSlot = ConfigManager.sellMenuConfig.sellSlot
+        val sellSlot = ConfigSM.sellMenuConfig.sellSlot
         inv.setIcon(sellSlot) {
             sell(player, inv)
         }
@@ -67,7 +67,7 @@ class SellMenu : AbstractMenuHandler() {
         val itemStackGroupMap = mutableMapOf<Material, MutableList<ItemStack>>()
         items.forEach { itemStack ->
             val itemType = itemStack.type
-            if (!ConfigManager.hasSellable(itemType)) {
+            if (!ConfigSM.hasSellable(itemType)) {
                 noSells.add(itemStack)
                 return@forEach
             }
@@ -81,7 +81,7 @@ class SellMenu : AbstractMenuHandler() {
         var flag = false
         var allTotalPrice = 0.0
         itemMaterialGroupMap.forEach { (type, amount) ->
-            val sellShop = ConfigManager.getSellShop(type)!!
+            val sellShop = ConfigSM.getSellShop(type)!!
             var totalPrice = sellShop.price * amount
 
             val sellCount = ShopManager.INSTANCE.getSellItemCount(player, type, sellShop)
@@ -195,7 +195,7 @@ class SellMenu : AbstractMenuHandler() {
         super.onClickPlayerInv(slot, player, inv, event)
         val pInv = event.clickedInventory ?: return
         val itemStack = pInv.getItem(slot) ?: return
-        if (!ConfigManager.hasSellable(itemStack.type)) {
+        if (!ConfigSM.hasSellable(itemStack.type)) {
             return
         }
         val freeSlot = inv.firstEmpty()

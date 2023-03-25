@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.offline_player_ext.asOfflineData
 import io.github.mainyf.worldsettings.PlayerDropItemStorage
+import io.github.mainyf.worldsettings.WorldSettings
 import io.github.mainyf.worldsettings.config.MatchType.LIKE
 import io.github.mainyf.worldsettings.config.MatchType.START
 import io.github.mainyf.worldsettings.config.ConfigWS
@@ -123,7 +124,7 @@ object PlayerListener : Listener {
     @EventHandler(ignoreCancelled = true)
     fun onToggleFlight(event: PlayerToggleFlightEvent) {
         val player = event.player
-
+        if (WorldSettings.INSTANCE.hasIgnoreFly(player.uuid)) return
         ignorePermAndGetWorldSettings(player) { settings ->
             if (settings.antiFly) {
                 player.allowFlight = false
@@ -175,17 +176,28 @@ object PlayerListener : Listener {
             if (!settings.tabComplete) {
                 event.commands.clear()
             } else {
+                val newCommands = mutableSetOf<String>()
                 settings.completeCommandList.forEach { (matchType, commandText) ->
                     when (matchType) {
                         LIKE -> {
-                            event.commands.removeAll { !it.contains(commandText) }
+                            event.commands.forEach {
+                                if(it.contains(commandText)) {
+                                    newCommands.add(it)
+                                }
+                            }
                         }
 
                         START -> {
-                            event.commands.removeAll { !it.startsWith(commandText) }
+                            event.commands.forEach {
+                                if(it.startsWith(commandText)) {
+                                    newCommands.add(it)
+                                }
+                            }
                         }
                     }
                 }
+                event.commands.clear()
+                event.commands.addAll(newCommands)
             }
         }
     }

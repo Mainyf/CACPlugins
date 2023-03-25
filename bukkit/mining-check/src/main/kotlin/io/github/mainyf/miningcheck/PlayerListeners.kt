@@ -21,6 +21,7 @@ import kotlin.collections.find
 object PlayerListeners : Listener {
 
     private val ignoreBlockKey = mutableSetOf<Long>()
+    private val playerCaveTimeMap = mutableMapOf<UUID, Long>()
     private val playerTimeMap = mutableMapOf<UUID, Long>()
     private val playerCountMap = mutableMapOf<UUID, Int>()
     private val cacheMap =
@@ -28,6 +29,7 @@ object PlayerListeners : Listener {
 
     fun reset() {
         playerTimeMap.clear()
+        playerCaveTimeMap.clear()
         playerCountMap.clear()
     }
 
@@ -57,13 +59,6 @@ object PlayerListeners : Listener {
             ignoreBlockKey.remove(bKey)
             return
         }
-        if (hasCaveAir(player, block)) {
-            debug(
-                player,
-                "玩家: ${player.name}，此次挖掘判定为矿洞，不计入限制"
-            )
-            return
-        }
         val worldName = block.world.name
         if (!ConfigMC.worlds.containsKey(worldName)) return
         val config = ConfigMC.worlds[worldName]!!
@@ -72,6 +67,20 @@ object PlayerListeners : Listener {
         val currentTime = currentTime()
         if (!playerTimeMap.containsKey(player.uuid)) {
             playerTimeMap[player.uuid] = currentTime
+        }
+        if (hasCaveAir(player, block)) {
+            playerCaveTimeMap[player.uuid] = currentTime
+            debug(
+                player,
+                "玩家: ${player.name}，此次挖掘判定为矿洞，不计入限制"
+            )
+            return
+        }
+        if(playerCaveTimeMap.containsKey(player.uuid)) {
+            val prevTime = playerCaveTimeMap[player.uuid]!!
+            if(currentTime - prevTime <= config.caveIgnoreCountTime * 1000L) {
+                return
+            }
         }
         val startTime = playerTimeMap[player.uuid]!!
         val elapsedTime = (currentTime - startTime) / 1000

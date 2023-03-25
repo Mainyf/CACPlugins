@@ -70,6 +70,31 @@ class SoulBind : JavaPlugin() {
                     sender.msg("绑定成功")
                 }
             }
+            "mark-bind" {
+                withArguments(
+                    playerArguments("玩家A")
+                )
+                executeOP {
+                    val player = player()
+                    val itemStack = player.inventory.itemInMainHand
+                    SBManager.markBindableTag(itemStack)
+                    sender.msg("已附加待绑定状态")
+                }
+            }
+            "view-mark-bind" {
+                withArguments(
+                    playerArguments("玩家A")
+                )
+                executeOP {
+                    val player = player()
+                    val itemStack = player.inventory.itemInMainHand
+                    if(SBManager.hasMarkBindableTag(itemStack)) {
+                        sender.msg("手上物品已是待绑定状态")
+                    } else {
+                        sender.msg("手上物品没有待绑定状态")
+                    }
+                }
+            }
             "bind-player" {
                 withArguments(
                     playerArguments("玩家A"),

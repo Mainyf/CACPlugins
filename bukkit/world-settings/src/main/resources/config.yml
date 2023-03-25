@@ -57,8 +57,8 @@ gloablServer:
     tabComplete: true
     # 玩家可用补全命令列表
     completeCommandList:
-      - "pay"
-      - "xconomy:pay"
+      - "start: pay"
+      - "start: xconomy:pay"
     # 阻止虚空伤害
     antiVoidDamage: true
     # 重生时的动作
