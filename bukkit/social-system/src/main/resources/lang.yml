@@ -24,6 +24,9 @@ refuseFriendRequestToReceiver:
   - "sound: BLOCK_NOTE_BLOCK_BELL,1,1"
   - "message: &c&l！&4你拒绝了 {sender} 的好友申请。"
 
+targetItemNoAllowRepair:
+  - "minimessage: <color:#FFFFF><player> 对方的手上的装备被禁止修复</color>"
+
 sendRepairHandEquipmentToSender:
   - "message: &c&l！&4成功修复对方手上的装备。"
 sendRepairHandEquipmentToReceiver:

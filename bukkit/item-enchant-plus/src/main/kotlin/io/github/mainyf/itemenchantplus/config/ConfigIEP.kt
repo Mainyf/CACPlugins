@@ -246,7 +246,7 @@ object ConfigIEP {
         loadExpandEnchantConfig()
         loadLuckEnchantConfig()
         loadLanRenEnchantConfig()
-        loadVolleyEnchantConfig()
+//        loadVolleyEnchantConfig()
     }
 
     private fun loadExpandEnchantConfig() {

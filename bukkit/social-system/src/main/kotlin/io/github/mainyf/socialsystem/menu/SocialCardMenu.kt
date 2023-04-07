@@ -2,6 +2,7 @@ package io.github.mainyf.socialsystem.menu
 
 import com.mojang.authlib.GameProfile
 import io.github.mainyf.bungeesettingsbukkit.CrossServerManager
+import io.github.mainyf.itemmanager.ConfigIM
 import io.github.mainyf.newmclib.config.IaIcon
 import io.github.mainyf.newmclib.exts.*
 import io.github.mainyf.newmclib.menu.AbstractMenuHandler
@@ -105,8 +106,12 @@ class SocialCardMenu(val offlineData: OfflinePlayerData) : AbstractMenuHandler()
                     player.sendLang("targetOffline", "{player}", offlineData.name)
                     return@setIcon
                 }
+                if (!ConfigIM.hasAllowRepair(target!!.inventory.itemInMainHand)) {
+                    player.sendLang("targetItemNoAllowRepair", "{player}", target.name)
+                    return@setIcon
+                }
                 repairCooldown.invoke(it.uuid, ConfigSS.repairCooldown * 1000L, {
-                    execmd("cmi repair hand ${target!!.name}")
+                    execmd("cmi repair hand ${target.name}")
                     player.sendLang("sendRepairHandEquipmentToSender")
                     target.sendLang("sendRepairHandEquipmentToReceiver", "{player}", player.name)
                 }, { eTime ->

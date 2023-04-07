@@ -207,6 +207,7 @@ subprojects {
 
                 "social-system" -> {
                     compileOnly(rootProject.project(":bukkit:bungee-settings-bukkit"))
+                    compileOnly(rootProject.project(":bukkit:item-manager"))
                     //                    compileOnly(rootProject.project(":bukkit:my-islands"))
                 }
 
@@ -359,7 +360,7 @@ subprojects {
                 }
 
                 "social-system" -> {
-                    dd.addAll(listOf("PlaceholderAPI", "BungeeSettingsBukkit"))
+                    dd.addAll(listOf("PlaceholderAPI", "BungeeSettingsBukkit", "ItemManager"))
                     //                    sd.addAll(listOf("MyIslands"))
                 }
 

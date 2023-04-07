@@ -156,7 +156,7 @@ object PlayerListeners : Listener {
         ).any {
             val loc = block.location.add(it.direction)
             val isAir = loc.block.type.isAir
-            if (isAir) {
+            if (isAir || loc.block.isLiquid) {
                 !blockSet.contains(loc.getBlockKey())
             } else false
         }
